@@ -1,4 +1,4 @@
-import { PlayerId, PlayingCard, TrickNumber, BidType } from '../interfaces/types'
+import { PlayerId, PlayingCard, TrickNumber, BidType } from '../interfaces'
 
 // CARD PLAYED EVENT
 

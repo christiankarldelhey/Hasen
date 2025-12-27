@@ -2,8 +2,9 @@ import dotenv from 'dotenv'
 import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import gameRoutes from './routes/gameRoutes.js'
 import cors from 'cors'
-import { connectDatabase } from './config/database'
+import { connectDatabase } from './config/database.js'
 
 // Load environment variables
 dotenv.config()
@@ -22,6 +23,7 @@ const io = new Server(httpServer, {
 // Middleware
 app.use(cors())
 app.use(express.json())
+app.use('/api', gameRoutes)
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -1,5 +1,5 @@
 import { CARD_DEFINITIONS } from '../data/cardDefinitions'
-import { PlayingCard, PlayerId } from '../interfaces/types'
+import { PlayingCard, PlayerId } from '../interfaces'
 
 /**
  * Creates a complete deck of playing cards based on card definitions.
