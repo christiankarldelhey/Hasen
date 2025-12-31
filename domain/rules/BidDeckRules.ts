@@ -18,13 +18,13 @@ export function createBidDeck(): BidDecks {
   const tricksBidDeck: Bid[] = []
   BID_DEFINITIONS.forEach((def: any) => {
     const bid: Bid = {
-      bid_id: parseInt(def.type + '_' + def.score),
+      bid_id: def.type + '_' + def.score,
       bid_type: def.type,
       bid_score: def.score,
       current_bids: {
-        trick_1: null,
-        trick_2: null,
-        trick_3: null
+        trick_1: { bidder: null, onLose: def.type === 'set_collection' ? -10 : -5 },
+        trick_2: { bidder: null, onLose: def.type === 'set_collection' ? -15 : -10 },
+        trick_3: { bidder: null, onLose: def.type === 'set_collection' ? -20 : -15 }
       },
       win_condition: def.win_condition,
       bid_winner: null

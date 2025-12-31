@@ -19,6 +19,7 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST']
   }
 })
+app.set('io', io)
 
 // Middleware
 app.use(cors())
@@ -33,6 +34,12 @@ app.get('/health', (req, res) => {
 // Socket.io connection handler
 io.on('connection', (socket) => {
   console.log(`✅ Client connected: ${socket.id}`)
+
+  // Handler to join game room
+  socket.on('join-game', (gameId: string) => {
+    socket.join(gameId);
+    console.log(`🎮 Socket ${socket.id} joined game room: ${gameId}`);
+  });
 
   // Handle disconnection
   socket.on('disconnect', () => {

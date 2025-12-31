@@ -17,10 +17,15 @@ export interface SetCollectionBidCondition {
 }
 
 export interface TrickBidCondition {
-  win_trick_position?: TrickNumber[] 
+  win_trick_position?: TrickNumber[]
   lose_trick_position?: TrickNumber[]
   win_min_tricks?: TrickNumber
   win_max_tricks?: TrickNumber
+}
+
+export interface PlayerBid {
+  bidder: PlayerId | null;
+  onLose: number;
 }
 
 export interface Bid {
@@ -28,9 +33,9 @@ export interface Bid {
   bid_type: BidType
   bid_score: BidScore
   current_bids: {
-    trick_1: PlayerId | null
-    trick_2: PlayerId | null
-    trick_3: PlayerId | null
+    trick_1: PlayerBid;
+    trick_2: PlayerBid;
+    trick_3: PlayerBid;
   }
   bid_winner: PlayerId[] | null
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition

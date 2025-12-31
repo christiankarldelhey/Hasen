@@ -12,10 +12,22 @@ const GameSchema = new Schema<GameDocument>({
     unique: true,
     index: true 
   },
+  gameName: {
+    type: String,
+    required: true,
+    default: 'My Hasen Game'
+  },
+  hostPlayer: {
+    type: String,
+    enum: ['player_1', 'player_2', 'player_3', 'player_4'],
+    required: true,
+    default: 'player_1'
+  },
   activePlayers: [{
     type: String,
     enum: ['player_1', 'player_2', 'player_3', 'player_4'],
-    required: true
+    required: true,
+    default: []
   }],
   deck: [Schema.Types.Mixed],
   bidDecks: {
@@ -43,7 +55,7 @@ const GameSchema = new Schema<GameDocument>({
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
-    pointsToWin: { type: Number, required: true, default: 100 }
+    pointsToWin: { type: Number, required: true, default: 300 }
   }
 }, {
   timestamps: true,

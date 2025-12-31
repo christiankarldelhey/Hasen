@@ -15,7 +15,7 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'acorns', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'acorns', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'acorns', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'acorns', points: 2, baseRank: 1, leadRank: null },  // Especial
+  { char: 'U', suit: 'acorns', points: 0, baseRank: 1, leadRank: null },  // Especial
   { char: 'O', suit: 'acorns', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'acorns', points: 4, baseRank: 3, leadRank: 21 },
 
@@ -25,7 +25,7 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'leaves', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'leaves', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'leaves', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'leaves', points: 2, baseRank: 2, leadRank: null},  // Especial
+  { char: 'U', suit: 'leaves', points: 0, baseRank: 2, leadRank: null},  // Especial
   { char: 'O', suit: 'leaves', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'leaves', points: 4, baseRank: 3, leadRank: 21 },
 
@@ -35,16 +35,16 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'berries', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'berries', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'berries', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'berries', points: 11, baseRank: 0, leadRank: 40 },  // MUY especial
+  { char: 'U', suit: 'berries', points: 0, baseRank: 0, leadRank: 40 },  // MUY especial
   { char: 'O', suit: 'berries', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'berries', points: 4, baseRank: 3, leadRank: 21 },
 
   // FLOWERS (Trumps)
-  { char: '7', suit: 'flowers', points: 0, baseRank: 11, leadRank: null },
-  { char: '8', suit: 'flowers', points: 0, baseRank: 12, leadRank: null },
-  { char: '9', suit: 'flowers', points: 0, baseRank: 13, leadRank: null },
+  { char: '7', suit: 'flowers', points: 2, baseRank: 11, leadRank: null },
+  { char: '8', suit: 'flowers', points: 2, baseRank: 12, leadRank: null },
+  { char: '9', suit: 'flowers', points: 2, baseRank: 13, leadRank: null },
   { char: '10', suit: 'flowers', points: 10, baseRank: 14, leadRank: null },
-  { char: 'U', suit: 'flowers', points: 2, baseRank: 31, leadRank: null },  // Special trump
-  { char: 'O', suit: 'flowers', points: 3, baseRank: 32, leadRank: null },
-  { char: 'K', suit: 'flowers', points: 4, baseRank: 33, leadRank: null },
+  { char: 'U', suit: 'flowers', points: 11, baseRank: 31, leadRank: null },  // Special trump
+  { char: 'O', suit: 'flowers', points: 11, baseRank: 32, leadRank: null },
+  { char: 'K', suit: 'flowers', points: 11, baseRank: 33, leadRank: null },
 ]

@@ -8,6 +8,8 @@ export type GamePhase = 'setup' | 'playing' | 'ended'
 
 export interface Game {
   gameId: string
+  gameName: string
+  hostPlayer: PlayerId
   activePlayers: PlayerId[]
   deck: PlayingCard[]
   bidDecks: {

@@ -1,157 +1,145 @@
-import { GameModel } from '../models/Game'
-import { PlayerId, PlayingCard, Trick, TrickNumber } from '../../../domain/interfaces'
-import { canPlayCard } from '../../../domain/rules/CardRules'
-import { determineLeadSuit, determineTrickWinner } from '../../../domain/rules/TrickRules'
+import { GameModel } from '../models/Game.js'
+import { createDeck } from '../../../domain/rules/DeckRules.js'
+import { createBidDeck } from '../../../domain/rules/BidDeckRules.js'
+import { shuffleDeck } from '../../../domain/rules/DeckRules.js'
+import { createDeckShuffledEvent } from '../../../domain/events/GameEvents.js'
+import { v4 as uuidv4 } from 'uuid'
+import { PlayerId } from '../../../domain/interfaces'
 
 export class GameService {
-  /**
-   * Procesa el juego de una carta y actualiza el estado del juego
-   */
-  static async playCard(
-    gameId: string,
-    playerId: PlayerId,
-    cardId: string
-  ): Promise<{
-    success: boolean
-    error?: string
-    updatedGame?: any
-    card?: PlayingCard
-    nextPlayerId?: PlayerId | null
-    trickCompleted?: boolean
-    trickWinner?: PlayerId
-  }> {
-    // 1. Obtener el juego de la BD
-    const game = await GameModel.findOne({ gameId })
-    if (!game) {
-      return { success: false, error: 'Juego no encontrado' }
-    }
-
-    // 2. Verificar que es el turno del jugador
-    if (game.round.playerTurn !== playerId) {
-      return { success: false, error: 'No es tu turno' }
-    }
-
-    // 3. Verificar que estamos en fase de juego
-    if (game.round.roundPhase !== 'playing') {
-      return { success: false, error: 'No estamos en fase de juego' }
-    }
-
-    // 4. Verificar que hay un trick activo
-    if (!game.round.currentTrick) {
-      return { success: false, error: 'No hay trick activo' }
-    }
-
-    // 5. Encontrar la carta en el deck
-    const card = game.deck.find(c => c.id === cardId)
-    if (!card) {
-      return { success: false, error: 'Carta no encontrada' }
-    }
-
-    // 6. Obtener la mano del jugador
-    const playerHand = game.deck.filter(
-      c => c.owner === playerId && c.state === 'in_hand'
-    )
-
-// 7. Validar con CardRules
-const validation = canPlayCard(
-  card,
-  playerId,
-  game.round.playerTurn,  // ✅ Agregar playerTurn
-  playerHand,
-  game.round.currentTrick
-)
-
-if (!validation.valid) {
-  return { success: false, error: validation.reason }
-}
-
-// 8. Actualizar el estado de la carta
-card.state = 'in_trick'
-
-// 9. Agregar la carta al trick (por ID)
-game.round.currentTrick.cards.push(card.id)
-
-// 10. Si es la primera carta, establecer lead_suit y lead_player
-if (game.round.currentTrick.cards.length === 1) {
-  game.round.currentTrick.lead_suit = determineLeadSuit(card)
-  game.round.currentTrick.lead_player = playerId
-}
-
-// 11. Determinar el siguiente jugador
-const currentPlayerIndex = game.playerTurnOrder.indexOf(playerId)
-const nextPlayerIndex = (currentPlayerIndex + 1) % game.playerTurnOrder.length
-const nextPlayerId = game.playerTurnOrder[nextPlayerIndex]
-
-// 12. Verificar si el trick está completo
-const trickCompleted = game.round.currentTrick.cards.length === game.activePlayers.length
-let trickWinner: PlayerId | undefined
-
-if (trickCompleted) {
-  // Cambiar estado a 'resolve' antes de determinar ganador
-  game.round.currentTrick.trick_state = 'resolve'
   
-  // Determinar ganador usando TrickRules
-  trickWinner = determineTrickWinner(game.round.currentTrick, game.deck)
-  game.round.currentTrick.winner = trickWinner
-  game.round.currentTrick.winning_card = card.id
-  game.round.currentTrick.trick_state = 'ended'
+  static async createGame(gameName?: string, hostPlayerId?: PlayerId) {
+    console.log("Creating game");
+    const gameId = uuidv4();
+    const deck = createDeck();
+    const bidDecks = createBidDeck();
+    
+    const newGame = new GameModel({
+      gameId,
+      gameName: gameName || 'My Hasen Game',
+      hostPlayer: hostPlayerId || 'player_1',
+      activePlayers: [hostPlayerId || 'player_1'],
+      deck,
+      bidDecks: {
+        setCollectionBidDeck: bidDecks.setCollectionBidDeck,
+        pointsBidDeck: bidDecks.pointsBidDeck,
+        tricksBidDeck: bidDecks.tricksBidDeck
+      },
+      round: {
+        round: 0,
+        playerTurn: null,
+        roundBids: {
+          points: [null, null],
+          set_collection: [null, null],
+          trick: [null, null]
+        },
+        roundPhase: 'shuffle',
+        currentTrick: null
+      },
+      playerTurnOrder: [],
+      tricksHistory: [],
+      bidsHistory: [],
+      playerScores: []
+    });
+    
+    await newGame.save();
+    return newGame;
+  }
 
-  // Actualizar estado de las cartas del trick
-  game.round.currentTrick.cards.forEach(cardId => {
-    const trickCard = game.deck.find(c => c.id === cardId)
-    if (trickCard) {
-      trickCard.state = 'in_finished_trick'
+  static async joinGame(gameId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    if (game.gamePhase !== 'setup') {
+      throw new Error('Game already started or ended');
     }
-  })
-
-  // Mover el trick al historial
-  game.tricksHistory.push(game.round.currentTrick)
-
-  // El ganador del trick es el siguiente en jugar
-  game.round.playerTurn = trickWinner
-  game.round.currentTrick = null
-} else {
-  // Actualizar turno al siguiente jugador
-  game.round.playerTurn = nextPlayerId
-}
-
-// 13. Guardar el estado en la BD
-await game.save()
-
-return {
-  success: true,
-  updatedGame: game,
-  card,
-  nextPlayerId: trickCompleted ? trickWinner : nextPlayerId,
-  trickCompleted,
-  trickWinner
-}
-
-  /**
-   * Crea un nuevo trick
-   */
-  static async startNewTrick(gameId: string): Promise<Trick> {
-    const game = await GameModel.findOne({ gameId })
-    if (!game) {
-      throw new Error('Juego no encontrado')
+    
+    if (game.activePlayers.length >= game.gameSettings.maxPlayers) {
+      throw new Error('Game is full');
     }
-
-    const trickNumber = (game.tricksHistory.length + 1) as TrickNumber
-
-    const newTrick: Trick = {
-      trick_id: Date.now(),
-      trick_state: 'in_progress',
-      trick_number: trickNumber,
-      lead_player: game.round.playerTurn,
-      winning_card: null,
-      winner: null,
-      lead_suit: null,
-      cards: []
+    
+    const allPlayers: PlayerId[] = ['player_1', 'player_2', 'player_3', 'player_4'];
+    const availablePlayer = allPlayers.find(p => !game.activePlayers.includes(p));
+    
+    if (!availablePlayer) {
+      throw new Error('No available player slots');
     }
+    
+    game.activePlayers.push(availablePlayer);
+    await game.save();
+    
+    return { game, assignedPlayerId: availablePlayer };
+  }
 
-    game.round.currentTrick = newTrick
-    await game.save()
+  static async startGame(gameId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
 
-    return newTrick
+    game.gamePhase = 'playing';
+    game.playerTurnOrder = [...game.activePlayers];
+    game.round.round = 1;
+    game.round.roundPhase = 'shuffle';
+    game.deck = shuffleDeck(game.deck);
+    
+    game.deck.forEach(card => {
+      card.state = 'in_deck';
+      card.owner = null;
+    });
+    
+    await game.save();
+    const event = createDeckShuffledEvent(game.round.round, game.deck.length);
+    console.log("Emitting deck shuffled event:", event);
+    return { game, event };
+  }
+
+  static async leaveGame(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    if (game.gamePhase !== 'setup') {
+      throw new Error('Cannot leave a game that has already started');
+    }
+    
+    if (!game.activePlayers.includes(playerId)) {
+      throw new Error('Player is not in this game');
+    }
+    
+    // Si el host se va, eliminar el juego completo
+    if (game.hostPlayer === playerId) {
+      await GameModel.deleteOne({ gameId });
+      return { gameDeleted: true };
+    }
+    
+    // Remover el jugador
+    game.activePlayers = game.activePlayers.filter(p => p !== playerId);
+    await game.save();
+    
+    return { game, gameDeleted: false };
+  }
+
+  static async deleteGame(gameId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    if (game.gamePhase !== 'setup') {
+      throw new Error('Cannot delete a game that has already started');
+    }
+    
+    await GameModel.deleteOne({ gameId });
+    return { success: true };
+  }
+
+  static async endGame(gameId: string, winnerId?: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    if (game.gamePhase !== 'playing') {
+      throw new Error('Game is not currently being played');
+    }
+    
+    game.gamePhase = 'ended';
+    await game.save();
+    
+    return { game, winnerId: winnerId || null };
   }
 }
