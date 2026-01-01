@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@plugin "daisyui";
+
+@theme {
+  --default-font-family: 'American Typewriter', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  
+  --color-hasen-base: #f5e7c1;
+  --color-hasen-green: #457f00;
+}

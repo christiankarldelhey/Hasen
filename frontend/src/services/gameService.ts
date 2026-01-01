@@ -1,0 +1,59 @@
+const API_URL = 'http://localhost:3001/api';
+
+export interface GameInfo {
+  gameId: string;
+  gameName: string;
+  hostPlayer: string;
+  currentPlayers: number;
+  maxPlayers: number;
+  minPlayers: number;
+  hasSpace: boolean;
+}
+
+export interface JoinGameResponse {
+  gameId: string;
+  assignedPlayerId: string;
+  activePlayers: string[];
+  currentPlayers: number;
+  maxPlayers: number;
+}
+
+export const gameService = {
+  async getAvailableGames(): Promise<GameInfo[]> {
+    try {
+      const response = await fetch(`${API_URL}/games`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch games');
+      }
+      
+      return data.data;
+    } catch (error) {
+      console.error('Error fetching games:', error);
+      throw error;
+    }
+  },
+
+  async joinGame(gameId: string): Promise<JoinGameResponse> {
+    try {
+      const response = await fetch(`${API_URL}/games/${gameId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to join game');
+      }
+      
+      return data.data;
+    } catch (error) {
+      console.error('Error joining game:', error);
+      throw error;
+    }
+  }
+};
+
