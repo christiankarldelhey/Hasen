@@ -1,37 +1,36 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { gameService } from '../services/gameService';
+import { useSocket } from '../composables/useSocket';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
 const playerId = sessionStorage.getItem('current_player_id');
+const currentPlayers = ref(0);
 
 onMounted(() => {
-  console.log('Joined lobby:', gameId, 'as player:', playerId);
-});
-
-onBeforeUnmount(async () => {
-  // Cuando el usuario sale del lobby (atrás, cierra pestaña, etc.)
-  if (gameId && playerId) {
-    try {
-      await gameService.leaveGame(gameId, playerId);
-      console.log('Left game:', gameId);
-      
-      // Limpiar sessionStorage
-      sessionStorage.removeItem('current_player_id');
-      sessionStorage.removeItem('current_game_id');
-    } catch (error) {
-      console.error('Error leaving game:', error);
-    }
-  }
+  const socket = useSocket();
+  
+  // Unirse al lobby
+  socket.emit('lobby:join', { gameId, playerId });
+  
+  // Escuchar cuando otros se unen/salen
+  socket.on('player:joined', ({ playerId }) => {
+    console.log('Jugador entró:', playerId);
+  });
+  
+  socket.on('player:left', ({ playerId, currentPlayers: count }) => {
+    console.log('Jugador salió:', playerId);
+    currentPlayers.value = count;
+  });
 });
 </script>
 
 <template>
   <div>
-    <h1>Lobby View</h1>
+    <h1>Lobby</h1>
     <p>Game ID: {{ gameId }}</p>
     <p>Player ID: {{ playerId }}</p>
+    <p v-if="currentPlayers">Jugadores: {{ currentPlayers }}</p>
   </div>
 </template>
