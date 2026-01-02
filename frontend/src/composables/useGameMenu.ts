@@ -22,22 +22,25 @@ export function useGameMenu() {
     }
   };
 
-  const joinGame = async (gameId: string) => {
+    const joinGame = async (gameId: string) => {
     joiningGameId.value = gameId;
     error.value = null;
     try {
-      const result = await gameService.joinGame(gameId);
-      console.log('Successfully joined game:', result);
-      
-      // Navegar al lobby con el gameId
-      await router.push({ name: 'lobby', params: { gameId: result.gameId } });
+        const result = await gameService.joinGame(gameId);
+        console.log('Successfully joined game:', result);
+        
+        // Guardar el playerId en sessionStorage para usarlo en el lobby
+        sessionStorage.setItem('current_player_id', result.assignedPlayerId);
+        sessionStorage.setItem('current_game_id', result.gameId);
+        
+        await router.push({ name: 'lobby', params: { gameId: result.gameId } });
     } catch (err: any) {
-      error.value = err.message || 'Error al unirse al juego';
-      console.error('Error joining game:', err);
+        error.value = err.message || 'Error al unirse al juego';
+        console.error('Error joining game:', err);
     } finally {
-      joiningGameId.value = null;
+        joiningGameId.value = null;
     }
-  };
+    };
 
   onMounted(() => {
     fetchGames();

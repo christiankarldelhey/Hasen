@@ -17,6 +17,7 @@ export interface Game {
     pointsBidDeck: Bid[];
     tricksBidDeck: Bid[];
   };
+  playerSessions?: Map<string, PlayerId>
   gamePhase: GamePhase
   round: Round
   playerTurnOrder: PlayerId[]

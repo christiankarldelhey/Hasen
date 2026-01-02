@@ -29,6 +29,12 @@ const GameSchema = new Schema<GameDocument>({
     required: true,
     default: []
   }],
+  playerSessions: {
+    type: Map,
+    of: String,
+    default: new Map(),
+    required: false
+  },
   deck: [Schema.Types.Mixed],
   bidDecks: {
     setCollectionBidDeck: [Schema.Types.Mixed],

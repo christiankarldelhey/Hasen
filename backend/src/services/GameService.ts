@@ -46,12 +46,18 @@ export class GameService {
     return newGame;
   }
 
-  static async joinGame(gameId: string) {
+  static async joinGame(gameId: string, sessionId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
     
     if (game.gamePhase !== 'setup') {
       throw new Error('Game already started or ended');
+    }
+    
+    // Verificar si este sessionId ya está en el juego
+    if (game.playerSessions && game.playerSessions.has(sessionId)) {
+      const existingPlayerId = game.playerSessions.get(sessionId);
+      return { game, assignedPlayerId: existingPlayerId };
     }
     
     if (game.activePlayers.length >= game.gameSettings.maxPlayers) {
@@ -66,10 +72,17 @@ export class GameService {
     }
     
     game.activePlayers.push(availablePlayer);
+    
+    // Guardar el mapeo sessionId -> playerId
+    if (!game.playerSessions) {
+      game.playerSessions = new Map();
+    }
+    game.playerSessions.set(sessionId, availablePlayer);
+    
     await game.save();
     
     return { game, assignedPlayerId: availablePlayer };
-  }
+}
 
   static async startGame(gameId: string) {
     const game = await GameModel.findOne({ gameId });

@@ -69,7 +69,13 @@ export const getGames = async (req: Request, res: Response) => {
 export const joinGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params;
-    const { game, assignedPlayerId } = await GameService.joinGame(gameId);
+    const { sessionId } = req.body;
+    
+    if (!sessionId) {
+      return res.status(400).json({ success: false, error: 'sessionId is required' });
+    }
+    
+    const { game, assignedPlayerId } = await GameService.joinGame(gameId, sessionId);
     
     res.status(200).json({
       success: true,

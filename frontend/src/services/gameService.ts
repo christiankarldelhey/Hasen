@@ -1,5 +1,7 @@
 const API_URL = 'http://localhost:3001/api';
 
+import { sessionService } from './sessionService';
+
 export interface GameInfo {
   gameId: string;
   gameName: string;
@@ -35,13 +37,16 @@ export const gameService = {
     }
   },
 
-  async joinGame(gameId: string): Promise<JoinGameResponse> {
+async joinGame(gameId: string): Promise<JoinGameResponse> {
     try {
+      const sessionId = sessionService.getSessionId();
+      
       const response = await fetch(`${API_URL}/games/${gameId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({ sessionId })
       });
       const data = await response.json();
       
@@ -52,6 +57,25 @@ export const gameService = {
       return data.data;
     } catch (error) {
       console.error('Error joining game:', error);
+      throw error;
+    }
+  },
+  async leaveGame(gameId: string, playerId: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/games/${gameId}/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ playerId })
+      });
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to leave game');
+      }
+    } catch (error) {
+      console.error('Error leaving game:', error);
       throw error;
     }
   }
