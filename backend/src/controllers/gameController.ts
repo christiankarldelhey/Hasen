@@ -12,6 +12,8 @@ export const createGame = async (req: Request, res: Response) => {
       success: true,
       data: {
         gameId: newGame.gameId,
+        gameName: gameName,
+        assignedPlayerId: newGame.hostPlayer,
         gamePhase: newGame.gamePhase,
         deckSize: newGame.deck.length,
         bidDecks: {
@@ -47,6 +49,7 @@ export const getGames = async (req: Request, res: Response) => {
   try {
     const games = await GameModel.find({ gamePhase: 'setup' })
       .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers')
+      .sort({ createdAt: -1 })
       .lean();
     
     const gamesInfo = games.map(game => ({
@@ -56,7 +59,8 @@ export const getGames = async (req: Request, res: Response) => {
       currentPlayers: game.activePlayers.length,
       maxPlayers: game.gameSettings.maxPlayers,
       minPlayers: game.gameSettings.minPlayers,
-      hasSpace: game.activePlayers.length < game.gameSettings.maxPlayers
+      hasSpace: game.activePlayers.length < game.gameSettings.maxPlayers,
+      createdAt: game.createdAt
     }));
     
     res.status(200).json({ success: true, data: gamesInfo });

@@ -1,8 +1,8 @@
-import { PlayerId } from './Player'
-import { PlayingCard } from './Card'
-import { Round, PlayerRoundScore } from './Round'
-import { Trick } from './Trick'
-import { Bid } from './Bid'
+import type { PlayerId } from './Player'
+import type { PlayingCard } from './Card'
+import type { Round, PlayerRoundScore } from './Round'
+import type { Trick } from './Trick'
+import type { Bid } from './Bid'
 
 export type GamePhase = 'setup' | 'playing' | 'ended'
 
@@ -29,4 +29,14 @@ export interface Game {
     maxPlayers: number
     pointsToWin: number
   }
+}
+export interface LobbyGame {
+  gameId: string;
+  gameName: string;
+  hostPlayer: PlayerId;
+  currentPlayers: 1 | 2 | 3 | 4;
+  maxPlayers: 4;
+  minPlayers: 2;
+  hasSpace: boolean;
+  createdAt: string;
 }

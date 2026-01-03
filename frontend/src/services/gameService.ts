@@ -1,16 +1,7 @@
 const API_URL = 'http://localhost:3001/api';
 
 import { sessionService } from './sessionService';
-
-export interface GameInfo {
-  gameId: string;
-  gameName: string;
-  hostPlayer: string;
-  currentPlayers: number;
-  maxPlayers: number;
-  minPlayers: number;
-  hasSpace: boolean;
-}
+import type { LobbyGame } from '@domain/interfaces/Game';
 
 export interface JoinGameResponse {
   gameId: string;
@@ -21,7 +12,7 @@ export interface JoinGameResponse {
 }
 
 export const gameService = {
-  async getAvailableGames(): Promise<GameInfo[]> {
+  async getAvailableGames(): Promise<LobbyGame[]> {
     try {
       const response = await fetch(`${API_URL}/games`);
       const data = await response.json();
@@ -33,6 +24,28 @@ export const gameService = {
       return data.data;
     } catch (error) {
       console.error('Error fetching games:', error);
+      throw error;
+    }
+  },
+
+  async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
+    try {
+      const response = await fetch(`${API_URL}/games/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ gameName, hostPlayerId })
+      });
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to create game');
+      }
+      
+      return data.data;
+    } catch (error) {
+      console.error('Error creating game:', error);
       throw error;
     }
   },

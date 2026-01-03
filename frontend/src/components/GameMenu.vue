@@ -1,13 +1,65 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useGameMenu } from '../composables/useGameMenu';
+import { onMounted, ref } from 'vue';
+import { useGame } from '../composables/useGame';
+import MenuContent from './MenuContent.vue';
+import LobbyContent from './LobbyContent.vue';
+import GameSettingsContent from './GameSettingsContent.vue';
+import { useRouter } from 'vue-router';
+import type { LobbyGame } from '@domain/interfaces/Game';
 
-const { games, loading, error, fetchGames, joinGame, joiningGameId } = useGameMenu();
+const { games, loading, error, fetchGames, joinGame, joiningGameId, createGame } = useGame();
+const router = useRouter();
+
+type ViewState = 'menu' | 'lobby' | 'settings';
+const currentView = ref<ViewState>('menu');
+const currentGameId = ref<string>('');
+const currentPlayerId = ref<string>('');
 
 onMounted(() => {
   fetchGames();
 });
 
+const handleViewChange = (view: ViewState) => {
+  currentView.value = view;
+};
+
+const handleGameSettings = () => {
+  // Handle game settings logic here
+  handleViewChange('settings');
+};
+
+const handleCreateGame = async (gameName, playerId) => {
+  try {
+    const result = await createGame(gameName, playerId);
+    if (result) {
+      currentGameId.value = result.gameId;
+      currentPlayerId.value = result.assignedPlayerId;
+      sessionStorage.setItem('current_player_id', result.assignedPlayerId);
+      sessionStorage.setItem('current_game_id', result.gameId);
+      handleViewChange('lobby');
+    }
+  } catch (err) {
+    console.error('Error creating game:', err);
+  }
+};
+
+const handleJoinGame = async (gameId: string) => {
+  try {
+    const result = await joinGame(gameId);
+    if (result) {
+      currentGameId.value = result.gameId;
+      currentPlayerId.value = result.assignedPlayerId;
+      handleViewChange('lobby');
+    }
+  } catch (err) {
+    console.error('Error joining game:', err);
+  }
+};
+
+const handleBackToMenu = () => {
+  handleViewChange('menu');;
+  fetchGames();
+};
 </script>
 
 <template>
@@ -16,37 +68,35 @@ onMounted(() => {
       <h2 class="text-center text-xxl font-bold text-black my-4">Hasen</h2>
     </div>
     <div class="card-body flex flex-col gap-4 overflow-y-auto">
-      <button class="btn bg-hasen-green text-white w-full">
-        Create new game
-      </button>
+      <MenuContent
+        v-if="currentView === 'menu'"
+        :games="games"
+        :loading="loading"
+        :error="error"
+        :joining-game-id="joiningGameId"
+        @game-settings="handleGameSettings"
+        @join-game="handleJoinGame"
+      />
       
-      <h2 class="text-center text-md font-semibold text-black mt-4">Join game</h2>
+      <GameSettingsContent
+        v-if="currentView === 'settings'"
+        :games="games"
+        :loading="loading"
+        :error="error"
+        :joining-game-id="joiningGameId"
+        @create-game="handleCreateGame"
+        @back="handleViewChange('menu')"
+      />
       
-      <div v-if="loading" class="text-center text-gray-600">
-        Fetching games...
-      </div>
-      
-      <div v-else-if="error" class="text-center text-red-600">
-        {{ error }}
-      </div>
-      
-      <div v-else-if="games.length === 0" class="text-center text-gray-600">
-        There are no available games at the moment.
-      </div>
-      
-      <button 
-        v-for="game in games" 
-        :key="game.gameId"
-        @click="joinGame(game.gameId)"
-        class="btn bg-hasen-green text-white w-full flex flex-row justify-between items-center"
-        :disabled="!game.hasSpace || joiningGameId === game.gameId"
-        :class="{ 'opacity-50 cursor-not-allowed': !game.hasSpace || joiningGameId === game.gameId }"
-        >
-        <span class="font-semibold">{{ game.gameName }}</span>
-        <span class="text-sm">
-          {{ joiningGameId === game.gameId ? 'Joining...' : `${game.currentPlayers}/${game.maxPlayers} players` }}
-        </span>
-       </button>
+      <LobbyContent
+        v-if="currentView === 'lobby'"
+        :current-game="games.find((game: LobbyGame) => game.gameId === currentGameId) as LobbyGame"
+        :player-id="currentPlayerId"
+        :assigned-player-id="(games.find((game: LobbyGame) => game.gameId === currentGameId) as LobbyGame)?.hostPlayer || ''"
+        @back="handleBackToMenu"
+        @start-game="handleViewChange('settings')"
+        @leave-game="handleBackToMenu"
+      />
     </div>
   </div>
 </template>

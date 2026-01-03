@@ -1,9 +1,7 @@
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { gameService, type GameInfo } from '../services/gameService';
 
-export function useGameMenu() {
-  const router = useRouter();
+export function useGame() {
   const games = ref<GameInfo[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -22,6 +20,21 @@ export function useGameMenu() {
     }
   };
 
+  const createGame = async (gameName: string, playerName: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+        const result = await gameService.createNewGame(gameName, playerName);
+        console.log('Successfully created game:', result);
+        return result;
+    } catch (err: any) {
+        error.value = err.message || 'Error creating new game';
+        console.error('Error creating new game:', err);
+    } finally {
+        loading.value = false;
+    }
+    };
+
     const joinGame = async (gameId: string) => {
     joiningGameId.value = gameId;
     error.value = null;
@@ -33,9 +46,9 @@ export function useGameMenu() {
         sessionStorage.setItem('current_player_id', result.assignedPlayerId);
         sessionStorage.setItem('current_game_id', result.gameId);
         
-        await router.push({ name: 'lobby', params: { gameId: result.gameId } });
+        return result;
     } catch (err: any) {
-        error.value = err.message || 'Error al unirse al juego';
+        error.value = err.message || 'Error joining game';
         console.error('Error joining game:', err);
     } finally {
         joiningGameId.value = null;
@@ -50,6 +63,7 @@ export function useGameMenu() {
     games,
     loading,
     error,
+    createGame,
     joiningGameId,
     fetchGames,
     joinGame

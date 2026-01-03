@@ -3,6 +3,8 @@ import { Game } from '../../../domain/interfaces';
 
 export interface GameDocument extends Omit<Game, 'gameId'>, Document {
   gameId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const GameSchema = new Schema<GameDocument>({

@@ -11,6 +11,10 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "baseUrl": ".",
+    "paths": {
+      "@domain/*": ["../domain/*"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
