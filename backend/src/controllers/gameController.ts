@@ -5,8 +5,13 @@ import { PlayerId } from '../../../domain/interfaces/Player'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
-    const { gameName, hostPlayerId } = req.body;
-    const newGame = await GameService.createGame(gameName, hostPlayerId);
+    const { gameName, hostPlayerId, userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'userId is required' });
+    }
+    
+    const newGame = await GameService.createGame(gameName, hostPlayerId, userId);
     
     res.status(201).json({
       success: true,
@@ -23,9 +28,9 @@ export const createGame = async (req: Request, res: Response) => {
         }
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating game:', error);
-    res.status(500).json({ success: false, error: 'Failed to create game' });
+    res.status(500).json({ success: false, error: error.message || 'Failed to create game' });
   }
 }
 
@@ -73,13 +78,13 @@ export const getGames = async (req: Request, res: Response) => {
 export const joinGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params;
-    const { sessionId } = req.body;
+    const { userId } = req.body;
     
-    if (!sessionId) {
-      return res.status(400).json({ success: false, error: 'sessionId is required' });
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'userId is required' });
     }
     
-    const { game, assignedPlayerId } = await GameService.joinGame(gameId, sessionId);
+    const { game, assignedPlayerId } = await GameService.joinGame(gameId, userId);
     
     res.status(200).json({
       success: true,
@@ -134,11 +139,21 @@ export const startGame = async (req: Request, res: Response) => {
 export const leaveGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params;
-    const { playerId } = req.body;
+    const { playerId, userId } = req.body;
     
-    const result = await GameService.leaveGame(gameId, playerId as PlayerId);
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'userId is required' });
+    }
+    
+    const result = await GameService.leaveGame(gameId, playerId as PlayerId, userId);
     
     if (result.gameDeleted) {
+      // Notificar a todos los jugadores que el host salió y el juego fue eliminado
+      const io = req.app.get('io');
+      if (io) {
+        io.to(gameId).emit('game:host-left', { gameId });
+      }
+      
       return res.status(200).json({
         success: true,
         message: 'Host left, game deleted',

@@ -8,7 +8,7 @@ import { PlayerId } from '../../../domain/interfaces'
 
 export class GameService {
   
-  static async createGame(gameName?: string, hostPlayerId?: PlayerId) {
+  static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string) {
     console.log("Creating game");
     const gameId = uuidv4();
     const deck = createDeck();
@@ -18,6 +18,7 @@ export class GameService {
       gameId,
       gameName: gameName || 'My Hasen Game',
       hostPlayer: hostPlayerId || 'player_1',
+      hostUserId,
       activePlayers: [hostPlayerId || 'player_1'],
       deck,
       bidDecks: {
@@ -46,17 +47,22 @@ export class GameService {
     return newGame;
   }
 
-  static async joinGame(gameId: string, sessionId: string) {
+  static async joinGame(gameId: string, userId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
     
     if (game.gamePhase !== 'setup') {
       throw new Error('Game already started or ended');
     }
+
+    // Validar que no sea el creador intentando unirse de nuevo
+    if (game.hostUserId === userId) {
+      throw new Error('You cannot join your own game. You are already the host.');
+    }
     
-    // Verificar si este sessionId ya está en el juego
-    if (game.playerSessions && game.playerSessions.has(sessionId)) {
-      const existingPlayerId = game.playerSessions.get(sessionId);
+    // Verificar si este userId ya está en el juego
+    if (game.playerSessions && game.playerSessions.has(userId)) {
+      const existingPlayerId = game.playerSessions.get(userId);
       return { game, assignedPlayerId: existingPlayerId };
     }
     
@@ -77,7 +83,7 @@ export class GameService {
     if (!game.playerSessions) {
       game.playerSessions = new Map();
     }
-    game.playerSessions.set(sessionId, availablePlayer);
+    game.playerSessions.set(userId, availablePlayer);
     
     await game.save();
     
@@ -105,7 +111,7 @@ export class GameService {
     return { game, event };
   }
 
-  static async leaveGame(gameId: string, playerId: PlayerId) {
+  static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
     
@@ -125,9 +131,15 @@ export class GameService {
     
     // Remover el jugador
     game.activePlayers = game.activePlayers.filter(p => p !== playerId);
+    
+    // Remover del mapeo de sesiones
+    if (game.playerSessions) {
+      game.playerSessions.delete(userId);
+    }
+
     await game.save();
     
-    return { game, gameDeleted: false };
+    return { game, gameDeleted: false, wasHost: false };
   }
 
   static async deleteGame(gameId: string) {

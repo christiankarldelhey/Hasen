@@ -19,6 +19,15 @@ const gameStore = useGameStore();
 const currentPlayers = ref(0);
 const socket = useSocket();
 
+const handleHostLeft = (event: any) => {
+  const { gameId } = event.detail;
+  
+  if (gameId === props.currentGame.gameId) {
+    alert('The host has left the game. The room has been closed.');
+    gameStore.clearCurrentGame();
+    emit('back'); // Volver al menú
+  }
+};
 onMounted(() => {
   socket.emit('lobby:join', { gameId: props.currentGame.gameId, playerId: props.playerId });
   
@@ -30,12 +39,16 @@ onMounted(() => {
     console.log('Jugador salió:', playerId);
     currentPlayers.value = count;
   });
+  // Escuchar cuando el host abandona
+  window.addEventListener('game-host-left', handleHostLeft);
 });
 
 onUnmounted(() => {
   socket.off('player:joined');
   socket.off('player:left');
+  window.removeEventListener('game-host-left', handleHostLeft);
 });
+
 </script>
 
 <template>

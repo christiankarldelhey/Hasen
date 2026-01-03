@@ -28,7 +28,13 @@ class SocketService {
       console.log('Game event received:', event);
       this.handleGameEvent(event);
     });
+
+    this.socket.on('game:host-left', ({ gameId }) => {
+    console.log('🚪 Host left game:', gameId);
+    window.dispatchEvent(new CustomEvent('game-host-left', { detail: { gameId } }));
+  });
   }
+
 
   private handleGameEvent(event: any) {
     switch (event.type) {

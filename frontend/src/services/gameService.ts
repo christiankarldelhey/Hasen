@@ -1,6 +1,6 @@
 const API_URL = 'http://localhost:3001/api';
 
-import { sessionService } from './sessionService';
+import { sessionService } from './userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
 export interface JoinGameResponse {
@@ -28,69 +28,73 @@ export const gameService = {
     }
   },
 
-  async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
-    try {
-      const response = await fetch(`${API_URL}/games/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ gameName, hostPlayerId })
-      });
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to create game');
-      }
-      
-      return data.data;
-    } catch (error) {
-      console.error('Error creating game:', error);
-      throw error;
+async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
+  try {
+    const userId = sessionService.getUserId(); // Cambiado de getSessionId
+    
+    const response = await fetch(`${API_URL}/games/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ gameName, hostPlayerId, userId })
+    });
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to create game');
     }
-  },
+    
+    return data.data;
+  } catch (error) {
+    console.error('Error creating game:', error);
+    throw error;
+  }
+},
 
 async joinGame(gameId: string): Promise<JoinGameResponse> {
-    try {
-      const sessionId = sessionService.getSessionId();
-      
-      const response = await fetch(`${API_URL}/games/${gameId}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionId })
-      });
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to join game');
-      }
-      
-      return data.data;
-    } catch (error) {
-      console.error('Error joining game:', error);
-      throw error;
+  try {
+    const userId = sessionService.getUserId(); // Cambiado de getSessionId
+    
+    const response = await fetch(`${API_URL}/games/${gameId}/join`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId })
+    });
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to join game');
     }
-  },
-  async leaveGame(gameId: string, playerId: string): Promise<void> {
-    try {
-      const response = await fetch(`${API_URL}/games/${gameId}/leave`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ playerId })
-      });
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to leave game');
-      }
-    } catch (error) {
-      console.error('Error leaving game:', error);
-      throw error;
-    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('Error joining game:', error);
+    throw error;
   }
+},
+  async leaveGame(gameId: string, playerId: string): Promise<void> {
+  try {
+    const userId = sessionService.getUserId(); // NUEVO
+    
+    const response = await fetch(`${API_URL}/games/${gameId}/leave`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ playerId, userId })
+    });
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to leave game');
+    }
+  } catch (error) {
+    console.error('Error leaving game:', error);
+    throw error;
+  }
+}
 };
 

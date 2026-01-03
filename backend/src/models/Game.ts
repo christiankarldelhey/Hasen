@@ -14,6 +14,11 @@ const GameSchema = new Schema<GameDocument>({
     unique: true,
     index: true 
   },
+  hostUserId: {
+    type: String,
+    required: false,
+    default: 'playerId_1'
+  },
   gameName: {
     type: String,
     required: true,

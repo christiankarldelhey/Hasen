@@ -10,6 +10,7 @@ export interface Game {
   gameId: string
   gameName: string
   hostPlayer: PlayerId
+  hostUserId: string
   activePlayers: PlayerId[]
   deck: PlayingCard[]
   bidDecks: {
