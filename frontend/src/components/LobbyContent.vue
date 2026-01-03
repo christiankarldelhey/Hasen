@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useSocket } from '../composables/useSocket';
+import { useGameStore } from '../stores/gameStore';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
 const props = defineProps<{
-  gameName: string;
   currentGame: LobbyGame;
   playerId: string;
-  assignedPlayerId: string;
 }>();
 
 const emit = defineEmits<{
@@ -16,11 +15,9 @@ const emit = defineEmits<{
   leaveGame: [];
 }>();
 
+const gameStore = useGameStore();
 const currentPlayers = ref(0);
 const socket = useSocket();
-
-// Computed property para verificar si es el host
-const isHost = computed(() => props.currentGame.hostPlayer === props.playerId);
 
 onMounted(() => {
   socket.emit('lobby:join', { gameId: props.currentGame.gameId, playerId: props.playerId });
@@ -50,7 +47,7 @@ onUnmounted(() => {
     <div class="text-center">
       <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
       <p class="text-gray-600">Game ID: {{ currentGame.gameId }}</p>
-      <p v-if="isHost" class="text-hasen-green font-semibold">👑 You are the host</p>
+      <p v-if="gameStore.isHost" class="text-hasen-green font-semibold">👑 You are the host</p>
       <p class="text-black font-semibold mt-4">
         Players: {{ currentGame.currentPlayers }} / {{ currentGame.maxPlayers }}
       </p>
@@ -62,7 +59,7 @@ onUnmounted(() => {
 
     <!-- Solo el host puede iniciar el juego -->
     <button 
-      v-if="isHost"
+      v-if="gameStore.isHost"
       :disabled="currentGame.currentPlayers < currentGame.minPlayers"
       class="btn w-full text-white"
       :class="currentGame.currentPlayers < currentGame.minPlayers ? 'bg-gray-400 cursor-not-allowed' : 'bg-hasen-green'"
@@ -75,7 +72,7 @@ onUnmounted(() => {
       class="btn bg-hasen-red text-white w-full"
       @click="emit('leaveGame')"
     >
-      {{ isHost ? 'Delete Game' : 'Leave Game' }}
+      {{ gameStore.isHost ? 'Delete Game' : 'Leave Game' }}
     </button>
   </div>
 </template>

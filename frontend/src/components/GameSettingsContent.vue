@@ -2,14 +2,14 @@
 import { ref } from 'vue';
 
 const emit = defineEmits<{
-  createGame: [gameName: string];
+  createGame: [gameName: string, playerId: string];
   back: [];
 }>();
 
 const gameName = ref('My Hasen Game');
 
 const handleCreateGame = () => {
-  emit('createGame', gameName.value);
+  emit('createGame', gameName.value, 'player_1');
 };
 </script>
 

@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useGame } from '../composables/useGame';
+import { useGameStore } from '../stores/gameStore';
 import MenuContent from './MenuContent.vue';
 import LobbyContent from './LobbyContent.vue';
 import GameSettingsContent from './GameSettingsContent.vue';
-import { useRouter } from 'vue-router';
-import type { LobbyGame } from '@domain/interfaces/Game';
 
-const { games, loading, error, fetchGames, joinGame, joiningGameId, createGame } = useGame();
-const router = useRouter();
+const gameStore = useGameStore();
 
 type ViewState = 'menu' | 'lobby' | 'settings';
 const currentView = ref<ViewState>('menu');
-const currentGameId = ref<string>('');
-const currentPlayerId = ref<string>('');
 
 onMounted(() => {
-  fetchGames();
+  gameStore.fetchGames();
+  gameStore.restoreSession();
 });
 
 const handleViewChange = (view: ViewState) => {
@@ -24,20 +20,13 @@ const handleViewChange = (view: ViewState) => {
 };
 
 const handleGameSettings = () => {
-  // Handle game settings logic here
   handleViewChange('settings');
 };
 
-const handleCreateGame = async (gameName, playerId) => {
+const handleCreateGame = async (gameName: string, playerId: string) => {
   try {
-    const result = await createGame(gameName, playerId);
-    if (result) {
-      currentGameId.value = result.gameId;
-      currentPlayerId.value = result.assignedPlayerId;
-      sessionStorage.setItem('current_player_id', result.assignedPlayerId);
-      sessionStorage.setItem('current_game_id', result.gameId);
-      handleViewChange('lobby');
-    }
+    await gameStore.createGame(gameName, playerId);
+    handleViewChange('lobby');
   } catch (err) {
     console.error('Error creating game:', err);
   }
@@ -45,20 +34,27 @@ const handleCreateGame = async (gameName, playerId) => {
 
 const handleJoinGame = async (gameId: string) => {
   try {
-    const result = await joinGame(gameId);
-    if (result) {
-      currentGameId.value = result.gameId;
-      currentPlayerId.value = result.assignedPlayerId;
-      handleViewChange('lobby');
-    }
+    await gameStore.joinGame(gameId);
+    handleViewChange('lobby');
   } catch (err) {
     console.error('Error joining game:', err);
   }
 };
 
 const handleBackToMenu = () => {
-  handleViewChange('menu');;
-  fetchGames();
+  handleViewChange('menu');
+  gameStore.fetchGames();
+};
+
+const handleLeaveGame = async () => {
+  try {
+    if (gameStore.currentGameId && gameStore.currentPlayerId) {
+      await gameStore.leaveGame(gameStore.currentGameId, gameStore.currentPlayerId);
+      handleBackToMenu();
+    }
+  } catch (err) {
+    console.error('Error leaving game:', err);
+  }
 };
 </script>
 
@@ -70,32 +66,27 @@ const handleBackToMenu = () => {
     <div class="card-body flex flex-col gap-4 overflow-y-auto">
       <MenuContent
         v-if="currentView === 'menu'"
-        :games="games"
-        :loading="loading"
-        :error="error"
-        :joining-game-id="joiningGameId"
+        :games="gameStore.games"
+        :loading="gameStore.loading"
+        :error="gameStore.error"
+        :joining-game-id="gameStore.joiningGameId"
         @game-settings="handleGameSettings"
         @join-game="handleJoinGame"
       />
       
       <GameSettingsContent
         v-if="currentView === 'settings'"
-        :games="games"
-        :loading="loading"
-        :error="error"
-        :joining-game-id="joiningGameId"
         @create-game="handleCreateGame"
         @back="handleViewChange('menu')"
       />
       
       <LobbyContent
-        v-if="currentView === 'lobby'"
-        :current-game="games.find((game: LobbyGame) => game.gameId === currentGameId) as LobbyGame"
-        :player-id="currentPlayerId"
-        :assigned-player-id="(games.find((game: LobbyGame) => game.gameId === currentGameId) as LobbyGame)?.hostPlayer || ''"
+        v-if="currentView === 'lobby' && gameStore.currentGameData"
+        :current-game="gameStore.currentGameData"
+        :player-id="gameStore.currentPlayerId"
         @back="handleBackToMenu"
         @start-game="handleViewChange('settings')"
-        @leave-game="handleBackToMenu"
+        @leave-game="handleLeaveGame"
       />
     </div>
   </div>
