@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { gameService } from '../services/gameService'
 import type { LobbyGame } from '@domain/interfaces/Game'
 import type { PlayerId } from '@domain/interfaces/Player'
 
@@ -25,85 +24,48 @@ export const useGameStore = defineStore('game', () => {
     return games.value.find(game => game.gameId === currentGameId.value) || null
   })
 
-  // Actions
-  async function fetchGames() {
-    loading.value = true
-    error.value = null
-    try {
-      games.value = await gameService.getAvailableGames()
-    } catch (err) {
-      error.value = 'Error when fetching games'
-      console.error(err)
-    } finally {
-      loading.value = false
+  // Setters (solo gestión de estado)
+  function setGames(newGames: LobbyGame[]) {
+    games.value = newGames
+  }
+
+  function setCurrentGame(game: LobbyGame | null) {
+    currentGame.value = game
+    if (game) {
+      games.value.unshift(game)
     }
   }
 
-  async function createGame(gameName: string, hostPlayerId: PlayerId) {
-    loading.value = true
-    error.value = null
-    try {
-      const result = await gameService.createNewGame(gameName, hostPlayerId)
-      
-      // Crear el objeto LobbyGame completo
-      currentGame.value = {
-        gameId: result.gameId,
-        gameName: result.gameName,
-        hostPlayer: result.assignedPlayerId as PlayerId,
-        currentPlayers: 1,
-        maxPlayers: 4,
-        minPlayers: 2,
-        hasSpace: true,
-        createdAt: new Date().toISOString()
-      }
-      
-      currentGameId.value = result.gameId
-      currentPlayerId.value = result.assignedPlayerId as PlayerId
-      
-      // Guardar en sessionStorage
-      sessionStorage.setItem('current_player_id', result.assignedPlayerId)
-      sessionStorage.setItem('current_game_id', result.gameId)
-      
-      // Agregar a la lista de juegos
-      games.value.unshift(currentGame.value)
-      
-      return result
-    } catch (err: any) {
-      error.value = err.message || 'Error creating new game'
-      console.error('Error creating new game:', err)
-      throw err
-    } finally {
-      loading.value = false
-    }
+  function setCurrentGameId(gameId: string) {
+    currentGameId.value = gameId
   }
 
-  async function joinGame(gameId: string) {
+  function setCurrentPlayerId(playerId: PlayerId) {
+    currentPlayerId.value = playerId
+  }
+
+  function setIsHost(value: boolean) {
+    // isHost es computed, pero podemos forzar el estado si es necesario
+    // Por ahora no hace nada, isHost se calcula automáticamente
+  }
+
+  function setLoading(value: boolean) {
+    loading.value = value
+  }
+
+  function setError(errorMessage: string | null) {
+    error.value = errorMessage
+  }
+
+  function setJoiningGameId(gameId: string | null) {
     joiningGameId.value = gameId
-    error.value = null
-    try {
-      const result = await gameService.joinGame(gameId)
-      
-      currentGameId.value = result.gameId
-      currentPlayerId.value = result.assignedPlayerId as PlayerId
-      
-      // Guardar en sessionStorage
-      sessionStorage.setItem('current_player_id', result.assignedPlayerId)
-      sessionStorage.setItem('current_game_id', result.gameId)
-      
-      // Actualizar el juego en la lista
-      const gameIndex = games.value.findIndex(g => g.gameId === gameId)
-      if (gameIndex !== -1) {
-        games.value[gameIndex].currentPlayers = result.currentPlayers as 1 | 2 | 3 | 4
-        currentGame.value = games.value[gameIndex]
-      }
-      
-      return result
-    } catch (err: any) {
-      error.value = err.message || 'Error joining game'
-      console.error('Error joining game:', err)
-      throw err
-    } finally {
-      joiningGameId.value = null
+  }
+
+  function updateGamePlayers(gameId: string, playerCount: 1 | 2 | 3 | 4) {
+    const gameIndex = games.value.findIndex(g => g.gameId === gameId)
+    if (gameIndex !== -1) {
+      games.value[gameIndex].currentPlayers = playerCount
+      currentGame.value = games.value[gameIndex]
     }
   }
 
@@ -138,10 +100,16 @@ export const useGameStore = defineStore('game', () => {
     isHost,
     currentGameData,
     
-    // Actions
-    fetchGames,
-    createGame,
-    joinGame,
+    // Setters
+    setGames,
+    setCurrentGame,
+    setCurrentGameId,
+    setCurrentPlayerId,
+    setIsHost,
+    setLoading,
+    setError,
+    setJoiningGameId,
+    updateGamePlayers,
     clearCurrentGame,
     restoreSession
   }

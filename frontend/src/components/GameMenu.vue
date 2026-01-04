@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useGameStore } from '../stores/gameStore';
+import { useGameAPI } from '../composables/useGameAPI';
 import { useSocket } from '../composables/useSocket';
 import MenuContent from './MenuContent.vue';
 import LobbyContent from './LobbyContent.vue';
 import GameSettingsContent from './GameSettingsContent.vue';
 
 const gameStore = useGameStore();
+const gameAPI = useGameAPI();
 const socket = useSocket();
 
 type ViewState = 'menu' | 'lobby' | 'settings';
 const currentView = ref<ViewState>('menu');
 
 onMounted(() => {
-  gameStore.fetchGames();
+  gameAPI.fetchGames();
   gameStore.restoreSession();
 });
 
@@ -27,7 +29,7 @@ const handleGameSettings = () => {
 
 const handleCreateGame = async (gameName: string, playerId: string) => {
   try {
-    await gameStore.createGame(gameName, playerId);
+    await gameAPI.createGame(gameName, playerId);
     handleViewChange('lobby');
   } catch (err) {
     console.error('Error creating game:', err);
@@ -36,7 +38,7 @@ const handleCreateGame = async (gameName: string, playerId: string) => {
 
 const handleJoinGame = async (gameId: string) => {
   try {
-    await gameStore.joinGame(gameId);
+    await gameAPI.joinGame(gameId);
     handleViewChange('lobby');
   } catch (err) {
     console.error('Error joining game:', err);
@@ -45,7 +47,7 @@ const handleJoinGame = async (gameId: string) => {
 
 const handleBackToMenu = () => {
   handleViewChange('menu');
-  gameStore.fetchGames();
+  gameAPI.fetchGames();
 };
 
 const handleLeaveGame = () => {
