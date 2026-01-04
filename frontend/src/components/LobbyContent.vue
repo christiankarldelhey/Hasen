@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useSocket } from '../composables/useSocket';
 import { useGameStore } from '../stores/gameStore';
+import { userIdService } from '../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
 const props = defineProps<{
@@ -20,7 +21,12 @@ const currentPlayers = ref(0);
 const socket = useSocket();
 
 onMounted(() => {
-  socket.emit('lobby:join', { gameId: props.currentGame.gameId, playerId: props.playerId });
+  const userId = userIdService.getUserId();
+  socket.emit('lobby:join', { 
+    gameId: props.currentGame.gameId, 
+    playerId: props.playerId,
+    userId 
+  });
   
   socket.on('player:joined', ({ playerId }) => {
     alert('Jugador entró: ' + playerId);
@@ -41,11 +47,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  socket.emit('lobby:leave', { 
-    gameId: props.currentGame.gameId, 
-    playerId: props.playerId 
-  });
-  
   socket.off('player:joined');
   socket.off('player:left');
   socket.off('game:deleted');

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 const USER_ID_KEY = 'hasen_user_id';
-export const sessionService = {
+export const userIdService = {
   getUserId(): string {
     let userId = localStorage.getItem(USER_ID_KEY);
     

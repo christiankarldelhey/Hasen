@@ -10,11 +10,11 @@ export function setupConnectionHandlers(io: Server, socket: Socket) {
     
     const playerInfo = socketToPlayer.get(socket.id)
     if (playerInfo) {
-      const { gameId, playerId } = playerInfo
+      const { gameId, playerId, userId } = playerInfo
       
       try {
-        console.log(`🚪 Auto-leaving player ${playerId} from game ${gameId}`)
-        const result = await GameService.leaveGame(gameId, playerId, 'unknown')
+        console.log(`🚪 Auto-leaving player ${playerId} (userId: ${userId}) from game ${gameId}`)
+        const result = await GameService.leaveGame(gameId, playerId, userId)
         
         // Notificar a otros jugadores en el lobby
         if (!result.gameDeleted) {

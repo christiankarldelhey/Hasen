@@ -112,6 +112,8 @@ export class GameService {
   }
 
   static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
+    console.log('🔵 [leaveGame] CALLED with:', { gameId, playerId, userId });
+    
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
     
@@ -120,6 +122,10 @@ export class GameService {
     }
     
     if (!game.activePlayers.includes(playerId)) {
+      console.error('❌ [leaveGame] Player not found in activePlayers!', {
+        requestedPlayerId: playerId,
+        activePlayers: game.activePlayers
+      });
       throw new Error('Player is not in this game');
     }
     

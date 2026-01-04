@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 import { useGameAPI } from '../composables/useGameAPI';
 import { useSocket } from '../composables/useSocket';
+import { userIdService } from '../services/userIdService';
 import MenuContent from './MenuContent.vue';
 import LobbyContent from './LobbyContent.vue';
 import GameSettingsContent from './GameSettingsContent.vue';
@@ -53,9 +54,11 @@ const handleBackToMenu = () => {
 const handleLeaveGame = () => {
   try {
     if (gameStore.currentGameId && gameStore.currentPlayerId) {
+      const userId = userIdService.getUserId();
       socket.emit('lobby:leave', { 
         gameId: gameStore.currentGameId, 
-        playerId: gameStore.currentPlayerId 
+        playerId: gameStore.currentPlayerId,
+        userId 
       });
       gameStore.clearCurrentGame();
       handleBackToMenu();
