@@ -107,27 +107,6 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  async function leaveGame(gameId: string, playerId: PlayerId) {
-    try {
-      await gameService.leaveGame(gameId, playerId)
-      
-      // Limpiar estado
-      currentGame.value = null
-      currentGameId.value = ''
-      currentPlayerId.value = ''
-      
-      sessionStorage.removeItem('current_player_id')
-      sessionStorage.removeItem('current_game_id')
-      
-      // Refrescar lista de juegos
-      await fetchGames()
-    } catch (err: any) {
-      error.value = err.message || 'Error leaving game'
-      console.error('Error leaving game:', err)
-      throw err
-    }
-  }
-
   function clearCurrentGame() {
     currentGame.value = null
     currentGameId.value = ''
@@ -163,7 +142,6 @@ export const useGameStore = defineStore('game', () => {
     fetchGames,
     createGame,
     joinGame,
-    leaveGame,
     clearCurrentGame,
     restoreSession
   }

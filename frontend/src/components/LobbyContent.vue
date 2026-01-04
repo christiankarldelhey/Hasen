@@ -19,34 +19,36 @@ const gameStore = useGameStore();
 const currentPlayers = ref(0);
 const socket = useSocket();
 
-const handleHostLeft = (event: any) => {
-  const { gameId } = event.detail;
-  
-  if (gameId === props.currentGame.gameId) {
-    alert('The host has left the game. The room has been closed.');
-    gameStore.clearCurrentGame();
-    emit('back'); // Volver al menú
-  }
-};
 onMounted(() => {
   socket.emit('lobby:join', { gameId: props.currentGame.gameId, playerId: props.playerId });
   
   socket.on('player:joined', ({ playerId }) => {
+    alert('Jugador entró: ' + playerId);
     console.log('Jugador entró:', playerId);
   });
   
   socket.on('player:left', ({ playerId, currentPlayers: count }) => {
+    alert('Jugador salió: ' + playerId);
     console.log('Jugador salió:', playerId);
     currentPlayers.value = count;
   });
-  // Escuchar cuando el host abandona
-  window.addEventListener('game-host-left', handleHostLeft);
+  
+  socket.on('game:deleted', ({ message }) => {
+    alert(message || 'The host has left. Game deleted.');
+    gameStore.clearCurrentGame();
+    emit('back');
+  });
 });
 
 onUnmounted(() => {
+  socket.emit('lobby:leave', { 
+    gameId: props.currentGame.gameId, 
+    playerId: props.playerId 
+  });
+  
   socket.off('player:joined');
   socket.off('player:left');
-  window.removeEventListener('game-host-left', handleHostLeft);
+  socket.off('game:deleted');
 });
 
 </script>

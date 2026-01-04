@@ -116,10 +116,7 @@ export const startGame = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: `Need at least ${game.gameSettings.minPlayers} players to start` });
     }
     
-    const { game: updatedGame, event } = await GameService.startGame(gameId);
-    
-    const io = req.app.get('io');
-    io.to(gameId).emit('game:event', event);
+    const { game: updatedGame } = await GameService.startGame(gameId);
 
     res.status(200).json({
       success: true,
@@ -136,45 +133,6 @@ export const startGame = async (req: Request, res: Response) => {
   }
 }
 
-export const leaveGame = async (req: Request, res: Response) => {
-  try {
-    const { gameId } = req.params;
-    const { playerId, userId } = req.body;
-    
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' });
-    }
-    
-    const result = await GameService.leaveGame(gameId, playerId as PlayerId, userId);
-    
-    if (result.gameDeleted) {
-      // Notificar a todos los jugadores que el host salió y el juego fue eliminado
-      const io = req.app.get('io');
-      if (io) {
-        io.to(gameId).emit('game:host-left', { gameId });
-      }
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Host left, game deleted',
-        gameDeleted: true
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      data: {
-        gameId: result.game!.gameId,
-        activePlayers: result.game!.activePlayers,
-        currentPlayers: result.game!.activePlayers.length
-      }
-    });
-  } catch (error: any) {
-    console.error('Error leaving game:', error);
-    const status = error.message === 'Game not found' ? 404 : 400;
-    res.status(status).json({ success: false, error: error.message });
-  }
-}
 
 export const deleteGame = async (req: Request, res: Response) => {
   try {

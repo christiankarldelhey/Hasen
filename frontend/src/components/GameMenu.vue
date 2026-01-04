@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useGameStore } from '../stores/gameStore';
+import { useSocket } from '../composables/useSocket';
 import MenuContent from './MenuContent.vue';
 import LobbyContent from './LobbyContent.vue';
 import GameSettingsContent from './GameSettingsContent.vue';
 
 const gameStore = useGameStore();
+const socket = useSocket();
 
 type ViewState = 'menu' | 'lobby' | 'settings';
 const currentView = ref<ViewState>('menu');
@@ -46,10 +48,14 @@ const handleBackToMenu = () => {
   gameStore.fetchGames();
 };
 
-const handleLeaveGame = async () => {
+const handleLeaveGame = () => {
   try {
     if (gameStore.currentGameId && gameStore.currentPlayerId) {
-      await gameStore.leaveGame(gameStore.currentGameId, gameStore.currentPlayerId);
+      socket.emit('lobby:leave', { 
+        gameId: gameStore.currentGameId, 
+        playerId: gameStore.currentPlayerId 
+      });
+      gameStore.clearCurrentGame();
       handleBackToMenu();
     }
   } catch (err) {

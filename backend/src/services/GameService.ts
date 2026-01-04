@@ -1,10 +1,10 @@
 import { GameModel } from '../models/Game.js'
-import { createDeck } from '../../../domain/rules/DeckRules.js'
-import { createBidDeck } from '../../../domain/rules/BidDeckRules.js'
-import { shuffleDeck } from '../../../domain/rules/DeckRules.js'
-import { createDeckShuffledEvent } from '../../../domain/events/GameEvents.js'
+import { createDeck } from '@domain/rules/DeckRules.js'
+import { createBidDeck } from '@domain/rules/BidDeckRules.js'
+import { shuffleDeck } from '@domain/rules/DeckRules.js'
+import { createDeckShuffledEvent } from '@domain/events/GameEvents.js'
 import { v4 as uuidv4 } from 'uuid'
-import { PlayerId } from '../../../domain/interfaces'
+import { PlayerId } from '@domain/interfaces'
 
 export class GameService {
   
