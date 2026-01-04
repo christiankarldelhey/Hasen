@@ -32,9 +32,4 @@ export function setupConnectionHandlers(io: Server, socket: Socket) {
       }
     }
   })
-  
-  // Handler: Ping/Pong (health check)
-  socket.on('ping', () => {
-    socket.emit('pong', { message: 'Server is alive!' })
-  })
 }

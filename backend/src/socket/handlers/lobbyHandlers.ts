@@ -42,7 +42,7 @@ socket.on('lobby:leave', async ({ gameId, playerId }: { gameId: string; playerId
     
   } catch (error) {
     console.error(`Error leaving lobby:`, error)
-    socket.emit('error', { message: 'Failed to leave lobby' })
+    // TODO: Agregar manejo de errores en el frontend
   }
 })
 }
