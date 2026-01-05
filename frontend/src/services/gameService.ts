@@ -1,6 +1,6 @@
 const API_URL = 'http://localhost:3001/api';
 
-import { sessionService } from './userIdService';
+import { userIdService } from './userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
 export interface JoinGameResponse {
@@ -30,7 +30,7 @@ export const gameService = {
 
 async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
   try {
-    const userId = sessionService.getUserId(); // Cambiado de getSessionId
+    const userId = userIdService.getUserId(); // Cambiado de getSessionId
     
     const response = await fetch(`${API_URL}/games/`, {
       method: 'POST',
@@ -54,7 +54,7 @@ async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> 
 
 async joinGame(gameId: string): Promise<JoinGameResponse> {
   try {
-    const userId = sessionService.getUserId(); // Cambiado de getSessionId
+    const userId = userIdService.getUserId();
     
     const response = await fetch(`${API_URL}/games/${gameId}/join`, {
       method: 'POST',
