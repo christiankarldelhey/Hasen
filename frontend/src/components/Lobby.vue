@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, computed } from 'vue';
 import { useSocket } from '../composables/useSocket';
 import { useGameStore } from '../stores/gameStore';
 import { userIdService } from '../services/userIdService';
@@ -17,40 +17,30 @@ const emit = defineEmits<{
 }>();
 
 const gameStore = useGameStore();
-const currentPlayers = ref(props.currentGame.currentPlayers);
 const socket = useSocket();
 
-  onMounted(() => {
-    const userId = userIdService.getUserId();
-    socket.emit('lobby:join', { 
-      gameId: props.currentGame.gameId, 
-      playerId: props.playerId,
-      userId 
-    });
-    
-    socket.on('player:joined', ({ playerId }) => {
-      console.log('Jugador entró:', playerId);
-      // Solo incrementar si NO es el jugador actual
-      if (playerId !== props.playerId) {
-        currentPlayers.value++;
-      }
-    });
-    
-    socket.on('player:left', ({ playerId, currentPlayers: count }) => {
-      console.log('Jugador salió:', playerId);
-      currentPlayers.value = count; // Actualizar con el valor del servidor
-    });
-    
-    socket.on('game:deleted', ({ message }) => {
-      alert(message || 'The host has left. Game deleted.');
-      gameStore.clearCurrentGame();
-      emit('back');
-    });
+const currentPlayers = computed(() => {
+  if (gameStore.currentGame) {
+    return gameStore.currentGame.currentPlayers;
+  }
+  return props.currentGame.currentPlayers;
+});
+
+onMounted(() => {
+  const userId = userIdService.getUserId();
+  socket.emit('lobby:join', { 
+    gameId: props.currentGame.gameId, 
+    playerId: props.playerId,
+    userId 
   });
+  
+  socket.on('game:deleted', ({ message }) => {
+    alert(message || 'The host has left. Game deleted.');
+    emit('back');
+  });
+});
 
 onUnmounted(() => {
-  socket.off('player:joined');
-  socket.off('player:left');
   socket.off('game:deleted');
 });
 

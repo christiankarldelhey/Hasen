@@ -86,6 +86,13 @@ export const joinGame = async (req: Request, res: Response) => {
     
     const { game, assignedPlayerId } = await GameService.joinGame(gameId, userId);
     
+    // Emitir evento de socket para actualizar contadores en tiempo real
+    const io = req.app.get('io');
+    io.to('lobby-list').emit('lobby:player-count-changed', {
+      gameId: game.gameId,
+      currentPlayers: game.activePlayers.length
+    });
+    
     res.status(200).json({
       success: true,
       data: {

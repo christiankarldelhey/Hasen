@@ -58,10 +58,7 @@ export function useGameAPI() {
       const result = await gameService.joinGame(gameId)
       
       gameStore.setCurrentGameId(result.gameId)
-      gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)      
-      
-      // Actualizar el juego en la lista
-      gameStore.updateGamePlayers(gameId, result.currentPlayers as 1 | 2 | 3 | 4)
+      gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
       
       return result
     } catch (err: any) {

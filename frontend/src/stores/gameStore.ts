@@ -61,11 +61,16 @@ export const useGameStore = defineStore('game', () => {
     joiningGameId.value = gameId
   }
 
-  function updateGamePlayers(gameId: string, playerCount: 1 | 2 | 3 | 4) {
+  function updateGamePlayers(gameId: string, playerCount: number) {
+    // Actualizar en la lista de juegos
     const gameIndex = games.value.findIndex(g => g.gameId === gameId)
-    if (gameIndex !== -1) {
-      games.value[gameIndex].currentPlayers = playerCount
-      currentGame.value = games.value[gameIndex]
+    if (gameIndex !== -1 && games.value[gameIndex]) {
+      games.value[gameIndex].currentPlayers = playerCount as 1 | 2 | 3 | 4
+    }
+    
+    // Si es el juego actual, también actualizarlo
+    if (currentGame.value?.gameId === gameId) {
+      currentGame.value.currentPlayers = playerCount as 1 | 2 | 3 | 4
     }
   }
 

@@ -8,20 +8,23 @@ export const socketToPlayer = new Map<string, { gameId: string; playerId: Player
 
 export function setupLobbyHandlers(io: Server, socket: Socket) {
   
+  // Handler: Unirse al room global de lista de lobbies
+  socket.on('lobby-list:join', () => {
+    socket.join('lobby-list')
+    console.log(`📋 Socket ${socket.id} joined lobby-list room`)
+  })
+
+  // Handler: Salir del room global de lista de lobbies
+  socket.on('lobby-list:leave', () => {
+    socket.leave('lobby-list')
+    console.log(`📋 Socket ${socket.id} left lobby-list room`)
+  })
+  
   // Handler: Unirse a un lobby
   socket.on('lobby:join', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
     socket.join(gameId)
     socketToPlayer.set(socket.id, { gameId, playerId, userId })
     console.log(`🎮 Socket ${socket.id} joined lobby: ${gameId} as ${playerId} (userId: ${userId})`)
-    
-    // Verificar si el jugador ya estaba en el juego
-    const game = await GameModel.findOne({ gameId });
-    const wasAlreadyInGame = game?.activePlayers.includes(playerId);
-    
-    // Solo notificar si es un nuevo jugador
-    if (!wasAlreadyInGame) {
-      io.to(gameId).emit('player:joined', { playerId })
-    }
   })
 
   socket.on('lobby:leave', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
@@ -32,11 +35,10 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
     
     const result = await GameService.leaveGame(gameId, playerId, userId)
     
-    // Siempre notificar que el jugador se fue (room persiste)
-    io.to(gameId).emit('player:left', { 
-      playerId,
-      currentPlayers: result.game!.activePlayers.length,
-      wasHost: result.wasHost
+    // Broadcast al lobby-list para actualizar contadores
+    io.to('lobby-list').emit('lobby:player-count-changed', { 
+      gameId, 
+      currentPlayers: result.game!.activePlayers.length 
     })
     
     socketToPlayer.delete(socket.id)

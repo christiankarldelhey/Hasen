@@ -15,11 +15,10 @@ socket.on('disconnect', async () => {
       console.log(`🚪 Auto-leaving player ${playerId} (userId: ${userId}) from game ${gameId}`)
       const result = await GameService.leaveGame(gameId, playerId, userId)
       
-      // Siempre notificar que el jugador se fue (room persiste)
-      io.to(gameId).emit('player:left', { 
-        playerId,
-        currentPlayers: result.game!.activePlayers.length,
-        wasHost: result.wasHost
+      // Broadcast al lobby-list para actualizar contadores
+      io.to('lobby-list').emit('lobby:player-count-changed', { 
+        gameId, 
+        currentPlayers: result.game!.activePlayers.length 
       })
       
       socketToPlayer.delete(socket.id)

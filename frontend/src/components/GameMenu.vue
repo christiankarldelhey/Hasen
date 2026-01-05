@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 import { useGameAPI } from '../composables/useGameAPI';
 import { useSocket } from '../composables/useSocket';
@@ -15,8 +15,13 @@ const socket = useSocket();
 type ViewState = 'menu' | 'lobby' | 'settings';
 const currentView = ref<ViewState>('menu');
 
-onMounted(() => {
-  gameAPI.fetchGames();
+onMounted(async () => {
+  socket.emit('lobby-list:join');
+  await gameAPI.fetchGames();
+});
+
+onUnmounted(() => {
+  socket.emit('lobby-list:leave');
 });
 
 const handleViewChange = (view: ViewState) => {
