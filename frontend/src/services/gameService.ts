@@ -74,5 +74,25 @@ async joinGame(gameId: string): Promise<JoinGameResponse> {
     console.error('Error joining game:', error);
     throw error;
   }
+},
+
+async deleteGame(gameId: string, hostPlayerId: string): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/games/${gameId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ hostPlayerId })
+    });
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to delete game');
+    }
+  } catch (error) {
+    console.error('Error deleting game:', error);
+    throw error;
+  }
 }
 };

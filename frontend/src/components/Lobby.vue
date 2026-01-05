@@ -30,7 +30,10 @@ const socket = useSocket();
     
     socket.on('player:joined', ({ playerId }) => {
       console.log('Jugador entró:', playerId);
-      currentPlayers.value++; // Incrementar contador
+      // Solo incrementar si NO es el jugador actual
+      if (playerId !== props.playerId) {
+        currentPlayers.value++;
+      }
     });
     
     socket.on('player:left', ({ playerId, currentPlayers: count }) => {
@@ -61,10 +64,9 @@ onUnmounted(() => {
     
     <div class="text-center">
       <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
-      <p class="text-gray-600">Game ID: {{ currentGame.gameId }}</p>
       <p v-if="gameStore.isHost" class="text-hasen-green font-semibold">👑 You are the host</p>
       <p class="text-black font-semibold mt-4">
-        Players: {{ currentGame.currentPlayers }} / {{ currentGame.maxPlayers }}
+        Players: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
       </p>
     </div>
     
@@ -75,9 +77,9 @@ onUnmounted(() => {
     <!-- Solo el host puede iniciar el juego -->
     <button 
       v-if="gameStore.isHost"
-      :disabled="currentGame.currentPlayers < currentGame.minPlayers"
+      :disabled="currentPlayers < currentGame.minPlayers"
       class="btn w-full text-white"
-      :class="currentGame.currentPlayers < currentGame.minPlayers ? 'bg-gray-400 cursor-not-allowed' : 'bg-hasen-green'"
+      :class="currentPlayers < currentGame.minPlayers ? 'bg-gray-400 cursor-not-allowed' : 'bg-hasen-green'"
       @click="emit('startGame')"
     >
       Start Game

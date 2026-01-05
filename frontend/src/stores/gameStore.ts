@@ -75,17 +75,6 @@ export const useGameStore = defineStore('game', () => {
     currentPlayerId.value = ''
   }
 
-  // Restaurar estado desde sessionStorage al iniciar
-  function restoreSession() {
-    const savedPlayerId = sessionStorage.getItem('current_player_id')
-    const savedGameId = sessionStorage.getItem('current_game_id')
-    
-    if (savedPlayerId && savedGameId) {
-      currentPlayerId.value = savedPlayerId as PlayerId
-      currentGameId.value = savedGameId
-    }
-  }
-
   return {
     // State
     games,
@@ -111,6 +100,5 @@ export const useGameStore = defineStore('game', () => {
     setJoiningGameId,
     updateGamePlayers,
     clearCurrentGame,
-    restoreSession
   }
 })

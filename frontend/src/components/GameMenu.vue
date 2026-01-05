@@ -17,7 +17,6 @@ const currentView = ref<ViewState>('menu');
 
 onMounted(() => {
   gameAPI.fetchGames();
-  gameStore.restoreSession();
 });
 
 const handleViewChange = (view: ViewState) => {
@@ -47,24 +46,44 @@ const handleJoinGame = async (gameId: string) => {
 };
 
 const handleBackToMenu = () => {
+  const userId = userIdService.getUserId();
   handleViewChange('menu');
+  socket.emit('lobby:leave', { 
+    gameId: gameStore.currentGameId, 
+    playerId: gameStore.currentPlayerId,
+    userId 
+  });
   gameAPI.fetchGames();
 };
 
-const handleLeaveGame = () => {
+const handleLeaveGame = async () => {
   try {
     if (gameStore.currentGameId && gameStore.currentPlayerId) {
       const userId = userIdService.getUserId();
-      socket.emit('lobby:leave', { 
-        gameId: gameStore.currentGameId, 
-        playerId: gameStore.currentPlayerId,
-        userId 
-      });
+      
+      if (gameStore.isHost) {
+        const confirmed = confirm('Are you sure you want to delete this room?');
+        if (!confirmed) {
+          return;
+        }
+        // Host: Deletear el juego via API REST
+        await gameAPI.deleteGame(gameStore.currentGameId, gameStore.currentPlayerId);
+        // Notificar via socket que el juego fue eliminado
+        socket.emit('game:deleted-by-host', { gameId: gameStore.currentGameId });
+      } else {
+        // Jugador normal: Solo hacer leave
+        socket.emit('lobby:leave', { 
+          gameId: gameStore.currentGameId, 
+          playerId: gameStore.currentPlayerId,
+          userId 
+        });
+      }
+      
       gameStore.clearCurrentGame();
       handleBackToMenu();
     }
   } catch (err) {
-    console.error('Error leaving game:', err);
+    console.error('Error leaving/deleting game:', err);
   }
 };
 </script>

@@ -41,10 +41,6 @@ export function useGameAPI() {
       gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
       gameStore.setIsHost(true)
       
-      // Guardar en sessionStorage
-      sessionStorage.setItem('current_player_id', result.assignedPlayerId)
-      sessionStorage.setItem('current_game_id', result.gameId)
-      
       return result
     } catch (err: any) {
       gameStore.setError(err.message || 'Error creating new game')
@@ -62,11 +58,7 @@ export function useGameAPI() {
       const result = await gameService.joinGame(gameId)
       
       gameStore.setCurrentGameId(result.gameId)
-      gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
-      
-      // Guardar en sessionStorage
-      sessionStorage.setItem('current_player_id', result.assignedPlayerId)
-      sessionStorage.setItem('current_game_id', result.gameId)
+      gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)      
       
       // Actualizar el juego en la lista
       gameStore.updateGamePlayers(gameId, result.currentPlayers as 1 | 2 | 3 | 4)
@@ -81,9 +73,25 @@ export function useGameAPI() {
     }
   }
 
+  async function deleteGame(gameId: string, hostPlayerId: string) {
+  gameStore.setLoading(true)
+  gameStore.setError(null)
+  try {
+    await gameService.deleteGame(gameId, hostPlayerId)
+    gameStore.clearCurrentGame()
+  } catch (err: any) {
+    gameStore.setError(err.message || 'Error deleting game')
+    console.error('Error deleting game:', err)
+    throw err
+  } finally {
+    gameStore.setLoading(false)
+  }
+}
+
   return {
     fetchGames,
     createGame,
-    joinGame
+    joinGame,
+    deleteGame
   }
 }
