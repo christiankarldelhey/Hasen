@@ -48,47 +48,53 @@ export class GameService {
   }
 
   static async joinGame(gameId: string, userId: string) {
-    const game = await GameModel.findOne({ gameId });
-    if (!game) throw new Error('Game not found');
-    
-    if (game.gamePhase !== 'setup') {
-      throw new Error('Game already started or ended');
-    }
+  const game = await GameModel.findOne({ gameId });
+  if (!game) throw new Error('Game not found');
+  
+  if (game.gamePhase !== 'setup') {
+    throw new Error('Game already started or ended');
+  }
 
-    // Validar que no sea el creador intentando unirse de nuevo
-    if (game.hostUserId === userId) {
-      throw new Error('You cannot join your own game. You are already the host.');
-    }
+  // Verificar si este userId ya tiene un playerId asignado (rejoin)
+  if (game.playerSessions && game.playerSessions.has(userId)) {
+    const existingPlayerId = game.playerSessions.get(userId);
     
-    // Verificar si este userId ya está en el juego
-    if (game.playerSessions && game.playerSessions.has(userId)) {
-      const existingPlayerId = game.playerSessions.get(userId);
+    // Si el jugador ya está en activePlayers, solo devolver su playerId
+    if (game.activePlayers.includes(existingPlayerId!)) {
       return { game, assignedPlayerId: existingPlayerId };
     }
     
-    if (game.activePlayers.length >= game.gameSettings.maxPlayers) {
-      throw new Error('Game is full');
-    }
-    
-    const allPlayers: PlayerId[] = ['player_1', 'player_2', 'player_3', 'player_4'];
-    const availablePlayer = allPlayers.find(p => !game.activePlayers.includes(p));
-    
-    if (!availablePlayer) {
-      throw new Error('No available player slots');
-    }
-    
-    game.activePlayers.push(availablePlayer);
-    
-    // Guardar el mapeo sessionId -> playerId
-    if (!game.playerSessions) {
-      game.playerSessions = new Map();
-    }
-    game.playerSessions.set(userId, availablePlayer);
-    
+    // Si no está en activePlayers (se desconectó), volver a agregarlo
+    game.activePlayers.push(existingPlayerId!);
     await game.save();
-    
-    return { game, assignedPlayerId: availablePlayer };
+    return { game, assignedPlayerId: existingPlayerId };
+  }
+  
+  // Nuevo jugador: verificar espacio disponible
+  if (game.activePlayers.length >= game.gameSettings.maxPlayers) {
+    throw new Error('Game is full');
+  }
+  
+  const allPlayers: PlayerId[] = ['player_1', 'player_2', 'player_3', 'player_4'];
+  const availablePlayer = allPlayers.find(p => !game.activePlayers.includes(p));
+  
+  if (!availablePlayer) {
+    throw new Error('No available player slots');
+  }
+  
+  game.activePlayers.push(availablePlayer);
+  
+  // Guardar el mapeo userId -> playerId
+  if (!game.playerSessions) {
+    game.playerSessions = new Map();
+  }
+  game.playerSessions.set(userId, availablePlayer);
+  
+  await game.save();
+  
+  return { game, assignedPlayerId: availablePlayer };
 }
+
 
   static async startGame(gameId: string) {
     const game = await GameModel.findOne({ gameId });
@@ -111,41 +117,36 @@ export class GameService {
     return { game, event };
   }
 
-  static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
-    console.log('🔵 [leaveGame] CALLED with:', { gameId, playerId, userId });
-    
-    const game = await GameModel.findOne({ gameId });
-    if (!game) throw new Error('Game not found');
-    
-    if (game.gamePhase !== 'setup') {
-      throw new Error('Cannot leave a game that has already started');
-    }
-    
-    if (!game.activePlayers.includes(playerId)) {
-      console.error('❌ [leaveGame] Player not found in activePlayers!', {
-        requestedPlayerId: playerId,
-        activePlayers: game.activePlayers
-      });
-      throw new Error('Player is not in this game');
-    }
-    
-    // Si el host se va, eliminar el juego completo
-    if (game.hostPlayer === playerId) {
-      await GameModel.deleteOne({ gameId });
-      return { gameDeleted: true };
-    }
-    
-    // Remover el jugador
-    game.activePlayers = game.activePlayers.filter(p => p !== playerId);
-    
-    // Remover del mapeo de sesiones
-    if (game.playerSessions) {
-      game.playerSessions.delete(userId);
-    }
+static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
+  console.log('🔵 [leaveGame] CALLED with:', { gameId, playerId, userId });
+  
+  const game = await GameModel.findOne({ gameId });
+  if (!game) throw new Error('Game not found');
+  
+  if (game.gamePhase !== 'setup') {
+    throw new Error('Cannot leave a game that has already started');
+  }
+  
+  if (!game.activePlayers.includes(playerId)) {
+    console.error('❌ [leaveGame] Player not found in activePlayers!', {
+      requestedPlayerId: playerId,
+      activePlayers: game.activePlayers
+    });
+    throw new Error('Player is not in this game');
+  }
+  
+  // Remover el jugador (ya no importa si es host o no)
+  game.activePlayers = game.activePlayers.filter(p => p !== playerId);
+  
+  // Remover del mapeo de sesiones
+  if (game.playerSessions) {
+    game.playerSessions.delete(userId);
+  }
 
-    await game.save();
-    
-    return { game, gameDeleted: false, wasHost: false };
+  await game.save();
+  
+    // La room persiste aunque se vaya el host
+    return { game, gameDeleted: false, wasHost: playerId === game.hostPlayer };
   }
 
   static async deleteGame(gameId: string) {

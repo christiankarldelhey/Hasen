@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { GameInfo } from '../services/gameService';
+import type { LobbyGame } from '@domain/interfaces/Game';
 
 defineProps<{
-  games: GameInfo[];
+  games: LobbyGame[];
   loading: boolean;
   error: string | null;
   joiningGameId: string | null;

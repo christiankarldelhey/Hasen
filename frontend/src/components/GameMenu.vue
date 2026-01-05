@@ -5,8 +5,8 @@ import { useGameAPI } from '../composables/useGameAPI';
 import { useSocket } from '../composables/useSocket';
 import { userIdService } from '../services/userIdService';
 import MenuContent from './MenuContent.vue';
-import LobbyContent from './LobbyContent.vue';
-import GameSettingsContent from './GameSettingsContent.vue';
+import Lobby from './Lobby.vue';
+import GameSettings from './GameSettings.vue';
 
 const gameStore = useGameStore();
 const gameAPI = useGameAPI();
@@ -85,13 +85,13 @@ const handleLeaveGame = () => {
         @join-game="handleJoinGame"
       />
       
-      <GameSettingsContent
+      <GameSettings
         v-if="currentView === 'settings'"
         @create-game="handleCreateGame"
         @back="handleViewChange('menu')"
       />
       
-      <LobbyContent
+      <Lobby
         v-if="currentView === 'lobby' && gameStore.currentGameData"
         :current-game="gameStore.currentGameData"
         :player-id="gameStore.currentPlayerId"

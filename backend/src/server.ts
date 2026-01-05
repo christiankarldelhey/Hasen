@@ -3,6 +3,7 @@ import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import gameRoutes from './routes/gameRoutes.js'
+import { GameCleanupService } from './services/GameCleanupService.js'
 import cors from 'cors'
 import { connectDatabase } from './config/database.js'
 import { setupSocketHandlers } from './socket/index.js'
@@ -11,6 +12,8 @@ dotenv.config()
 
 const app = express()
 const httpServer = createServer(app)
+
+GameCleanupService.startCleanupService();
 
 // Configure Socket.io with CORS
 const io = new Server(httpServer, {
@@ -36,6 +39,7 @@ setupSocketHandlers(io)
 
 // Start server
 async function startServer() {
+  
   try {
     await connectDatabase()
     
@@ -51,3 +55,13 @@ async function startServer() {
 }
 
 startServer()
+
+// Limpiar al cerrar el servidor
+process.on('SIGTERM', () => {
+  GameCleanupService.stopCleanupService();
+  process.exit(0);
+});
+process.on('SIGINT', () => {
+  GameCleanupService.stopCleanupService();
+  process.exit(0);
+});

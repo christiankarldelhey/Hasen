@@ -17,34 +17,33 @@ const emit = defineEmits<{
 }>();
 
 const gameStore = useGameStore();
-const currentPlayers = ref(0);
+const currentPlayers = ref(props.currentGame.currentPlayers);
 const socket = useSocket();
 
-onMounted(() => {
-  const userId = userIdService.getUserId();
-  socket.emit('lobby:join', { 
-    gameId: props.currentGame.gameId, 
-    playerId: props.playerId,
-    userId 
+  onMounted(() => {
+    const userId = userIdService.getUserId();
+    socket.emit('lobby:join', { 
+      gameId: props.currentGame.gameId, 
+      playerId: props.playerId,
+      userId 
+    });
+    
+    socket.on('player:joined', ({ playerId }) => {
+      console.log('Jugador entró:', playerId);
+      currentPlayers.value++; // Incrementar contador
+    });
+    
+    socket.on('player:left', ({ playerId, currentPlayers: count }) => {
+      console.log('Jugador salió:', playerId);
+      currentPlayers.value = count; // Actualizar con el valor del servidor
+    });
+    
+    socket.on('game:deleted', ({ message }) => {
+      alert(message || 'The host has left. Game deleted.');
+      gameStore.clearCurrentGame();
+      emit('back');
+    });
   });
-  
-  socket.on('player:joined', ({ playerId }) => {
-    alert('Jugador entró: ' + playerId);
-    console.log('Jugador entró:', playerId);
-  });
-  
-  socket.on('player:left', ({ playerId, currentPlayers: count }) => {
-    alert('Jugador salió: ' + playerId);
-    console.log('Jugador salió:', playerId);
-    currentPlayers.value = count;
-  });
-  
-  socket.on('game:deleted', ({ message }) => {
-    alert(message || 'The host has left. Game deleted.');
-    gameStore.clearCurrentGame();
-    emit('back');
-  });
-});
 
 onUnmounted(() => {
   socket.off('player:joined');

@@ -18,31 +18,24 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
   })
 
   socket.on('lobby:leave', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
-    try {
-      console.log(`🚪 Player ${playerId} (userId: ${userId}) leaving lobby ${gameId}`)
-      
-      // Salir de la sala de Socket.io
-      socket.leave(gameId)
-      
-      // Remover del juego en la base de datos
-      const result = await GameService.leaveGame(gameId, playerId, userId)
-      
-      // Notificar a otros jugadores
-      if (!result.gameDeleted) {
-        io.to(gameId).emit('player:left', { 
-          playerId,
-          currentPlayers: result.game!.activePlayers.length 
-        })
-      } else {
-        io.to(gameId).emit('game:deleted', { gameId, message: 'Host left, game deleted' })
-      }
-      
-      // Limpiar el mapeo
-      socketToPlayer.delete(socket.id)
-      
-    } catch (error) {
-      console.error(`Error leaving lobby:`, error)
-      // TODO: Agregar manejo de errores en el frontend
-    }
-  })
+  try {
+    console.log(`🚪 Player ${playerId} (userId: ${userId}) leaving lobby ${gameId}`)
+    
+    socket.leave(gameId)
+    
+    const result = await GameService.leaveGame(gameId, playerId, userId)
+    
+    // Siempre notificar que el jugador se fue (room persiste)
+    io.to(gameId).emit('player:left', { 
+      playerId,
+      currentPlayers: result.game!.activePlayers.length,
+      wasHost: result.wasHost
+    })
+    
+    socketToPlayer.delete(socket.id)
+    
+  } catch (error) {
+    console.error(`Error leaving lobby:`, error)
+  }
+})
 }
