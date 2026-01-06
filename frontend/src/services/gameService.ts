@@ -94,5 +94,27 @@ async deleteGame(gameId: string, hostPlayerId: string): Promise<void> {
     console.error('Error deleting game:', error);
     throw error;
   }
+},
+
+async startGame(gameId: string, hostPlayerId: string): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/games/${gameId}/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ hostPlayerId })
+    });
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to start game');
+    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('Error starting game:', error);
+    throw error;
+  }
 }
 };

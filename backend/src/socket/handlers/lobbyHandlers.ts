@@ -1,7 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { GameService } from '../../services/GameService.js'
 import { PlayerId } from '@domain/interfaces/Player.js'
-import { GameModel } from '../../models/Game.js'
 
 // Map compartido entre handlers
 export const socketToPlayer = new Map<string, { gameId: string; playerId: PlayerId; userId: string }>()

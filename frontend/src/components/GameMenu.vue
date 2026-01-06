@@ -18,10 +18,16 @@ const currentView = ref<ViewState>('menu');
 onMounted(async () => {
   socket.emit('lobby-list:join');
   await gameAPI.fetchGames();
+  
+  socket.on('game:started', ({ gameId }) => {
+    console.log('Game started, redirecting to game view...');
+    window.location.href = `/game/${gameId}`;
+  });
 });
 
 onUnmounted(() => {
   socket.emit('lobby-list:leave');
+  socket.off('game:started');
 });
 
 const handleViewChange = (view: ViewState) => {
@@ -91,6 +97,16 @@ const handleLeaveGame = async () => {
     console.error('Error leaving/deleting game:', err);
   }
 };
+
+const handleStartGame = async () => {
+  try {
+    if (gameStore.currentGameId && gameStore.currentPlayerId) {
+      await gameAPI.startGame(gameStore.currentGameId, gameStore.currentPlayerId);
+    }
+  } catch (err) {
+    console.error('Error starting game:', err);
+  }
+};
 </script>
 
 <template>
@@ -120,7 +136,7 @@ const handleLeaveGame = async () => {
         :current-game="gameStore.currentGameData"
         :player-id="gameStore.currentPlayerId"
         @back="handleBackToMenu"
-        @start-game="handleViewChange('settings')"
+        @start-game="handleStartGame"
         @leave-game="handleLeaveGame"
       />
     </div>

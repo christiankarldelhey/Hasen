@@ -123,7 +123,19 @@ export const startGame = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: `Need at least ${game.gameSettings.minPlayers} players to start` });
     }
     
-    const { game: updatedGame } = await GameService.startGame(gameId);
+    const { game: updatedGame, event } = await GameService.startGame(gameId);
+
+    const io = req.app.get('io');
+    io.to(gameId).emit('game:started', {
+      gameId: updatedGame.gameId,
+      gamePhase: updatedGame.gamePhase,
+      activePlayers: updatedGame.activePlayers,
+      playerTurnOrder: updatedGame.playerTurnOrder
+    });
+    
+    if (event) {
+      io.to(gameId).emit('game:event', event);
+    }
 
     res.status(200).json({
       success: true,

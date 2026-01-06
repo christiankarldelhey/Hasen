@@ -85,10 +85,25 @@ export function useGameAPI() {
   }
 }
 
+  async function startGame(gameId: string, hostPlayerId: string) {
+    gameStore.setLoading(true)
+    gameStore.setError(null)
+    try {
+      await gameService.startGame(gameId, hostPlayerId)
+    } catch (err: any) {
+      gameStore.setError(err.message || 'Error starting game')
+      console.error('Error starting game:', err)
+      throw err
+    } finally {
+      gameStore.setLoading(false)
+    }
+  }
+
   return {
     fetchGames,
     createGame,
     joinGame,
-    deleteGame
+    deleteGame,
+    startGame
   }
 }

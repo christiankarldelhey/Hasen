@@ -113,7 +113,6 @@ export class GameService {
     
     await game.save();
     const event = createDeckShuffledEvent(game.round.round, game.deck.length);
-    console.log("Emitting deck shuffled event:", event);
     return { game, event };
   }
 
