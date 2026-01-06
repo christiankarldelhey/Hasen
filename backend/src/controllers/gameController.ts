@@ -43,7 +43,24 @@ export const getGame = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Game not found' });
     }
     
-    res.status(200).json({ success: true, data: game });
+    // Devolver solo información pública
+    const publicGameData = {
+      gameId: game.gameId,
+      gameName: game.gameName,
+      hostPlayer: game.hostPlayer,
+      activePlayers: game.activePlayers,
+      gamePhase: game.gamePhase,
+      playerTurnOrder: game.playerTurnOrder,
+      round: {
+        round: game.round.round,
+        roundPhase: game.round.roundPhase,
+        playerTurn: game.round.playerTurn,
+        currentTrick: game.round.currentTrick
+      },
+      gameSettings: game.gameSettings
+    };
+    
+    res.status(200).json({ success: true, data: publicGameData });
   } catch (error) {
     console.error('Error fetching game:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch game' });

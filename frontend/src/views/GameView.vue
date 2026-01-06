@@ -2,24 +2,19 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
+import { useGameAPI } from '../composables/useGameAPI';
 
 const route = useRoute();
 const gameStore = useGameStore();
 const gameId = route.params.gameId as string;
+const gameAPI = useGameAPI();
 const gameData = ref<any>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
 onMounted(async () => {
   try {
-    const response = await fetch(`http://localhost:3001/api/games/${gameId}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      gameData.value = data.data;
-    } else {
-      error.value = data.error || 'Failed to load game';
-    }
+    gameData.value = await gameAPI.fetchPublicGameState(gameId);
   } catch (err) {
     console.error('Error loading game:', err);
     error.value = 'Failed to load game';

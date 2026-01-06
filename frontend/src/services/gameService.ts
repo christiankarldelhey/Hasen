@@ -2,6 +2,7 @@ const API_URL = 'http://localhost:3001/api';
 
 import { userIdService } from './userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
+import type { PublicGameState } from '@domain/interfaces/Game';
 
 export interface JoinGameResponse {
   gameId: string;
@@ -27,6 +28,22 @@ export const gameService = {
       throw error;
     }
   },
+
+async getPublicGameState(gameId: string): Promise<PublicGameState> {
+  try {
+    const response = await fetch(`${API_URL}/games/${gameId}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to fetch game');
+    }
+    
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching game:', error);
+    throw error;
+  }
+},
 
 async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
   try {

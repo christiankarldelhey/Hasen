@@ -85,6 +85,21 @@ export function useGameAPI() {
   }
 }
 
+async function fetchPublicGameState(gameId: string) {
+  gameStore.setLoading(true)
+  gameStore.setError(null)
+  try {
+    const publicState = await gameService.getPublicGameState(gameId)
+    return publicState
+  } catch (err: any) {
+    gameStore.setError(err.message || 'Error fetching game state')
+    console.error('Error fetching game state:', err)
+    throw err
+  } finally {
+    gameStore.setLoading(false)
+  }
+}
+
   async function startGame(gameId: string, hostPlayerId: string) {
     gameStore.setLoading(true)
     gameStore.setError(null)
@@ -104,6 +119,7 @@ export function useGameAPI() {
     createGame,
     joinGame,
     deleteGame,
-    startGame
+    startGame,
+    fetchPublicGameState
   }
 }

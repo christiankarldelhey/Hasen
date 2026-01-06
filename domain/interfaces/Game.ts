@@ -3,6 +3,7 @@ import type { PlayingCard } from './Card'
 import type { Round, PlayerRoundScore } from './Round'
 import type { Trick } from './Trick'
 import type { Bid } from './Bid'
+import type { RoundPhase } from './Round'
 
 export type GamePhase = 'setup' | 'playing' | 'ended'
 
@@ -40,4 +41,25 @@ export interface LobbyGame {
   minPlayers: 2;
   hasSpace: boolean;
   createdAt: string;
+}
+
+export interface PublicRoundState {
+  round: number
+  roundPhase: RoundPhase
+  playerTurn: PlayerId
+  currentTrick: Trick | null
+}
+export interface PublicGameState {
+  gameId: string
+  gameName: string
+  hostPlayer: PlayerId
+  activePlayers: PlayerId[]
+  gamePhase: GamePhase
+  playerTurnOrder: PlayerId[]
+  round: PublicRoundState
+  gameSettings: {
+    minPlayers: number
+    maxPlayers: number
+    pointsToWin: number
+  }
 }
