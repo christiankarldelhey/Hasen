@@ -19,7 +19,7 @@ const backgroundPosition = computed(() => {
 
 <template>
   <div 
-    class="w-[120px] h-[200px]"
+    class="w-[160px] h-[260px] rounded-lg drop-shadow-2xl"
     :style="{
       backgroundImage: `url(${deckSprite})`,
       backgroundSize: '800% 400%',

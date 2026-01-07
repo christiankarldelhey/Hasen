@@ -11,15 +11,8 @@ import { RouterView } from 'vue-router'
     <header class="p-4 border-b border-slate-700">
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-3xl text-black font-bold">Hasen</h1>
-        
-        <!-- Info del jugador si está conectado -->
-        <!-- <div v-if="gameStore.player" class="text-white">
-          {{ gameStore.player.name }}
-        </div> -->
       </div>
     </header>
-
-    <!-- Aquí se renderizan las diferentes vistas según la ruta -->
     <main class="">
       <RouterView />
     </main>
