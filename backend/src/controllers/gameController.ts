@@ -37,33 +37,16 @@ export const createGame = async (req: Request, res: Response) => {
 export const getGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params;
-    const game = await GameModel.findOne({ gameId });
-    
-    if (!game) {
-      return res.status(404).json({ success: false, error: 'Game not found' });
-    }
-    
-    // Devolver solo información pública
-    const publicGameData = {
-      gameId: game.gameId,
-      gameName: game.gameName,
-      hostPlayer: game.hostPlayer,
-      activePlayers: game.activePlayers,
-      gamePhase: game.gamePhase,
-      playerTurnOrder: game.playerTurnOrder,
-      round: {
-        round: game.round.round,
-        roundPhase: game.round.roundPhase,
-        playerTurn: game.round.playerTurn,
-        currentTrick: game.round.currentTrick
-      },
-      gameSettings: game.gameSettings
-    };
+    const publicGameData = await GameService.getPublicGameState(gameId);
     
     res.status(200).json({ success: true, data: publicGameData });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching game:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch game' });
+    const status = error.message === 'Game not found' ? 404 : 500;
+    res.status(status).json({ 
+      success: false, 
+      error: error.message || 'Failed to fetch game' 
+    });
   }
 }
 

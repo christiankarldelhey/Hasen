@@ -11,7 +11,7 @@ export class GameService {
   static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string) {
     console.log("Creating game");
     const gameId = uuidv4();
-    const deck = createDeck();
+    let deck = createDeck();
     const bidDecks = createBidDeck();
     
     const newGame = new GameModel({
@@ -46,6 +46,32 @@ export class GameService {
     await newGame.save();
     return newGame;
   }
+
+  static async getPublicGameState(gameId: string) {
+  const game = await GameModel.findOne({ gameId });
+  
+  if (!game) {
+    throw new Error('Game not found');
+  }
+  
+  // Devolver solo información pública
+  return {
+    gameId: game.gameId,
+    gameName: game.gameName,
+    hostPlayer: game.hostPlayer,
+    activePlayers: game.activePlayers,
+    gamePhase: game.gamePhase,
+    playerTurnOrder: game.playerTurnOrder,
+    round: {
+      round: game.round.round,
+      roundPhase: game.round.roundPhase,
+      playerTurn: game.round.playerTurn,
+      currentTrick: game.round.currentTrick
+    },
+    gameSettings: game.gameSettings,
+    playerScores: game.playerScores
+  };
+}
 
   static async joinGame(gameId: string, userId: string) {
   const game = await GameModel.findOne({ gameId });
@@ -95,26 +121,26 @@ export class GameService {
   return { game, assignedPlayerId: availablePlayer };
 }
 
+static async startGame(gameId: string) {
+  console.log('🔵 [startGame] CALLED with:', { gameId });
+  const game = await GameModel.findOne({ gameId });
+  if (!game) throw new Error('Game not found');
 
-  static async startGame(gameId: string) {
-    const game = await GameModel.findOne({ gameId });
-    if (!game) throw new Error('Game not found');
-
-    game.gamePhase = 'playing';
-    game.playerTurnOrder = [...game.activePlayers];
-    game.round.round = 1;
-    game.round.roundPhase = 'shuffle';
-    game.deck = shuffleDeck(game.deck);
-    
-    game.deck.forEach(card => {
-      card.state = 'in_deck';
-      card.owner = null;
-    });
-    
-    await game.save();
-    const event = createDeckShuffledEvent(game.round.round, game.deck.length);
-    return { game, event };
-  }
+  game.gamePhase = 'playing';
+  game.playerTurnOrder = [...game.activePlayers];
+  game.round.round = 1;
+  game.round.roundPhase = 'shuffle';
+  game.deck = shuffleDeck(game.deck);
+  
+  game.deck.forEach(card => {
+    card.state = 'in_deck';
+    card.owner = null;
+  });
+  
+  await game.save();
+  const event = createDeckShuffledEvent(game.round.round, game.deck.length);
+  return { game, event };
+}
 
 static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
   console.log('🔵 [leaveGame] CALLED with:', { gameId, playerId, userId });

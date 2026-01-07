@@ -4,6 +4,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useGameAPI } from '../composables/useGameAPI';
 import { useSocket } from '../composables/useSocket';
 import { userIdService } from '../services/userIdService';
+import { useRouter } from 'vue-router';
 import MenuContent from './MenuContent.vue';
 import Lobby from './Lobby.vue';
 import GameSettings from './GameSettings.vue';
@@ -11,6 +12,7 @@ import GameSettings from './GameSettings.vue';
 const gameStore = useGameStore();
 const gameAPI = useGameAPI();
 const socket = useSocket();
+const router = useRouter(); 
 
 type ViewState = 'menu' | 'lobby' | 'settings';
 const currentView = ref<ViewState>('menu');
@@ -21,7 +23,7 @@ onMounted(async () => {
   
   socket.on('game:started', ({ gameId }) => {
     console.log('Game started, redirecting to game view...');
-    window.location.href = `/game/${gameId}`;
+    router.push(`/game/${gameId}`);
   });
 });
 

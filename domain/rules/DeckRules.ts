@@ -1,5 +1,26 @@
 import { CARD_DEFINITIONS } from '../data/cardDefinitions'
-import { PlayingCard, PlayerId } from '../interfaces'
+import type { PlayingCard, PlayerId, SpritePosition, Suit, Character } from '../interfaces'
+
+
+function getSpritePosition(suit: Suit, char: Character): SpritePosition {
+  const suitRow: Record<Suit, number> = {
+    'flowers': 0,
+    'berries': 1,
+    'leaves': 2,
+    'acorns': 3
+  }
+  
+  const charCol: Record<Character, number> = {
+    '6': 0, '7': 1, '8': 2, '9': 3, '10': 4,
+    'U': 5, 'O': 6, 'K': 7
+  }
+  
+  return {
+    row: suitRow[suit],
+    col: charCol[char]
+  }
+}
+
 
 /**
  * Creates a complete deck of playing cards based on card definitions.
@@ -10,13 +31,11 @@ export function createDeck(): PlayingCard[] {
     id: `${def.suit}-${def.char}`,
     suit: def.suit,
     char: def.char,
-    rank: {
-      base: def.baseRank,
-      onSuit: def.leadRank
-    },
+    rank: { base: def.baseRank, onSuit: def.leadRank },
     owner: null,
     state: 'in_deck',
-    points: def.points
+    points: def.points,
+    spritePos: getSpritePosition(def.suit, def.char)
   }))
 }
 

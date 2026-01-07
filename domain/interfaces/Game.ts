@@ -1,5 +1,5 @@
 import type { PlayerId } from './Player'
-import type { PlayingCard } from './Card'
+import type { PlayingCard, PlayerHand } from './Card'
 import type { Round, PlayerRoundScore } from './Round'
 import type { Trick } from './Trick'
 import type { Bid } from './Bid'
@@ -43,6 +43,11 @@ export interface LobbyGame {
   createdAt: string;
 }
 
+export interface PrivateGameState {
+  playerId: PlayerId;
+  hand: PlayerHand | null;
+}
+
 export interface PublicRoundState {
   round: number
   roundPhase: RoundPhase
@@ -57,6 +62,7 @@ export interface PublicGameState {
   gamePhase: GamePhase
   playerTurnOrder: PlayerId[]
   round: PublicRoundState
+  playerScores: PlayerRoundScore[];
   gameSettings: {
     minPlayers: number
     maxPlayers: number
