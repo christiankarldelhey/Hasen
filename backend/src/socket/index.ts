@@ -1,6 +1,6 @@
 import { Server } from 'socket.io'
 import { setupLobbyHandlers } from './handlers/lobbyHandlers.js'
-import { setupGameHandlers } from './handlers/gameHandlers.js'
+import { setupRoundHandlers } from './handlers/roundHandlers.js'
 import { setupConnectionHandlers } from './handlers/connectionHandlers.js'
 
 export function setupSocketHandlers(io: Server) {
@@ -9,7 +9,7 @@ export function setupSocketHandlers(io: Server) {
     
     // Registrar todos los handlers
     setupLobbyHandlers(io, socket)
-    setupGameHandlers(io, socket)
+    setupRoundHandlers(io, socket)
     setupConnectionHandlers(io, socket)
   })
 }

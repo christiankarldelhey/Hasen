@@ -121,26 +121,26 @@ export class GameService {
   return { game, assignedPlayerId: availablePlayer };
 }
 
-static async startGame(gameId: string) {
-  console.log('🔵 [startGame] CALLED with:', { gameId });
-  const game = await GameModel.findOne({ gameId });
-  if (!game) throw new Error('Game not found');
+  static async startGame(gameId: string) {
+    console.log('🔵 [startGame] CALLED with:', { gameId });
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
 
-  game.gamePhase = 'playing';
-  game.playerTurnOrder = [...game.activePlayers];
-  game.round.round = 1;
-  game.round.roundPhase = 'shuffle';
-  game.deck = shuffleDeck(game.deck);
-  
-  game.deck.forEach(card => {
-    card.state = 'in_deck';
-    card.owner = null;
-  });
-  
-  await game.save();
-  const event = createDeckShuffledEvent(game.round.round, game.deck.length);
-  return { game, event };
-}
+    game.gamePhase = 'playing';
+    game.playerTurnOrder = [...game.activePlayers];
+    game.round.round = 1;
+    game.round.roundPhase = 'shuffle';
+    game.deck = shuffleDeck(game.deck);
+    
+    game.deck.forEach(card => {
+      card.state = 'in_deck';
+      card.owner = null;
+    });
+    
+    await game.save();
+    const event = createDeckShuffledEvent(game.round.round, game.deck.length);
+    return { game, event };
+  }
 
 static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
   console.log('🔵 [leaveGame] CALLED with:', { gameId, playerId, userId });

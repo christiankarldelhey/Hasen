@@ -1,25 +1,34 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useSocket } from '../composables/useSocket';
 import { useGameAPI } from '../composables/useGameAPI';
+import { useGameStore } from '@/stores/gameStore';
 import PlayingCard from '@/components/PlayingCard.vue';
 import GameLayout from '../layout/GameLayout.vue';
-
 const route = useRoute();
+const socket = useSocket();
 const gameId = route.params.gameId as string;
 const gameAPI = useGameAPI();
-const gameData = ref<any>(null);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
+const gameStore = useGameStore();
+const loading = computed(() => gameStore.loading);
+const error = computed(() => gameStore.error);
 onMounted(async () => {
   try {
-    gameData.value = await gameAPI.fetchPublicGameState(gameId);
+    gameStore.setLoading(true);
+    const gameData = await gameAPI.fetchPublicGameState(gameId);
+    gameStore.setPublicGameState(gameData);
+    
+    console.log('mounted game view');
+    if (gameData.round.round === 0 && gameData.round.roundPhase === 'shuffle') {
+      console.log('round:start en front');
+      socket.emit('round:start', { gameId });
+    }
   } catch (err) {
     console.error('Error loading game:', err);
-    error.value = 'Failed to load game';
+    gameStore.setError('Failed to load game');
   } finally {
-    loading.value = false;
+    gameStore.setLoading(false);
   }
 });
 </script>

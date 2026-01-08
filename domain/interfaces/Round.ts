@@ -1,6 +1,6 @@
-import { PlayerId } from './Player'
-import { Trick } from './Trick'
-import { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from './Bid'
+import type { PlayerId } from './Player'
+import type { Trick } from './Trick'
+import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from './Bid'
 
 export type RoundPhase = 
   | 'shuffle'

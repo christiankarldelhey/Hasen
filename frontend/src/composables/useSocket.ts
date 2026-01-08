@@ -43,4 +43,12 @@ function initializeGlobalListeners(socket: Socket) {
       gameStore.clearCurrentGame();
     }
   });
+    socket.on('game:event', (event) => {
+    console.log('🎮 Game event received:', event)
+    gameStore.handleGameEvent(event)
+  })
+  socket.on('round:phase-changed', ({ phase }) => {
+    console.log('📍 Phase changed to:', phase)
+    gameStore.setCurrentPhase(phase)
+  })
 }

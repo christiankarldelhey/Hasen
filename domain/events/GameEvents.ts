@@ -1,4 +1,4 @@
-import { PlayingCard, PlayerId } from "../interfaces";
+import type { PlayingCard, PlayerId } from "../interfaces";
 // DECK SHUFFLED EVENT
 /**
  * Event emitted when the deck is shuffled
