@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { LobbyGame } from '@domain/interfaces/Game'
+import type { LobbyGame, PublicGameState, PrivateGameState } from '@domain/interfaces/Game'
 import type { PlayerId } from '@domain/interfaces/Player'
 
 export const useGameStore = defineStore('game', () => {
-  // State
+  // State - Lobby
   const games = ref<LobbyGame[]>([])
   const currentGame = ref<LobbyGame | null>(null)
   const currentGameId = ref<string>('')
@@ -12,6 +12,10 @@ export const useGameStore = defineStore('game', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const joiningGameId = ref<string | null>(null)
+
+  // State - Game Playing
+  const publicGameState = ref<PublicGameState | null>(null)
+  const privateGameState = ref<PrivateGameState | null>(null)
 
   // Getters
   const isHost = computed(() => {
@@ -24,7 +28,9 @@ export const useGameStore = defineStore('game', () => {
     return games.value.find(game => game.gameId === currentGameId.value) || null
   })
 
-  // Setters (solo gestión de estado)
+  const playerHand = computed(() => privateGameState.value?.hand || null)
+
+  // Setters - Lobby
   function setGames(newGames: LobbyGame[]) {
     games.value = newGames
   }
@@ -62,13 +68,11 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function updateGamePlayers(gameId: string, playerCount: number) {
-    // Actualizar en la lista de juegos
     const gameIndex = games.value.findIndex(g => g.gameId === gameId)
     if (gameIndex !== -1 && games.value[gameIndex]) {
       games.value[gameIndex].currentPlayers = playerCount as 1 | 2 | 3 | 4
     }
     
-    // Si es el juego actual, también actualizarlo
     if (currentGame.value?.gameId === gameId) {
       currentGame.value.currentPlayers = playerCount as 1 | 2 | 3 | 4
     }
@@ -78,10 +82,27 @@ export const useGameStore = defineStore('game', () => {
     currentGame.value = null
     currentGameId.value = ''
     currentPlayerId.value = ''
+    publicGameState.value = null
+    privateGameState.value = null
+  }
+
+  // Setters - Game Playing State
+  function setPublicGameState(state: PublicGameState) {
+    publicGameState.value = state
+  }
+
+  function setPrivateGameState(state: PrivateGameState) {
+    privateGameState.value = state
+  }
+
+  function updatePlayerHand(hand: PrivateGameState['hand']) {
+    if (privateGameState.value) {
+      privateGameState.value.hand = hand
+    }
   }
 
   return {
-    // State
+    // State - Lobby
     games,
     currentGame,
     currentGameId,
@@ -90,11 +111,16 @@ export const useGameStore = defineStore('game', () => {
     error,
     joiningGameId,
     
+    // State - Game Playing
+    publicGameState,
+    privateGameState,
+    
     // Getters
     isHost,
     currentGameData,
+    playerHand,
     
-    // Setters
+    // Setters - Lobby
     setGames,
     setCurrentGame,
     setCurrentGameId,
@@ -105,5 +131,10 @@ export const useGameStore = defineStore('game', () => {
     setJoiningGameId,
     updateGamePlayers,
     clearCurrentGame,
+    
+    // Setters - Game Playing
+    setPublicGameState,
+    setPrivateGameState,
+    updatePlayerHand,
   }
 })

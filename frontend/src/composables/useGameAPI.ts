@@ -90,6 +90,7 @@ async function fetchPublicGameState(gameId: string) {
   gameStore.setError(null)
   try {
     const publicState = await gameService.getPublicGameState(gameId)
+    gameStore.setPublicGameState(publicState)
     return publicState
   } catch (err: any) {
     gameStore.setError(err.message || 'Error fetching game state')
