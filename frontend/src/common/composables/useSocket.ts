@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { useGameStore } from '../stores/gameStore';
+import { useGameStore } from '../../stores/gameStore';
 
 let socket: Socket | null = null;
 let listenersInitialized = false;

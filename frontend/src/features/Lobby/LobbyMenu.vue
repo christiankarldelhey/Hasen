@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useGameStore } from '../stores/gameStore';
-import { useGameAPI } from '../composables/useGameAPI';
-import { useSocket } from '../composables/useSocket';
-import { userIdService } from '../services/userIdService';
+import { useGameStore } from '../../stores/gameStore';
+import { useGameAPI } from '../../common/composables/useGameAPI';
+import { useSocket } from '../../common/composables/useSocket';
+import { userIdService } from '../../services/userIdService';
 import { useRouter } from 'vue-router';
-import MenuContent from './MenuContent.vue';
-import Lobby from './Lobby.vue';
-import GameSettings from './GameSettings.vue';
+import LobbyOptions from './LobbyOptions.vue';
+import Room from './Room.vue';
+import RoomSettings from './RoomSettings.vue';
 
 const gameStore = useGameStore();
 const gameAPI = useGameAPI();
 const socket = useSocket();
 const router = useRouter(); 
 
-type ViewState = 'menu' | 'lobby' | 'settings';
+type ViewState = 'menu' | 'room' | 'settings';
 const currentView = ref<ViewState>('menu');
 
 onMounted(async () => {
@@ -43,7 +43,7 @@ const handleGameSettings = () => {
 const handleCreateGame = async (gameName: string, playerId: string) => {
   try {
     await gameAPI.createGame(gameName, playerId);
-    handleViewChange('lobby');
+    handleViewChange('room');
   } catch (err) {
     console.error('Error creating game:', err);
   }
@@ -52,7 +52,7 @@ const handleCreateGame = async (gameName: string, playerId: string) => {
 const handleJoinGame = async (gameId: string) => {
   try {
     await gameAPI.joinGame(gameId);
-    handleViewChange('lobby');
+    handleViewChange('room');
   } catch (err) {
     console.error('Error joining game:', err);
   }
@@ -117,7 +117,7 @@ const handleStartGame = async () => {
       <h2 class="text-center text-xxl font-bold text-black my-4">Hasen</h2>
     </div>
     <div class="card-body flex flex-col gap-4 overflow-y-auto">
-      <MenuContent
+      <LobbyOptions
         v-if="currentView === 'menu'"
         :games="gameStore.games"
         :loading="gameStore.loading"
@@ -127,14 +127,14 @@ const handleStartGame = async () => {
         @join-game="handleJoinGame"
       />
       
-      <GameSettings
+      <RoomSettings
         v-if="currentView === 'settings'"
         @create-game="handleCreateGame"
         @back="handleViewChange('menu')"
       />
       
-      <Lobby
-        v-if="currentView === 'lobby' && gameStore.currentGameData"
+      <Room
+        v-if="currentView === 'room' && gameStore.currentGameData"
         :current-game="gameStore.currentGameData"
         :player-id="gameStore.currentPlayerId"
         @back="handleBackToMenu"

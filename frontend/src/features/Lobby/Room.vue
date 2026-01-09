@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed } from 'vue';
-import { useSocket } from '../composables/useSocket';
-import { useGameStore } from '../stores/gameStore';
-import { userIdService } from '../services/userIdService';
+import { useSocket } from '../../common/composables/useSocket';
+import { useGameStore } from '../../stores/gameStore';
+import { userIdService } from '../../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
 const props = defineProps<{

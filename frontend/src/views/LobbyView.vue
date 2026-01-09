@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import GameMenu from '../components/GameMenu.vue';
+import LobbyMenu from '../features/Lobby/LobbyMenu.vue';
 import GameLayout from '../layout/GameLayout.vue';
 </script>
 
 <template>
   <GameLayout>
-    <GameMenu />
+    <LobbyMenu />
   </GameLayout>
 </template>

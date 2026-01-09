@@ -1,5 +1,5 @@
-import { gameService } from '../services/gameService'
-import { useGameStore } from '../stores/gameStore'
+import { gameService } from '../../services/gameService'
+import { useGameStore } from '../../stores/gameStore'
 import type { PlayerId } from '@domain/interfaces/Player'
 
 export function useGameAPI() {
@@ -39,7 +39,6 @@ export function useGameAPI() {
       
       gameStore.setCurrentGameId(result.gameId)
       gameStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
-      gameStore.setIsHost(true)
       
       return result
     } catch (err: any) {

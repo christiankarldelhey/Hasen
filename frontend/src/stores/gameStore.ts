@@ -66,11 +66,6 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  function setIsHost() {
-    // isHost es computed, pero podemos forzar el estado si es necesario
-    // Por ahora no hace nada, isHost se calcula automáticamente
-  }
-
   function setLoading(value: boolean) {
     loading.value = value
   }
@@ -105,16 +100,6 @@ export const useGameStore = defineStore('game', () => {
   // Setters - Game Playing State
   function setPublicGameState(state: PublicGameState) {
     publicGameState.value = state
-  }
-
-  function setPrivateGameState(state: PrivateGameState) {
-    privateGameState.value = state
-  }
-
-  function updatePlayerHand(hand: PrivateGameState['hand']) {
-    if (privateGameState.value) {
-      privateGameState.value.hand = hand
-    }
   }
 
   function handleGameEvent(event: any) {
@@ -205,7 +190,6 @@ export const useGameStore = defineStore('game', () => {
     setCurrentGame,
     setCurrentGameId,
     setCurrentPlayerId,
-    setIsHost,
     setLoading,
     setError,
     setJoiningGameId,
@@ -214,8 +198,6 @@ export const useGameStore = defineStore('game', () => {
     
     // Setters - Game Playing
     setPublicGameState,
-    setPrivateGameState,
-    updatePlayerHand,
 
     // Round
     currentRound,

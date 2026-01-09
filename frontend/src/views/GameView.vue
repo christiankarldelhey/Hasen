@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useSocket } from '../composables/useSocket';
-import { useGameAPI } from '../composables/useGameAPI';
+import { useSocket } from '../common/composables/useSocket';
+import { useGameAPI } from '../common/composables/useGameAPI';
 import { useGameStore } from '@/stores/gameStore';
-import PlayingCard from '@/components/PlayingCard.vue';
+import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 
 const route = useRoute();
@@ -12,7 +12,7 @@ const socket = useSocket();
 const gameId = route.params.gameId as string;
 const gameAPI = useGameAPI();
 const gameStore = useGameStore();
-const playerHand = computed(() => gameStore.privateGameState?.hand);
+const playerHand = computed(() => gameStore.privateGameState?.hand || []);
 
 const loading = computed(() => gameStore.loading);
 const error = computed(() => gameStore.error);
@@ -40,18 +40,20 @@ onMounted(async () => {
 
 <template>
   <GameLayout>
-    <div class="container mx-auto p-8">
-        <div class="row flex gap-4">
-          <PlayingCard v-for="card in playerHand" :key="card.id" :card="card" />
-        <div v-if="loading" class="text-center py-12">
-          <div class="text-xl text-black">Loading game...</div>
-        </div>
-        
-        <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p class="font-bold">Error</p>
-          <p>{{ error }}</p>
-        </div>
-        </div>
-      </div>
+    <div v-if="loading" class="text-center py-12">
+      <div class="text-xl text-black">Loading game...</div>
+    </div>
+    
+    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-8">
+      <p class="font-bold">Error</p>
+      <p>{{ error }}</p>
+    </div>
+
+    <div v-else class="relative w-full h-screen">
+      <!-- Aquí irá el contenido del juego (mesa, otras manos, etc.) -->
+      
+      <!-- Mano del jugador (fixed en el bottom) -->
+      <PlayerHand :cards="playerHand" />
+    </div>
   </GameLayout>
 </template>
