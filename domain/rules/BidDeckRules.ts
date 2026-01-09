@@ -1,5 +1,5 @@
 import { BID_DEFINITIONS } from '../data/bidDefinitions'
-import { Bid, BidPool } from '../interfaces'
+import type { Bid, BidPool } from '../interfaces'
 
 
 export interface BidDecks {

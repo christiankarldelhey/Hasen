@@ -1,4 +1,4 @@
-import type { PlayingCard, PlayerId } from "../interfaces";
+import type { Bid, PlayingCard, PlayerId } from "../interfaces";
 // DECK SHUFFLED EVENT
 /**
  * Event emitted when the deck is shuffled
@@ -17,6 +17,38 @@ export function createDeckShuffledEvent(
   return {
     type: 'DECK_SHUFFLED',
     payload: { round, deckSize }
+  }
+}
+
+export interface RoundSetupCompletedEvent {
+  type: 'ROUND_SETUP_COMPLETED'
+  payload: {
+    round: number
+    deckSize: number
+    roundBids: {
+      points: [Bid, Bid]
+      set_collection: [Bid, Bid]
+      trick: [Bid, Bid]
+    }
+    // TODO: En el futuro agregar firstCards cuando implementemos dealing
+    // firstCards: {
+    //   playerId: PlayerId
+    //   card: PlayingCard
+    // }[]
+  }
+}
+export function createRoundSetupCompletedEvent(
+  round: number,
+  deckSize: number,
+  roundBids: {
+    points: [Bid, Bid]
+    set_collection: [Bid, Bid]
+    trick: [Bid, Bid]
+  }
+): RoundSetupCompletedEvent {
+  return {
+    type: 'ROUND_SETUP_COMPLETED',
+    payload: { round, deckSize, roundBids }
   }
 }
 
@@ -178,3 +210,4 @@ export type GameEvent =
   | TrickStartedEvent
   | TrickCompletedEvent
   | RoundEndedEvent
+  | RoundSetupCompletedEvent

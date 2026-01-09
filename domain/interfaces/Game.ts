@@ -3,7 +3,7 @@ import type { PlayingCard, PlayerHand } from './Card'
 import type { Round, PlayerRoundScore } from './Round'
 import type { Trick } from './Trick'
 import type { Bid } from './Bid'
-import type { RoundPhase } from './Round'
+import type { RoundPhase, RoundBids } from './Round'
 
 export type GamePhase = 'setup' | 'playing' | 'ended'
 
@@ -53,6 +53,7 @@ export interface PublicRoundState {
   roundPhase: RoundPhase
   playerTurn: PlayerId
   currentTrick: Trick | null
+  roundBids: RoundBids
 }
 export interface PublicGameState {
   gameId: string

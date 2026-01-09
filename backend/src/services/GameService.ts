@@ -34,7 +34,7 @@ export class GameService {
           set_collection: [null, null],
           trick: [null, null]
         },
-        roundPhase: 'shuffle',
+        roundPhase: 'round_setup',
         currentTrick: null
       },
       playerTurnOrder: [],
@@ -129,7 +129,7 @@ export class GameService {
     game.gamePhase = 'playing';
     game.playerTurnOrder = [...game.activePlayers];
     game.round.round = 1;
-    game.round.roundPhase = 'shuffle';
+    game.round.roundPhase = 'round_setup';
     game.deck = shuffleDeck(game.deck);
     
     game.deck.forEach(card => {

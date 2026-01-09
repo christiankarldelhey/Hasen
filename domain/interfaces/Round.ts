@@ -3,10 +3,7 @@ import type { Trick } from './Trick'
 import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from './Bid'
 
 export type RoundPhase = 
-  | 'shuffle'
-  | 'update_bids'
-  | 'dealing_first_card'
-  | 'dealing_remaining_cards'
+  | 'round_setup'
   | 'player_drawing'
   | 'back_to_hand'
   | 'playing'
