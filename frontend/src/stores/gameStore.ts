@@ -133,8 +133,11 @@ export const useGameStore = defineStore('game', () => {
     case 'FIRST_CARD_DEALT':
     console.log('🃏 First cards dealt (visible):', event.payload.firstCards)
     
-    // Encontrar MI primera carta
+    
     if (currentPlayerId.value) {
+      // Guardar todas las cartas publicas de otros jugadores
+      publicGameState.value!.playersFirstCards = event.payload.firstCards;
+      // Encontrar MI primera carta
       const myFirstCard = event.payload.firstCards.find(
         (fc: any) => fc.playerId === currentPlayerId.value
       );

@@ -61,6 +61,10 @@ export interface PublicGameState {
   hostPlayer: PlayerId
   activePlayers: PlayerId[]
   gamePhase: GamePhase
+  playersFirstCards: {
+    playerId: PlayerId
+    card: PlayingCard
+  }[]
   playerTurnOrder: PlayerId[]
   round: PublicRoundState
   playerScores: PlayerRoundScore[];

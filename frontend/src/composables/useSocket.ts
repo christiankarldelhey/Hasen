@@ -28,6 +28,10 @@ export function useSocket() {
 function initializeGlobalListeners(socket: Socket) {
   const gameStore = useGameStore();
   
+  // Remove all existing listeners for these events to prevent duplicates
+  const events = ['lobby:player-count-changed', 'game:deleted', 'game:event', 'round:phase-changed'];
+  events.forEach(event => socket.off(event));
+  
   // Evento global para cambios en el contador de jugadores (desde lobby-list room)
   socket.on('lobby:player-count-changed', ({ gameId, currentPlayers }) => {
     console.log(`🔄 Player count changed for ${gameId}: ${currentPlayers}`);
@@ -43,10 +47,12 @@ function initializeGlobalListeners(socket: Socket) {
       gameStore.clearCurrentGame();
     }
   });
-    socket.on('game:event', (event) => {
+  
+  socket.on('game:event', (event) => {
     console.log('🎮 Game event received:', event)
     gameStore.handleGameEvent(event)
   })
+  
   socket.on('round:phase-changed', ({ phase }) => {
     console.log('📍 Phase changed to:', phase)
     gameStore.setCurrentPhase(phase)
