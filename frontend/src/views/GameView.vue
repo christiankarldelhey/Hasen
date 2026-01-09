@@ -5,6 +5,7 @@ import { useSocket } from '../common/composables/useSocket';
 import { useGameAPI } from '../common/composables/useGameAPI';
 import { useGameStore } from '@/stores/gameStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
+import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 
 const route = useRoute();
@@ -16,6 +17,53 @@ const playerHand = computed(() => gameStore.privateGameState?.hand || []);
 
 const loading = computed(() => gameStore.loading);
 const error = computed(() => gameStore.error);
+
+interface OpponentCard {
+  playerId: string
+  card: any
+}
+
+const opponentsCards = computed(() => {
+  if (!gameStore.publicGameState?.playersFirstCards || !gameStore.currentPlayerId) {
+    return []
+  }
+  
+  // Filtrar las cartas de los oponentes (excluir la del jugador actual)
+  return gameStore.publicGameState.playersFirstCards.filter(
+    (playerCard) => playerCard.playerId !== gameStore.currentPlayerId
+  )
+})
+
+const opponentPositions = computed(() => {
+  const opponents = opponentsCards.value
+  const totalOpponents = opponents.length
+  
+  if (totalOpponents === 0) return []
+  
+  // 1 oponente: solo top
+  if (totalOpponents === 1) {
+    return [{ ...opponents[0], position: 'top' as const }]
+  }
+  
+  // 2 oponentes: top + left
+  if (totalOpponents === 2) {
+    return [
+      { ...opponents[0], position: 'top' as const },
+      { ...opponents[1], position: 'left' as const }
+    ]
+  }
+  
+  // 3 oponentes: top + left + right
+  if (totalOpponents === 3) {
+    return [
+      { ...opponents[0], position: 'top' as const },
+      { ...opponents[1], position: 'left' as const },
+      { ...opponents[2], position: 'right' as const }
+    ]
+  }
+  
+  return []
+})
 
 onMounted(async () => {
   try {
@@ -50,7 +98,14 @@ onMounted(async () => {
     </div>
 
     <div v-else class="relative w-full h-screen">
-      <!-- Aquí irá el contenido del juego (mesa, otras manos, etc.) -->
+      <!-- Oponentes en diferentes posiciones -->
+      <OtherPlayerHand
+        v-for="opponent in opponentPositions"
+        :key="opponent.playerId"
+        :player-id="opponent.playerId"
+        :card="opponent.card"
+        :position="opponent.position"
+      />
       
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand :cards="playerHand" />

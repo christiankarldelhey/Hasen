@@ -13,23 +13,18 @@ const cardPositions = computed(() => {
   const totalCards = props.cards.length;
   if (totalCards === 0) return [];
   
-  // Ángulo máximo del abanico (en grados)
+  const cardWidth = 180; // Ancho de PlayingCard
   const maxRotation = Math.min(30, totalCards * 3);
-  
-  // Separación horizontal entre cartas
   const cardSpacing = Math.min(80, 400 / totalCards);
   
   return props.cards.map((card, index) => {
-    // Calcular rotación (centrada en 0)
     const rotation = totalCards === 1 
       ? 0 
       : (index / (totalCards - 1) - 0.5) * maxRotation;
     
-    // Calcular posición horizontal
     const totalWidth = (totalCards - 1) * cardSpacing;
-    const translateX = index * cardSpacing - totalWidth / 2;
+    const translateX = index * cardSpacing - totalWidth / 2 - cardWidth / 2;
     
-    // Calcular elevación vertical (forma de arco)
     const normalizedPos = totalCards === 1 ? 0 : index / (totalCards - 1) - 0.5;
     const translateY = Math.abs(normalizedPos) * 20;
     
@@ -46,7 +41,7 @@ const cardPositions = computed(() => {
 
 <template>
   <div class="fixed bottom-0 left-0 right-0 flex justify-center items-end pointer-events-none h-[300px]" 
-       style="transform: translateY(40%);">
+       style="transform: translateY(20%);">
     <div class="relative h-[260px]">
       <TransitionGroup name="card">
         <div
@@ -70,7 +65,6 @@ const cardPositions = computed(() => {
 </template>
 
 <style scoped>
-/* Solo dejamos las animaciones de TransitionGroup que no se pueden hacer con Tailwind */
 .card-enter-active,
 .card-leave-active {
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
