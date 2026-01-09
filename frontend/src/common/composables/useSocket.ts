@@ -1,60 +1,105 @@
 import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../../stores/gameStore';
 
-let socket: Socket | null = null;
-let listenersInitialized = false;
+class SocketManager {
+  private socket: Socket | null = null;
+  private listenersRegistered = false;
+  private eventHandlers = new Map<string, Function>();
 
-export function useSocket() {
-  if (!socket) {
-    socket = io('http://localhost:3001');
-    
-    socket.on('connect', () => {
+  getSocket(): Socket {
+    if (!this.socket) {
+      this.socket = io('http://localhost:3001');
+      this.setupConnectionHandlers();
+    }
+    return this.socket;
+  }
+
+  private setupConnectionHandlers() {
+    if (!this.socket) return;
+
+    this.socket.on('connect', () => {
       console.log('✅ Conectado al servidor');
     });
-    
-    socket.on('disconnect', () => {
+
+    this.socket.on('disconnect', () => {
       console.log('❌ Desconectado del servidor');
     });
   }
-  
-  if (!listenersInitialized) {
-    initializeGlobalListeners(socket);
-    listenersInitialized = true;
+
+  registerGameListeners() {
+    if (this.listenersRegistered) {
+      console.log('⚠️ Listeners already registered, skipping...');
+      return;
+    }
+    
+    const socket = this.getSocket();
+    const gameStore = useGameStore();
+
+    const handlers = {
+      'lobby:player-count-changed': ({ gameId, currentPlayers }: any) => {
+        console.log(`🔄 Player count changed for ${gameId}: ${currentPlayers}`);
+        gameStore.updateGamePlayers(gameId, currentPlayers);
+      },
+      
+      'game:deleted': ({ gameId }: any) => {
+        console.log(`🗑️ Game ${gameId} deleted`);
+        gameStore.games = gameStore.games.filter(g => g.gameId !== gameId);
+        if (gameStore.currentGameId === gameId) {
+          gameStore.clearCurrentGame();
+        }
+      },
+      
+      'game:event': (event: any) => {
+        console.log('🎮 Game event received:', event);
+        gameStore.handleGameEvent(event);
+      },
+      
+      'round:phase-changed': ({ phase }: any) => {
+        console.log('📍 Phase changed to:', phase);
+        gameStore.setCurrentPhase(phase);
+      }
+    };
+
+    Object.entries(handlers).forEach(([event, handler]) => {
+      this.eventHandlers.set(event, handler);
+      socket.on(event, handler as any);
+    });
+
+    this.listenersRegistered = true;
+    console.log('✅ Socket listeners registered');
   }
-  
-  return socket;
+
+  unregisterGameListeners() {
+    if (!this.listenersRegistered || !this.socket) return;
+
+    this.eventHandlers.forEach((handler, event) => {
+      this.socket!.off(event, handler as any);
+    });
+
+    this.eventHandlers.clear();
+    this.listenersRegistered = false;
+    console.log('🧹 Socket listeners unregistered');
+  }
+
+  disconnect() {
+    this.unregisterGameListeners();
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
 }
 
-function initializeGlobalListeners(socket: Socket) {
-  const gameStore = useGameStore();
-  
-  // Remove all existing listeners for these events to prevent duplicates
-  const events = ['lobby:player-count-changed', 'game:deleted', 'game:event', 'round:phase-changed'];
-  events.forEach(event => socket.off(event));
-  
-  // Evento global para cambios en el contador de jugadores (desde lobby-list room)
-  socket.on('lobby:player-count-changed', ({ gameId, currentPlayers }) => {
-    console.log(`🔄 Player count changed for ${gameId}: ${currentPlayers}`);
-    gameStore.updateGamePlayers(gameId, currentPlayers);
-  });
-  
-  // Evento para cuando un juego es eliminado
-  socket.on('game:deleted', ({ gameId }) => {
-    console.log(`🗑️ Game ${gameId} deleted`);
-    gameStore.games = gameStore.games.filter(g => g.gameId !== gameId);
-    
-    if (gameStore.currentGameId === gameId) {
-      gameStore.clearCurrentGame();
-    }
-  });
-  
-  socket.on('game:event', (event) => {
-    console.log('🎮 Game event received:', event)
-    gameStore.handleGameEvent(event)
-  })
-  
-  socket.on('round:phase-changed', ({ phase }) => {
-    console.log('📍 Phase changed to:', phase)
-    gameStore.setCurrentPhase(phase)
-  })
+const socketManager = new SocketManager();
+
+export function useSocket() {
+  return socketManager.getSocket();
+}
+
+export function initializeSocketListeners() {
+  socketManager.registerGameListeners();
+}
+
+export function cleanupSocketListeners() {
+  socketManager.unregisterGameListeners();
 }

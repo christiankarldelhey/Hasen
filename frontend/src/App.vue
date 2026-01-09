@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-// import { useGameStore } from './stores/gameStore'
+import { onMounted, onUnmounted } from 'vue'
+import { initializeSocketListeners, cleanupSocketListeners } from './common/composables/useSocket'
 
-// const gameStore = useGameStore()
+onMounted(() => {
+  initializeSocketListeners()
+})
+
+onUnmounted(() => {
+  cleanupSocketListeners()
+})
 </script>
 
 <template>
