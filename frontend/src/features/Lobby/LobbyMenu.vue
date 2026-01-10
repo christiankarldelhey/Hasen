@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useGameStore } from '../../stores/gameStore';
 import { useGameAPI } from '../../common/composables/useGameAPI';
-import { useSocket } from '../../common/composables/useSocket';
+import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { userIdService } from '../../services/userIdService';
 import { useRouter } from 'vue-router';
 import LobbyOptions from './LobbyOptions.vue';
@@ -11,26 +11,25 @@ import RoomSettings from './RoomSettings.vue';
 
 const gameStore = useGameStore();
 const gameAPI = useGameAPI();
-const socket = useSocket();
+const socketLobby = useSocketLobby();
 const router = useRouter(); 
 
 type ViewState = 'menu' | 'room' | 'settings';
 const currentView = ref<ViewState>('menu');
 
 onMounted(async () => {
-  socket.emit('lobby-list:join');
+  socketLobby.joinLobbyList();
   await gameAPI.fetchGames();
   
-  socket.on('game:started', ({ gameId }) => {
-    console.log('Game started, emitting round:start and redirecting...');
-    socket.emit('round:start', { gameId });
+  socketLobby.onGameStarted(({ gameId }) => {
+    console.log('Game started, redirecting...');
     router.push(`/game/${gameId}`);
   });
 });
 
 onUnmounted(() => {
-  socket.emit('lobby-list:leave');
-  socket.off('game:started');
+  socketLobby.leaveLobbyList();
+  socketLobby.offGameStarted();
 });
 
 const handleViewChange = (view: ViewState) => {
@@ -62,11 +61,13 @@ const handleJoinGame = async (gameId: string) => {
 const handleBackToMenu = () => {
   const userId = userIdService.getUserId();
   handleViewChange('menu');
-  socket.emit('lobby:leave', { 
-    gameId: gameStore.currentGameId, 
-    playerId: gameStore.currentPlayerId,
-    userId 
-  });
+  if (gameStore.currentGameId && gameStore.currentPlayerId) {
+    socketLobby.leaveLobby({ 
+      gameId: gameStore.currentGameId, 
+      playerId: gameStore.currentPlayerId,
+      userId 
+    });
+  }
   gameAPI.fetchGames();
 };
 
@@ -83,10 +84,10 @@ const handleLeaveGame = async () => {
         // Host: Deletear el juego via API REST
         await gameAPI.deleteGame(gameStore.currentGameId, gameStore.currentPlayerId);
         // Notificar via socket que el juego fue eliminado
-        socket.emit('game:deleted-by-host', { gameId: gameStore.currentGameId });
+        socketLobby.deleteGameByHost(gameStore.currentGameId);
       } else {
         // Jugador normal: Solo hacer leave
-        socket.emit('lobby:leave', { 
+        socketLobby.leaveLobby({ 
           gameId: gameStore.currentGameId, 
           playerId: gameStore.currentPlayerId,
           userId 

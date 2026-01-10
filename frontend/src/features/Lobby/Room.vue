@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed } from 'vue';
-import { useSocket } from '../../common/composables/useSocket';
+import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { useGameStore } from '../../stores/gameStore';
 import { userIdService } from '../../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const gameStore = useGameStore();
-const socket = useSocket();
+const socketLobby = useSocketLobby();
 
 const currentPlayers = computed(() => {
   if (gameStore.currentGame) {
@@ -28,20 +28,20 @@ const currentPlayers = computed(() => {
 
 onMounted(() => {
   const userId = userIdService.getUserId();
-  socket.emit('lobby:join', { 
+  socketLobby.joinLobby({ 
     gameId: props.currentGame.gameId, 
-    playerId: props.playerId,
+    playerId: props.playerId as import('@domain/interfaces/Player').PlayerId,
     userId 
   });
   
-  socket.on('game:deleted', ({ message }) => {
+  socketLobby.onGameDeleted(({ message }) => {
     alert(message || 'The host has left. Game deleted.');
     emit('back');
   });
 });
 
 onUnmounted(() => {
-  socket.off('game:deleted');
+  socketLobby.offGameDeleted();
 });
 
 </script>
