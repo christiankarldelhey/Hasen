@@ -29,9 +29,14 @@ export const gameService = {
     }
   },
 
-async getPublicGameState(gameId: string): Promise<PublicGameState> {
+async getPlayerGameState(gameId: string): Promise<any> {
   try {
-    const response = await fetch(`${API_URL}/games/${gameId}`);
+    const userId = userIdService.getUserId();
+    const url = userId 
+      ? `${API_URL}/games/${gameId}?userId=${userId}`
+      : `${API_URL}/games/${gameId}`;
+    
+    const response = await fetch(url);
     const data = await response.json();
     
     if (!data.success) {

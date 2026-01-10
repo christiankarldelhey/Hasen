@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useSocket } from '../common/composables/useSocket';
 import { useGameAPI } from '../common/composables/useGameAPI';
 import { useGameStore } from '@/stores/gameStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
@@ -9,7 +8,6 @@ import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 
 const route = useRoute();
-const socket = useSocket();
 const gameId = route.params.gameId as string;
 const gameAPI = useGameAPI();
 const gameStore = useGameStore();
@@ -67,20 +65,11 @@ const opponentPositions = computed(() => {
 
 onMounted(async () => {
   try {
-    gameStore.setLoading(true);
-    const gameData = await gameAPI.fetchPublicGameState(gameId);
-    gameStore.setPublicGameState(gameData);
-    
+    await gameAPI.fetchPlayerGameState(gameId);
     console.log('mounted game view');
-    if (gameData.round.round === 0 && gameData.round.roundPhase === 'round_setup') {
-      console.log('round:start en front');
-      socket.emit('round:start', { gameId });
-    }
   } catch (err) {
     console.error('Error loading game:', err);
     gameStore.setError('Failed to load game');
-  } finally {
-    gameStore.setLoading(false);
   }
 });
 

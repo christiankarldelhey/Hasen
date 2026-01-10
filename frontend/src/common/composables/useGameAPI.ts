@@ -84,13 +84,24 @@ export function useGameAPI() {
   }
 }
 
-async function fetchPublicGameState(gameId: string) {
+async function fetchPlayerGameState(gameId: string) {
   gameStore.setLoading(true)
   gameStore.setError(null)
   try {
-    const publicState = await gameService.getPublicGameState(gameId)
-    gameStore.setPublicGameState(publicState)
-    return publicState
+    const gameData = await gameService.getPlayerGameState(gameId)
+    
+    // Setear estado público
+    gameStore.setPublicGameState(gameData.publicState)
+    
+    // Si hay estado privado, restaurarlo
+    if (gameData.privateState) {
+      gameStore.setCurrentPlayerId(gameData.privateState.playerId)
+      if (gameStore.privateGameState) {
+        gameStore.privateGameState.hand = gameData.privateState.hand
+      }
+    }
+    
+    return gameData
   } catch (err: any) {
     gameStore.setError(err.message || 'Error fetching game state')
     console.error('Error fetching game state:', err)
@@ -120,6 +131,6 @@ async function fetchPublicGameState(gameId: string) {
     joinGame,
     deleteGame,
     startGame,
-    fetchPublicGameState
+    fetchPlayerGameState
   }
 }

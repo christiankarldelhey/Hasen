@@ -35,28 +35,32 @@ export class RoundService {
       set_collection: [shuffledSetCollection[0], shuffledSetCollection[1]] as [Bid, Bid],
       trick: [shuffledTricks[0], shuffledTricks[1]] as [Bid, Bid]
     };
-    
+
     // 4. Deal first card to each player (visible/público)
-    const firstCards: { playerId: PlayerId; card: PlayingCard }[] = [];
-    for (const playerId of game.activePlayers) {
-      const card = game.deck.shift()!;
+  const firstCards: { playerId: PlayerId; card: PlayingCard }[] = [];
+  let cardIndex = 0;
+  for (const playerId of game.activePlayers) {
+    const card = game.deck[cardIndex];
+    card.owner = playerId;
+    card.state = 'in_hand_visible';
+    firstCards.push({ playerId, card });
+    cardIndex++;
+  }
+  // 5. Deal remaining 4 cards to each player (privado)
+  const privateCards = new Map<PlayerId, PlayingCard[]>();
+  for (const playerId of game.activePlayers) {
+    const cards: PlayingCard[] = [];
+    for (let i = 0; i < 4; i++) {
+      const card = game.deck[cardIndex];
       card.owner = playerId;
-      card.state = 'in_hand_visible'; // Visible para todos
-      firstCards.push({ playerId, card });
+      card.state = 'in_hand_hidden';
+      cards.push(card);
+      cardIndex++;
     }
+    privateCards.set(playerId, cards);
+  }
     
-    // 5. Deal remaining 4 cards to each player (privado)
-    const privateCards = new Map<PlayerId, PlayingCard[]>();
-    for (const playerId of game.activePlayers) {
-      const cards: PlayingCard[] = [];
-      for (let i = 0; i < 4; i++) {
-        const card = game.deck.shift()!;
-        card.owner = playerId;
-        card.state = 'in_hand_hidden'; // Privado
-        cards.push(card);
-      }
-      privateCards.set(playerId, cards);
-    }
+    
     
     // 6. Actualizar fase a player_drawing
     game.round.roundPhase = 'player_drawing';

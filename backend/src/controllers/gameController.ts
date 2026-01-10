@@ -37,9 +37,11 @@ export const createGame = async (req: Request, res: Response) => {
 export const getGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params;
-    const publicGameData = await GameService.getPublicGameState(gameId);
+    const { userId } = req.query;
     
-    res.status(200).json({ success: true, data: publicGameData });
+    const gameData = await GameService.getPlayerGameState(gameId, userId as string | undefined);
+    
+    res.status(200).json({ success: true, data: gameData });
   } catch (error: any) {
     console.error('Error fetching game:', error);
     const status = error.message === 'Game not found' ? 404 : 500;

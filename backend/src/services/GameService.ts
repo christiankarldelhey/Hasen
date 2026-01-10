@@ -14,12 +14,19 @@ export class GameService {
     let deck = createDeck();
     const bidDecks = createBidDeck();
     
+    // Inicializar playerSessions con el host
+    const playerSessions = new Map<string, PlayerId>();
+    if (hostUserId && hostPlayerId) {
+      playerSessions.set(hostUserId, hostPlayerId);
+    }
+    
     const newGame = new GameModel({
       gameId,
       gameName: gameName || 'My Hasen Game',
       hostPlayer: hostPlayerId || 'player_1',
       hostUserId,
       activePlayers: [hostPlayerId || 'player_1'],
+      playerSessions,
       deck,
       bidDecks: {
         setCollectionBidDeck: bidDecks.setCollectionBidDeck,
@@ -47,29 +54,65 @@ export class GameService {
     return newGame;
   }
 
-  static async getPublicGameState(gameId: string) {
+  static async getPlayerGameState(gameId: string, userId?: string) {
   const game = await GameModel.findOne({ gameId });
   
   if (!game) {
     throw new Error('Game not found');
   }
   
-  // Devolver solo información pública
-  return {
+  // Información pública base
+  const publicState = {
     gameId: game.gameId,
     gameName: game.gameName,
     hostPlayer: game.hostPlayer,
     activePlayers: game.activePlayers,
     gamePhase: game.gamePhase,
     playerTurnOrder: game.playerTurnOrder,
+    playersFirstCards: [] as any[],
     round: {
       round: game.round.round,
       roundPhase: game.round.roundPhase,
       playerTurn: game.round.playerTurn,
-      currentTrick: game.round.currentTrick
+      currentTrick: game.round.currentTrick,
+      roundBids: game.round.roundBids
     },
     gameSettings: game.gameSettings,
     playerScores: game.playerScores
+  };
+
+  // Agregar las primeras cartas visibles (públicas)
+  publicState.playersFirstCards = game.deck
+    .filter((card: any) => card.state === 'in_hand_visible')
+    .map((card: any) => ({
+      playerId: card.owner,
+      card
+    }));
+
+  // Si se proporciona userId, buscar su playerId y agregar su mano privada
+  let playerHand = null;
+  let playerId: PlayerId | null = null;
+  
+  if (userId && game.playerSessions) {
+    playerId = game.playerSessions.get(userId) || null;
+    console.log(`🔍 [getPlayerGameState] userId: ${userId}, mapped playerId: ${playerId}`);
+    console.log(`🔍 [getPlayerGameState] playerSessions:`, Array.from(game.playerSessions.entries()));
+    
+    if (playerId && game.activePlayers.includes(playerId)) {
+      playerHand = game.deck.filter(
+        (card: any) => card.owner === playerId && 
+        (card.state === 'in_hand_visible' || card.state === 'in_hand_hidden')
+      );
+      console.log(`🔍 [getPlayerGameState] Found ${playerHand.length} cards for ${playerId}`);
+    }
+  }
+
+  return {
+    publicState,
+    privateState: playerHand ? {
+      playerId,
+      hand: playerHand
+    } : null
   };
 }
 

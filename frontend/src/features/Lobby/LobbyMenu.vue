@@ -22,7 +22,8 @@ onMounted(async () => {
   await gameAPI.fetchGames();
   
   socket.on('game:started', ({ gameId }) => {
-    console.log('Game started, redirecting to game view...');
+    console.log('Game started, emitting round:start and redirecting...');
+    socket.emit('round:start', { gameId });
     router.push(`/game/${gameId}`);
   });
 });
