@@ -12,6 +12,18 @@ export interface JoinGameResponse {
   maxPlayers: number;
 }
 
+export interface CreateGameResponse {
+  gameId: string;
+  gameName: string;
+  assignedPlayerId: string;
+  hostPlayer: string;
+  currentPlayers: number;
+  maxPlayers: number;
+  minPlayers: number;
+  hasSpace: boolean;
+  createdAt: string;
+}
+
 export const gameService = {
   async getAvailableGames(): Promise<LobbyGame[]> {
     try {
@@ -50,7 +62,7 @@ async getPlayerGameState(gameId: string): Promise<any> {
   }
 },
 
-async createNewGame(gameName: string, hostPlayerId: string): Promise<LobbyGame> {
+async createNewGame(gameName: string, hostPlayerId: string): Promise<CreateGameResponse> {
   try {
     const userId = userIdService.getUserId(); // Cambiado de getSessionId
     

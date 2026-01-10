@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { useLobbyStore } from '../../stores/lobbyStore';
 import { useGameStore } from '../../stores/gameStore';
 
 class SocketManager {
@@ -33,19 +34,20 @@ class SocketManager {
     }
     
     const socket = this.getSocket();
+    const lobbyStore = useLobbyStore();
     const gameStore = useGameStore();
 
     const handlers = {
       'lobby:player-count-changed': ({ gameId, currentPlayers }: any) => {
         console.log(`🔄 Player count changed for ${gameId}: ${currentPlayers}`);
-        gameStore.updateGamePlayers(gameId, currentPlayers);
+        lobbyStore.updateRoomPlayers(gameId, currentPlayers);
       },
       
       'game:deleted': ({ gameId }: any) => {
         console.log(`🗑️ Game ${gameId} deleted`);
-        gameStore.games = gameStore.games.filter(g => g.gameId !== gameId);
-        if (gameStore.currentGameId === gameId) {
-          gameStore.clearCurrentGame();
+        lobbyStore.setRooms(lobbyStore.rooms.filter(r => r.gameId !== gameId));
+        if (lobbyStore.currentRoomId === gameId) {
+          lobbyStore.clearCurrentRoom();
         }
       },
       

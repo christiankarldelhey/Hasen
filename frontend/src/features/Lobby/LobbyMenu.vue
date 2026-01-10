@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useGameStore } from '../../stores/gameStore';
+import { useLobbyStore } from '../../stores/lobbyStore';
+import { useHasenStore } from '../../stores/hasenStore';
 import { useGameAPI } from '../../common/composables/useGameAPI';
 import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { userIdService } from '../../services/userIdService';
@@ -9,7 +10,8 @@ import LobbyOptions from './LobbyOptions.vue';
 import Room from './Room.vue';
 import RoomSettings from './RoomSettings.vue';
 
-const gameStore = useGameStore();
+const lobbyStore = useLobbyStore();
+const hasenStore = useHasenStore();
 const gameAPI = useGameAPI();
 const socketLobby = useSocketLobby();
 const router = useRouter(); 
@@ -42,7 +44,7 @@ const handleGameSettings = () => {
 
 const handleCreateGame = async (gameName: string, playerId: string) => {
   try {
-    await gameAPI.createGame(gameName, playerId);
+    await gameAPI.createGame(gameName, playerId as import('@domain/interfaces/Player').PlayerId);
     handleViewChange('room');
   } catch (err) {
     console.error('Error creating game:', err);
@@ -61,10 +63,10 @@ const handleJoinGame = async (gameId: string) => {
 const handleBackToMenu = () => {
   const userId = userIdService.getUserId();
   handleViewChange('menu');
-  if (gameStore.currentGameId && gameStore.currentPlayerId) {
+  if (lobbyStore.currentRoomId && hasenStore.currentPlayerId) {
     socketLobby.leaveLobby({ 
-      gameId: gameStore.currentGameId, 
-      playerId: gameStore.currentPlayerId,
+      gameId: lobbyStore.currentRoomId, 
+      playerId: hasenStore.currentPlayerId,
       userId 
     });
   }
@@ -73,28 +75,28 @@ const handleBackToMenu = () => {
 
 const handleLeaveGame = async () => {
   try {
-    if (gameStore.currentGameId && gameStore.currentPlayerId) {
+    if (lobbyStore.currentRoomId && hasenStore.currentPlayerId) {
       const userId = userIdService.getUserId();
       
-      if (gameStore.isHost) {
+      if (lobbyStore.isHost(hasenStore.currentPlayerId)) {
         const confirmed = confirm('Are you sure you want to delete this room?');
         if (!confirmed) {
           return;
         }
         // Host: Deletear el juego via API REST
-        await gameAPI.deleteGame(gameStore.currentGameId, gameStore.currentPlayerId);
+        await gameAPI.deleteGame(lobbyStore.currentRoomId, hasenStore.currentPlayerId);
         // Notificar via socket que el juego fue eliminado
-        socketLobby.deleteGameByHost(gameStore.currentGameId);
+        socketLobby.deleteGameByHost(lobbyStore.currentRoomId);
       } else {
         // Jugador normal: Solo hacer leave
         socketLobby.leaveLobby({ 
-          gameId: gameStore.currentGameId, 
-          playerId: gameStore.currentPlayerId,
+          gameId: lobbyStore.currentRoomId, 
+          playerId: hasenStore.currentPlayerId,
           userId 
         });
       }
       
-      gameStore.clearCurrentGame();
+      lobbyStore.clearCurrentRoom();
       handleBackToMenu();
     }
   } catch (err) {
@@ -104,8 +106,8 @@ const handleLeaveGame = async () => {
 
 const handleStartGame = async () => {
   try {
-    if (gameStore.currentGameId && gameStore.currentPlayerId) {
-      await gameAPI.startGame(gameStore.currentGameId, gameStore.currentPlayerId);
+    if (lobbyStore.currentRoomId && hasenStore.currentPlayerId) {
+      await gameAPI.startGame(lobbyStore.currentRoomId, hasenStore.currentPlayerId);
     }
   } catch (err) {
     console.error('Error starting game:', err);
@@ -121,10 +123,10 @@ const handleStartGame = async () => {
     <div class="card-body flex flex-col gap-4 overflow-y-auto">
       <LobbyOptions
         v-if="currentView === 'menu'"
-        :games="gameStore.games"
-        :loading="gameStore.loading"
-        :error="gameStore.error"
-        :joining-game-id="gameStore.joiningGameId"
+        :games="lobbyStore.rooms"
+        :loading="lobbyStore.loading"
+        :error="lobbyStore.error"
+        :joining-game-id="lobbyStore.joiningRoomId"
         @game-settings="handleGameSettings"
         @join-game="handleJoinGame"
       />
@@ -136,9 +138,9 @@ const handleStartGame = async () => {
       />
       
       <Room
-        v-if="currentView === 'room' && gameStore.currentGameData"
-        :current-game="gameStore.currentGameData"
-        :player-id="gameStore.currentPlayerId"
+        v-if="currentView === 'room' && lobbyStore.currentRoomData"
+        :current-game="lobbyStore.currentRoomData"
+        :player-id="hasenStore.currentPlayerId"
         @back="handleBackToMenu"
         @start-game="handleStartGame"
         @leave-game="handleLeaveGame"

@@ -3,6 +3,8 @@ import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameAPI } from '../common/composables/useGameAPI';
 import { useGameStore } from '@/stores/gameStore';
+import { useHasenStore } from '@/stores/hasenStore';
+import { useLobbyStore } from '@/stores/lobbyStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
@@ -11,19 +13,21 @@ const route = useRoute();
 const gameId = route.params.gameId as string;
 const gameAPI = useGameAPI();
 const gameStore = useGameStore();
+const hasenStore = useHasenStore();
+const lobbyStore = useLobbyStore();
 const playerHand = computed(() => gameStore.privateGameState?.hand || []);
 
-const loading = computed(() => gameStore.loading);
-const error = computed(() => gameStore.error);
+const loading = computed(() => lobbyStore.loading);
+const error = computed(() => lobbyStore.error);
 
 const opponentsCards = computed(() => {
-  if (!gameStore.publicGameState?.opponentsPublicInfo || !gameStore.currentPlayerId) {
+  if (!gameStore.publicGameState?.opponentsPublicInfo || !hasenStore.currentPlayerId) {
     return []
   }
   
   // Filtrar la info de los oponentes (excluir la del jugador actual)
   return gameStore.publicGameState.opponentsPublicInfo.filter(
-    (info) => info.playerId !== gameStore.currentPlayerId
+    (info) => info.playerId !== hasenStore.currentPlayerId
   )
 })
 
@@ -64,7 +68,7 @@ onMounted(async () => {
     console.log('mounted game view');
   } catch (err) {
     console.error('Error loading game:', err);
-    gameStore.setError('Failed to load game');
+    lobbyStore.setError('Failed to load game');
   }
 });
 

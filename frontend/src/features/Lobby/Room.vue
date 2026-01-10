@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed } from 'vue';
 import { useSocketLobby } from '../../common/composables/useSocketLobby';
-import { useGameStore } from '../../stores/gameStore';
+import { useLobbyStore } from '../../stores/lobbyStore';
 import { userIdService } from '../../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 
@@ -16,12 +16,12 @@ const emit = defineEmits<{
   leaveGame: [];
 }>();
 
-const gameStore = useGameStore();
+const lobbyStore = useLobbyStore();
 const socketLobby = useSocketLobby();
 
 const currentPlayers = computed(() => {
-  if (gameStore.currentGame) {
-    return gameStore.currentGame.currentPlayers;
+  if (lobbyStore.currentRoom) {
+    return lobbyStore.currentRoom.currentPlayers;
   }
   return props.currentGame.currentPlayers;
 });
@@ -54,7 +54,7 @@ onUnmounted(() => {
     
     <div class="text-center">
       <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
-      <p v-if="gameStore.isHost" class="text-hasen-green font-semibold">👑 You are the host</p>
+      <p v-if="lobbyStore.isHost(playerId)" class="text-hasen-green font-semibold">👑 You are the host</p>
       <p class="text-black font-semibold mt-4">
         Players: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
       </p>
@@ -66,7 +66,7 @@ onUnmounted(() => {
 
     <!-- Solo el host puede iniciar el juego -->
     <button 
-      v-if="gameStore.isHost"
+      v-if="lobbyStore.isHost(playerId)"
       :disabled="currentPlayers < currentGame.minPlayers"
       class="btn w-full text-white"
       :class="currentPlayers < currentGame.minPlayers ? 'bg-gray-400 cursor-not-allowed' : 'bg-hasen-green'"
@@ -79,7 +79,7 @@ onUnmounted(() => {
       class="btn bg-hasen-red text-white w-full"
       @click="emit('leaveGame')"
     >
-      {{ gameStore.isHost ? 'Delete Game' : 'Leave Game' }}
+      {{ lobbyStore.isHost(playerId) ? 'Delete Game' : 'Leave Game' }}
     </button>
   </div>
 </template>
