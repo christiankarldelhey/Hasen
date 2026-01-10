@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { LobbyGame, PublicGameState, PrivateGameState } from '@domain/interfaces/Game'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { RoundPhase } from '@domain/interfaces/Round'
+import { processGameEvent } from './gameEventHandlers'
 
 export const useGameStore = defineStore('game', () => {
   // State - Lobby
@@ -103,63 +104,14 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function handleGameEvent(event: any) {
-  lastEvent.value = event
-  
-  switch (event.type) {
-    case 'ROUND_SETUP_COMPLETED':
-      if (publicGameState.value) {
-        publicGameState.value.round.round = event.payload.round
-        publicGameState.value.round.roundPhase = 'player_drawing'
-        publicGameState.value.round.roundBids = event.payload.roundBids
-      }
-      console.log(`✅ Round ${event.payload.round} setup completed`)
-      break
-      
-    case 'FIRST_CARD_DEALT':
-    console.log('🃏 First cards dealt (visible):', event.payload.firstCards)
+    lastEvent.value = event
     
-    
-    if (currentPlayerId.value) {
-      // Guardar todas las cartas publicas de otros jugadores
-      publicGameState.value!.playersFirstCards = event.payload.firstCards;
-      // Encontrar MI primera carta
-      const myFirstCard = event.payload.firstCards.find(
-        (fc: any) => fc.playerId === currentPlayerId.value
-      );
-      
-      if (myFirstCard && privateGameState.value) {
-        // Inicializar la mano con la primera carta
-        privateGameState.value.hand = [myFirstCard.card];
-        console.log('🃏 Received first visible card');
-      }
-    }
-    break
-      
-    case 'REMAINING_CARDS_DEALT_PRIVATE':
-      if (privateGameState.value && 
-          privateGameState.value.playerId === event.payload.playerId) {
-        // Agregar las 4 cartas privadas a la mano existente
-        privateGameState.value.hand = [
-          ...(privateGameState.value.hand || []), 
-          ...event.payload.cards
-        ];
-        console.log('🃏 Received 4 private cards. Total hand:', privateGameState.value.hand.length);
-      }
-    break
-      
-    case 'TRICK_STARTED':
-      console.log('🎯 Trick started:', event.payload)
-      break
-      
-    case 'TRICK_COMPLETED':
-      console.log('✅ Trick completed:', event.payload)
-      break
-      
-    case 'ROUND_ENDED':
-      console.log('🏁 Round ended:', event.payload)
-      break
+    processGameEvent(event, {
+      publicGameState: publicGameState.value,
+      privateGameState: privateGameState.value,
+      currentPlayerId: currentPlayerId.value
+    })
   }
-}
   function setCurrentPhase(phase: RoundPhase) {
     if (publicGameState.value) {
       publicGameState.value.round.roundPhase = phase
