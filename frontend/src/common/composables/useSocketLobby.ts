@@ -51,8 +51,6 @@ export function useSocketLobby() {
     // Game lifecycle
     onGameStarted: (callback: (payload: GameStartedPayload) => void) => {
       socket.on('game:started', (payload: GameStartedPayload) => {
-        // Auto-emit round:start cuando el juego comienza
-        socket.emit('round:start', { gameId: payload.gameId });
         callback(payload);
       });
     },
@@ -76,7 +74,6 @@ export function useSocketLobby() {
     // Navegación integrada
     startGameAndNavigate: (gameId: string) => {
       socket.on('game:started', (payload: GameStartedPayload) => {
-        socket.emit('round:start', { gameId: payload.gameId });
         router.push(`/game/${gameId}`);
       });
     },

@@ -2,6 +2,7 @@ import type { PublicGameState, PrivateGameState } from '@domain/interfaces/Game'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { 
   GameEvent,
+  DeckShuffledEvent,
   RoundSetupCompletedEvent,
   FirstCardDealtEvent,
   RemainingCardsDealtEvent,
@@ -21,13 +22,19 @@ export type GameEventHandler = (
   context: GameEventContext
 ) => void
 
+const handleDeckShuffled: GameEventHandler = (event, context) => {
+  if (event.type !== 'DECK_SHUFFLED') return
+  
+  const payload = (event as DeckShuffledEvent).payload
+  console.log(`🎴 Deck shuffled for round ${payload.round}, ${payload.deckSize} cards`)
+}
+
 const handleRoundSetupCompleted: GameEventHandler = (event, context) => {
   if (event.type !== 'ROUND_SETUP_COMPLETED') return
   if (!context.publicGameState) return
   
   const payload = (event as RoundSetupCompletedEvent).payload
   context.publicGameState.round.round = payload.round
-  context.publicGameState.round.roundPhase = 'player_drawing'
   context.publicGameState.round.roundBids = payload.roundBids
   
   console.log(`✅ Round ${payload.round} setup completed`)
@@ -95,6 +102,7 @@ const handleRoundEnded: GameEventHandler = (event, _context) => {
 }
 
 export const gameEventHandlers: Record<string, GameEventHandler> = {
+  'DECK_SHUFFLED': handleDeckShuffled,
   'ROUND_SETUP_COMPLETED': handleRoundSetupCompleted,
   'FIRST_CARD_DEALT': handleFirstCardDealt,
   'REMAINING_CARDS_DEALT_PRIVATE': handleRemainingCardsDealtPrivate,

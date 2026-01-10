@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
 import { GameModel } from '../models/Game.js'
 import { GameService } from '../services/GameService.js'
+import { RoundService } from '../services/RoundService.js'
 import { PlayerId } from '../../../domain/interfaces/Player'
+import { createRemainingCardsDealtEvent } from '@domain/events/GameEvents.js'
+import { socketToPlayer } from '../socket/handlers/lobbyHandlers.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
@@ -138,6 +141,29 @@ export const startGame = async (req: Request, res: Response) => {
     if (event) {
       io.to(gameId).emit('game:event', event);
     }
+
+    const { game: gameWithRound, setupEvent, firstCardsEvent, privateCards } = 
+      await RoundService.startNewRound(gameId);
+    
+    io.to(gameId).emit('game:event', setupEvent);
+    io.to(gameId).emit('game:event', firstCardsEvent);
+    
+    for (const [playerId, cards] of privateCards) {
+      const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
+      
+      const playerSocketId = Array.from(socketToPlayer.entries())
+        .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
+      
+      if (playerSocketId) {
+        io.to(playerSocketId).emit('game:event', privateEvent);
+        console.log(`🃏 Sent private cards to ${playerId}`);
+      } else {
+        console.warn(`⚠️ Socket not found for player ${playerId}`);
+      }
+    }
+    
+    // Emitir cambio de fase a player_drawing
+    io.to(gameId).emit('round:phase-changed', { phase: 'player_drawing' });
 
     res.status(200).json({
       success: true,

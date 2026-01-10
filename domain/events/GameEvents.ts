@@ -30,11 +30,6 @@ export interface RoundSetupCompletedEvent {
       set_collection: [Bid, Bid]
       trick: [Bid, Bid]
     }
-    // TODO: En el futuro agregar firstCards cuando implementemos dealing
-    // firstCards: {
-    //   playerId: PlayerId
-    //   card: PlayingCard
-    // }[]
   }
 }
 export function createRoundSetupCompletedEvent(

@@ -35,6 +35,9 @@ socket.on('round:start', async ({ gameId }) => {
         }
       }
       
+      // 4. Emitir cambio de fase a player_drawing
+      io.to(gameId).emit('round:phase-changed', { phase: 'player_drawing' });
+      
       console.log('✅ Round setup, first cards dealt, and private cards sent');
       
     } catch (error: any) {
