@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { PlayingCard as Card } from '@domain/interfaces'
 import PlayingCard from '@/common/components/PlayingCard.vue'
+import { useGameStore } from '@/stores/gameStore'
 
 interface Props {
   playerId: string
-  card: Card
+  publicCardId: string
+  handCardsCount: number
   position: 'top' | 'left' | 'right'
 }
 
 const props = defineProps<Props>()
+const gameStore = useGameStore()
+
+const publicCard = computed(() => {
+  return gameStore.publicGameState?.publicCards[props.publicCardId] || null
+})
 
 const positionClasses = computed(() => {
   switch (props.position) {
@@ -28,8 +34,8 @@ const positionClasses = computed(() => {
     :class="['fixed z-10 flex flex-col items-center gap-2', positionClasses]"
   >
     <div class="text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full">
-      {{ playerId }}
+      {{ playerId }} ({{ handCardsCount }})
     </div>
-    <PlayingCard :card="card" size="small" />
+    <PlayingCard v-if="publicCard" :card="publicCard" size="small" />
   </div>
 </template>

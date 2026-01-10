@@ -69,7 +69,8 @@ export class GameService {
     activePlayers: game.activePlayers,
     gamePhase: game.gamePhase,
     playerTurnOrder: game.playerTurnOrder,
-    playersFirstCards: [] as any[],
+    publicCards: {} as Record<string, any>,
+    opponentsPublicInfo: [] as any[],
     round: {
       round: game.round.round,
       roundPhase: game.round.roundPhase,
@@ -81,13 +82,22 @@ export class GameService {
     playerScores: game.playerScores
   };
 
-  // Agregar las primeras cartas visibles (públicas)
-  publicState.playersFirstCards = game.deck
-    .filter((card: any) => card.state === 'in_hand_visible')
-    .map((card: any) => ({
-      playerId: card.owner,
-      card
-    }));
+  // Agregar las cartas públicas visibles al mapa
+  const visibleCards = game.deck.filter((card: any) => card.state === 'in_hand_visible');
+  
+  visibleCards.forEach((card: any) => {
+    publicState.publicCards[card.id] = card;
+  });
+
+  // Crear opponentsPublicInfo con referencias y conteo de cartas
+  publicState.opponentsPublicInfo = visibleCards.map((card: any) => ({
+    playerId: card.owner,
+    publicCardId: card.id,
+    handCardsCount: game.deck.filter((c: any) => 
+      c.owner === card.owner && 
+      (c.state === 'in_hand_visible' || c.state === 'in_hand_hidden')
+    ).length
+  }));
 
   // Si se proporciona userId, buscar su playerId y agregar su mano privada
   let playerHand = null;

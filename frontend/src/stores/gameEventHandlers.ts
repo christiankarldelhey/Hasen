@@ -41,7 +41,18 @@ const handleFirstCardDealt: GameEventHandler = (event, context) => {
   
   if (!context.currentPlayerId || !context.publicGameState) return
   
-  context.publicGameState.playersFirstCards = payload.firstCards
+  // Populate publicCards map
+  context.publicGameState.publicCards = {}
+  payload.firstCards.forEach((fc: any) => {
+    context.publicGameState!.publicCards[fc.card.id] = fc.card
+  })
+  
+  // Populate opponentsPublicInfo with references and initial hand count
+  context.publicGameState.opponentsPublicInfo = payload.firstCards.map((fc: any) => ({
+    playerId: fc.playerId,
+    publicCardId: fc.card.id,
+    handCardsCount: 5
+  }))
   
   const myFirstCard = payload.firstCards.find(
     (fc: any) => fc.playerId === context.currentPlayerId

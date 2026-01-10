@@ -61,9 +61,11 @@ export interface PublicGameState {
   hostPlayer: PlayerId
   activePlayers: PlayerId[]
   gamePhase: GamePhase
-  playersFirstCards: {
+  publicCards: Record<string, PlayingCard>
+  opponentsPublicInfo: {
     playerId: PlayerId
-    card: PlayingCard
+    publicCardId: string
+    handCardsCount: number
   }[]
   playerTurnOrder: PlayerId[]
   round: PublicRoundState

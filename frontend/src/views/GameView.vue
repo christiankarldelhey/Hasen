@@ -16,19 +16,14 @@ const playerHand = computed(() => gameStore.privateGameState?.hand || []);
 const loading = computed(() => gameStore.loading);
 const error = computed(() => gameStore.error);
 
-interface OpponentCard {
-  playerId: string
-  card: any
-}
-
 const opponentsCards = computed(() => {
-  if (!gameStore.publicGameState?.playersFirstCards || !gameStore.currentPlayerId) {
+  if (!gameStore.publicGameState?.opponentsPublicInfo || !gameStore.currentPlayerId) {
     return []
   }
   
-  // Filtrar las cartas de los oponentes (excluir la del jugador actual)
-  return gameStore.publicGameState.playersFirstCards.filter(
-    (playerCard) => playerCard.playerId !== gameStore.currentPlayerId
+  // Filtrar la info de los oponentes (excluir la del jugador actual)
+  return gameStore.publicGameState.opponentsPublicInfo.filter(
+    (info) => info.playerId !== gameStore.currentPlayerId
   )
 })
 
@@ -39,12 +34,12 @@ const opponentPositions = computed(() => {
   if (totalOpponents === 0) return []
   
   // 1 oponente: solo top
-  if (totalOpponents === 1) {
+  if (totalOpponents === 1 && opponents[0]) {
     return [{ ...opponents[0], position: 'top' as const }]
   }
   
   // 2 oponentes: top + left
-  if (totalOpponents === 2) {
+  if (totalOpponents === 2 && opponents[0] && opponents[1]) {
     return [
       { ...opponents[0], position: 'top' as const },
       { ...opponents[1], position: 'left' as const }
@@ -52,7 +47,7 @@ const opponentPositions = computed(() => {
   }
   
   // 3 oponentes: top + left + right
-  if (totalOpponents === 3) {
+  if (totalOpponents === 3 && opponents[0] && opponents[1] && opponents[2]) {
     return [
       { ...opponents[0], position: 'top' as const },
       { ...opponents[1], position: 'left' as const },
@@ -92,7 +87,8 @@ onMounted(async () => {
         v-for="opponent in opponentPositions"
         :key="opponent.playerId"
         :player-id="opponent.playerId"
-        :card="opponent.card"
+        :public-card-id="opponent.publicCardId"
+        :hand-cards-count="opponent.handCardsCount"
         :position="opponent.position"
       />
       
