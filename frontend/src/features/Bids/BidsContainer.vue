@@ -7,11 +7,6 @@ defineProps<{
   type: 'points' | 'set_collection' | 'trick'
 }>()
 
-const typeLabels = {
-  points: 'Points',
-  set_collection: 'Set Collection',
-  trick: 'Tricks'
-}
 </script>
 
 <template>

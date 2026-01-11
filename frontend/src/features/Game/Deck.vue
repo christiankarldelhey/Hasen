@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import deckImage from '@/assets/symbols/deck.png'
+import deckImage from '@/assets/decks/deck-2.png'
 </script>
 
 <template>
@@ -7,7 +7,7 @@ import deckImage from '@/assets/symbols/deck.png'
     <img 
       :src="deckImage" 
       alt="Deck" 
-      class="w-[122px] h-[122px] object-contain"
+      class="h-[182px] object-contain"
     />
   </div>
 </template>
