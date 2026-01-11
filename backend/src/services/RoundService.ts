@@ -31,9 +31,9 @@ export class RoundService {
     game.bidDecks.tricksBidDeck = shuffledTricks;
     
     game.round.roundBids = {
-      points: [shuffledPoints[0], shuffledPoints[1]] as [Bid, Bid],
-      set_collection: [shuffledSetCollection[0], shuffledSetCollection[1]] as [Bid, Bid],
-      trick: [shuffledTricks[0], shuffledTricks[1]] as [Bid, Bid]
+      points: shuffledPoints[0] || null,
+      set_collection: shuffledSetCollection[0] || null,
+      trick: shuffledTricks[0] || null
     };
 
     // 4. Deal first card to each player (visible/público)

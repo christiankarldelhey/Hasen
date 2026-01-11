@@ -1,6 +1,6 @@
-import { PlayerId } from './Player'
-import { Suit } from './Card'
-import { TrickNumber } from './Trick'
+import type { PlayerId } from './Player'
+import type { Suit } from './Card'
+import type { TrickNumber } from './Trick'
 
 export type BidType = 'points' | 'set_collection' | 'trick'
 export type BidScore = number
@@ -29,7 +29,7 @@ export interface PlayerBid {
 }
 
 export interface Bid {
-  bid_id: number
+  bid_id: string
   bid_type: BidType
   bid_score: BidScore
   current_bids: {
@@ -42,7 +42,7 @@ export interface Bid {
 }
 
 export interface BidPool {
-  setCollectionBids: [Bid, Bid, Bid]
-  pointsBids: [Bid, Bid, Bid]
-  trickBids: [Bid, Bid, Bid]
+  setCollectionBid: Bid
+  pointsBid: Bid
+  trickBid: Bid
 }

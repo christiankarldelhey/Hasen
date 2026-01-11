@@ -37,9 +37,9 @@ export class GameService {
         round: 0,
         playerTurn: null,
         roundBids: {
-          points: [null, null],
-          set_collection: [null, null],
-          trick: [null, null]
+          points: null,
+          set_collection: null,
+          trick: null
         },
         roundPhase: 'round_setup',
         currentTrick: null
@@ -77,6 +77,11 @@ export class GameService {
       playerTurn: game.round.playerTurn,
       currentTrick: game.round.currentTrick,
       roundBids: game.round.roundBids
+    },
+    bidDecks: {
+      setCollectionBidDeck: game.bidDecks.setCollectionBidDeck,
+      pointsBidDeck: game.bidDecks.pointsBidDeck,
+      tricksBidDeck: game.bidDecks.tricksBidDeck
     },
     gameSettings: game.gameSettings,
     playerScores: game.playerScores

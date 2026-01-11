@@ -10,9 +10,9 @@ export type RoundPhase =
   | 'scoring'
 
 export interface RoundBids {
-  points: [Bid, Bid]
-  set_collection: [Bid, Bid]
-  trick: [Bid, Bid]
+  points: Bid | null
+  set_collection: Bid | null
+  trick: Bid | null
 }
 
 export interface Round {

@@ -16,15 +16,15 @@ watch(roundBids, (newVal) => {
   <div class="fixed top-4 right-4 z-10">
     <div v-if="roundBids" class="flex flex-col gap-1">
       <BidsContainer 
-        :bids="roundBids.points"
+        :bid="roundBids.points"
         type="points"
       />
       <BidsContainer 
-        :bids="roundBids.set_collection"
+        :bid="roundBids.set_collection"
         type="set_collection"
       />
       <BidsContainer 
-        :bids="roundBids.trick"
+        :bid="roundBids.trick"
         type="trick"
       />
     </div>

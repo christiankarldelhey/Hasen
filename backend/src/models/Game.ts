@@ -7,6 +7,79 @@ export interface GameDocument extends Omit<Game, 'gameId'>, Document {
   updatedAt: Date;
 }
 
+// Schema para Card
+const CardSchema = new Schema({
+  id: { type: String, required: true },
+  suit: { type: String, enum: ['berries', 'leaves', 'flowers', 'acorns'], required: true },
+  char: { type: String, required: true },
+  rank: {
+    base: { type: Number, required: true },
+    onSuit: { type: Number }
+  },
+  owner: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
+  state: { type: String, enum: ['in_deck', 'in_hand_visible', 'in_hand_hidden', 'played'], required: true },
+  points: { type: Number, required: true },
+  spritePos: {
+    row: { type: Number, required: true },
+    col: { type: Number, required: true }
+  }
+}, { _id: false });
+
+// Schema para PlayerBid
+const PlayerBidSchema = new Schema({
+  bidder: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
+  onLose: { type: Number, required: true }
+}, { _id: false });
+
+// Schema para Bid
+const BidSchema = new Schema({
+  bid_id: { type: String, required: true },
+  bid_type: { type: String, enum: ['points', 'set_collection', 'trick'], required: true },
+  bid_score: { type: Number, required: true },
+  current_bids: {
+    trick_1: { type: PlayerBidSchema, required: true },
+    trick_2: { type: PlayerBidSchema, required: true },
+    trick_3: { type: PlayerBidSchema, required: true }
+  },
+  bid_winner: [{ type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'] }],
+  win_condition: { type: Schema.Types.Mixed, required: true }
+}, { _id: false });
+
+// Schema para Trick
+const TrickSchema = new Schema({
+  trickNumber: { type: Number, required: true },
+  leadPlayer: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+  cardsPlayed: { type: Schema.Types.Mixed, required: true },
+  winner: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'] },
+  points: { type: Number }
+}, { _id: false });
+
+// Schema para Round
+const RoundSchema = new Schema({
+  round: { type: Number, required: true },
+  playerTurn: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
+  roundPhase: { 
+    type: String, 
+    enum: ['round_setup', 'player_drawing', 'back_to_hand', 'playing', 'scoring'],
+    required: true 
+  },
+  roundBids: {
+    points: { type: BidSchema, default: null },
+    set_collection: { type: BidSchema, default: null },
+    trick: { type: BidSchema, default: null }
+  },
+  currentTrick: { type: TrickSchema, default: null }
+}, { _id: false });
+
+// Schema para PlayerRoundScore
+const PlayerRoundScoreSchema = new Schema({
+  playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+  points: { type: Number, required: true },
+  totalScore: { type: Number, required: true },
+  tricksWon: { type: Number, required: true },
+  win_condition: { type: Schema.Types.Mixed, required: true }
+}, { _id: false });
+
 const GameSchema = new Schema<GameDocument>({
   gameId: { 
     type: String, 
@@ -42,11 +115,11 @@ const GameSchema = new Schema<GameDocument>({
     default: new Map(),
     required: false
   },
-  deck: [Schema.Types.Mixed],
+  deck: [CardSchema],
   bidDecks: {
-    setCollectionBidDeck: [Schema.Types.Mixed],
-    pointsBidDeck: [Schema.Types.Mixed],
-    tricksBidDeck: [Schema.Types.Mixed]
+    setCollectionBidDeck: [BidSchema],
+    pointsBidDeck: [BidSchema],
+    tricksBidDeck: [BidSchema]
   },
   gamePhase: { 
     type: String, 
@@ -55,16 +128,16 @@ const GameSchema = new Schema<GameDocument>({
     default: 'setup'
   },
   round: { 
-    type: Schema.Types.Mixed,
+    type: RoundSchema,
     required: true
   },
   playerTurnOrder: [{
     type: String,
     enum: ['player_1', 'player_2', 'player_3', 'player_4']
   }],
-  tricksHistory: [Schema.Types.Mixed],
-  bidsHistory: [Schema.Types.Mixed],
-  playerScores: [Schema.Types.Mixed],
+  tricksHistory: [TrickSchema],
+  bidsHistory: [BidSchema],
+  playerScores: [PlayerRoundScoreSchema],
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },

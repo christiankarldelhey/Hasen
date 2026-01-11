@@ -3,7 +3,7 @@ import type { Bid as BidType } from '@domain/interfaces/Bid'
 import Bid from './Bid.vue'
 
 defineProps<{
-  bids: [BidType, BidType]
+  bid: BidType | null
   type: 'points' | 'set_collection' | 'trick'
 }>()
 
@@ -16,10 +16,8 @@ const typeLabels = {
 
 <template>
   <div class="mb-3">
-    <div class="flex flex-col gap-2">
+    <div v-if="bid" class="flex flex-col gap-2">
       <Bid 
-        v-for="bid in bids" 
-        :key="bid?.bid_id"
         :bid="bid"
       />
     </div>

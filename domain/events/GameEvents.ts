@@ -26,9 +26,9 @@ export interface RoundSetupCompletedEvent {
     round: number
     deckSize: number
     roundBids: {
-      points: [Bid, Bid]
-      set_collection: [Bid, Bid]
-      trick: [Bid, Bid]
+      points: Bid | null
+      set_collection: Bid | null
+      trick: Bid | null
     }
   }
 }
@@ -36,9 +36,9 @@ export function createRoundSetupCompletedEvent(
   round: number,
   deckSize: number,
   roundBids: {
-    points: [Bid, Bid]
-    set_collection: [Bid, Bid]
-    trick: [Bid, Bid]
+    points: Bid | null
+    set_collection: Bid | null
+    trick: Bid | null
   }
 ): RoundSetupCompletedEvent {
   return {
