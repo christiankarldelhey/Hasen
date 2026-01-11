@@ -6,6 +6,9 @@ import { useGameStore } from '@/stores/gameStore';
 import { useHasenStore } from '@/stores/hasenStore';
 import { useLobbyStore } from '@/stores/lobbyStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
+import GameStats from '@/features/Game/GameStats.vue';
+import Deck from '@/features/Game/Deck.vue';
+import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 
@@ -86,6 +89,9 @@ onMounted(async () => {
     </div>
 
     <div v-else class="relative w-full h-screen">
+      <Deck />
+      <GameStats />
+      <BidsPanel />
       <!-- Oponentes en diferentes posiciones -->
       <OtherPlayerHand
         v-for="opponent in opponentPositions"

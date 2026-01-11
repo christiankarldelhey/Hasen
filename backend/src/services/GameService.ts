@@ -223,8 +223,8 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
 
   await game.save();
   
-    // La room persiste aunque se vaya el host
-    return { game, gameDeleted: false, wasHost: playerId === game.hostPlayer };
+  // La room persiste aunque se vaya el host
+  return { game, gameDeleted: false, wasHost: playerId === game.hostPlayer };
   }
 
   static async deleteGame(gameId: string) {
