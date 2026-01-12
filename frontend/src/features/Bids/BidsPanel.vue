@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
-import BidsContainer from './BidsContainer.vue'
+import Bid from './Bid.vue'
 
 const gameStore = useGameStore()
 
@@ -15,21 +15,21 @@ watch(roundBids, (newVal) => {
 <template>
   <div class="fixed top-4 right-4 z-10">
     <div v-if="roundBids" class="flex flex-col gap-1">
-      <BidsContainer 
+      <Bid 
         :bid="roundBids.points"
         type="points"
       />
-      <BidsContainer 
+      <Bid 
         :bid="roundBids.set_collection"
         type="set_collection"
       />
-      <BidsContainer 
+      <Bid 
         :bid="roundBids.trick"
         type="trick"
       />
     </div>
     <div v-else class="bg-red-500 text-white p-2 rounded">
-      No roundBids data
+      No round bids data
     </div>
   </div>
 </template>

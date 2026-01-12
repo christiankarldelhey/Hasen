@@ -20,7 +20,7 @@ const playerColor = computed(() => {
     data-name="Capa 2" 
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="0 0 385.26 420.69"
-    :style="{ fill: playerColor }"
+    :style="{ fill: playerColor, height: '40px' }"
   >
     <g id="Capa_1-2" data-name="Capa 1">
       <g id="QTlxMR.tif">
