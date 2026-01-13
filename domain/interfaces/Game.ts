@@ -14,6 +14,7 @@ export interface Game {
   hostUserId: string
   activePlayers: PlayerId[]
   deck: PlayingCard[]
+  discardPile: PlayingCard[]
   bidDecks: {
     setCollectionBidDeck: Bid[];
     pointsBidDeck: Bid[];

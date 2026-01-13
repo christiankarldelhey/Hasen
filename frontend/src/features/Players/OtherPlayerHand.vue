@@ -83,10 +83,6 @@ const stackedCards = computed(() => {
         />
       </div>
     </div>
-    
-
-    
-    <!-- Public card if exists -->
 
   </div>
 </template>

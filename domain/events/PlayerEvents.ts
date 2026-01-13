@@ -1,4 +1,4 @@
-import { PlayerId, PlayingCard, TrickNumber, BidType } from '../interfaces'
+import type { PlayerId, PlayingCard, TrickNumber, BidType } from '../interfaces'
 
 // CARD PLAYED EVENT
 
@@ -87,9 +87,55 @@ export function createBidPlacedEvent(
   }
 }
 
+// CARD REPLACEMENT SKIPPED EVENT
+
+export interface CardReplacementSkippedEvent {
+  type: 'CARD_REPLACEMENT_SKIPPED'
+  payload: {
+    playerId: PlayerId
+    round: number
+    nextPlayerId: PlayerId
+  }
+}
+
+export function createCardReplacementSkippedEvent(
+  playerId: PlayerId,
+  round: number,
+  nextPlayerId: PlayerId
+): CardReplacementSkippedEvent {
+  return {
+    type: 'CARD_REPLACEMENT_SKIPPED',
+    payload: { playerId, round, nextPlayerId }
+  }
+}
+
+// CARD REPLACEMENT COMPLETED EVENT
+
+export interface CardReplacementCompletedEvent {
+  type: 'CARD_REPLACEMENT_COMPLETED'
+  payload: {
+    playerId: PlayerId
+    round: number
+    nextPlayerId: PlayerId
+  }
+}
+
+export function createCardReplacementCompletedEvent(
+  playerId: PlayerId,
+  round: number,
+  nextPlayerId: PlayerId
+): CardReplacementCompletedEvent {
+  return {
+    type: 'CARD_REPLACEMENT_COMPLETED',
+    payload: { playerId, round, nextPlayerId }
+  }
+}
+
 // UNION TYPE
 
 export type PlayerEvent = 
   | CardPlayedEvent
   | CardReplacedPrivateEvent
   | BidPlacedEvent
+  | CardReplacementSkippedEvent
+  | CardReplacementCompletedEvent
