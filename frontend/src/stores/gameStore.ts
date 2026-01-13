@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { PublicGameState, PrivateGameState } from '@domain/interfaces/Game'
-import type { RoundPhase } from '@domain/interfaces/Round'
 import { processGameEvent } from './gameEventHandlers'
 
 export const useGameStore = defineStore('game', () => {
@@ -36,12 +35,6 @@ export const useGameStore = defineStore('game', () => {
     })
   }
 
-  function setCurrentPhase(phase: RoundPhase) {
-    if (publicGameState.value) {
-      publicGameState.value.round.roundPhase = phase
-    }
-  }
-
   function reset() {
     publicGameState.value = null
     privateGameState.value = null
@@ -63,7 +56,6 @@ export const useGameStore = defineStore('game', () => {
     setPublicGameState,
     setPrivateGameState,
     handleGameEvent,
-    setCurrentPhase,
     reset,
   }
 })

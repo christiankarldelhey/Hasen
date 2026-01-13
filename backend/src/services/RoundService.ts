@@ -14,7 +14,10 @@ export class RoundService {
     // 1. Incrementar ronda
     game.round.round += 1;
     
-    // 2. Shuffle deck de cartas
+    // 2. Reset discard pile
+    game.discardPile = [];
+    
+    // 3. Shuffle deck de cartas
     game.deck = shuffleDeck(game.deck);
     game.deck.forEach(card => {
       card.state = 'in_deck';
@@ -65,6 +68,7 @@ export class RoundService {
     // 6. Actualizar fase a player_drawing
     game.round.roundPhase = 'player_drawing';
     game.round.currentTrick = null;
+    game.round.playerTurn = game.activePlayers[0];
     
     await game.save();
     

@@ -1,4 +1,5 @@
 import { RoundService } from '@/services/RoundService';
+import { GameService } from '@/services/GameService';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
@@ -35,10 +36,18 @@ socket.on('round:start', async ({ gameId }) => {
         }
       }
       
-      // 4. Emitir cambio de fase a player_drawing
-      io.to(gameId).emit('round:phase-changed', { phase: 'player_drawing' });
+      // 4. Enviar estado actualizado del juego con playerTurn seteado y fase player_drawing
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState
+          });
+        }
+      }
       
-      console.log('✅ Round setup, first cards dealt, and private cards sent');
+      console.log('✅ Round setup, first cards dealt, private cards sent, and game state updated');
       
     } catch (error: any) {
       socket.emit('error', { message: error.message });
@@ -57,10 +66,80 @@ socket.on('round:start', async ({ gameId }) => {
       case 'back_to_hand':
         // Transición a playing
         await RoundService.updateRoundPhase(gameId, 'playing');
-        io.to(gameId).emit('round:phase-changed', { phase: 'playing' });
+        
+        // Enviar estado actualizado con nueva fase
+        for (const [socketId, data] of socketToPlayer.entries()) {
+          if (data.gameId === gameId) {
+            const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+            io.to(socketId).emit('game:stateUpdate', {
+              publicGameState: publicState,
+              privateGameState: privateState
+            });
+          }
+        }
         break;
         
-      // ... etc
+    }
+  });
+
+  socket.on('player:skipCardReplacement', async ({ gameId }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, event } = await GameService.skipCardReplacement(gameId, playerData.playerId);
+      
+      const { publicState, privateState } = await GameService.getPlayerGameState(gameId, playerData.userId);
+      
+      io.to(gameId).emit('game:stateUpdate', {
+        publicGameState: publicState,
+        event
+      });
+
+      console.log(`✅ Player ${playerData.playerId} skipped card replacement`);
+      
+    } catch (error: any) {
+      console.error('Error in skipCardReplacement:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
+  socket.on('player:replaceCard', async ({ gameId, cardId }: { gameId: string; cardId: string }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, publicEvent, privateEvent } = await GameService.replaceCard(
+        gameId, 
+        playerData.playerId, 
+        cardId
+      );
+      
+      // Enviar estado actualizado a cada jugador (público + privado)
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState,
+            event: publicEvent
+          });
+        }
+      }
+
+      // Enviar evento privado solo al jugador que reemplazó
+      io.to(socket.id).emit('game:event', privateEvent);
+      
+    } catch (error: any) {
+      console.error('Error in replaceCard:', error);
+      socket.emit('error', { message: error.message });
     }
   });
 

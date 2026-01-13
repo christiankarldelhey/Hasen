@@ -4,7 +4,13 @@ import { createBidDeck } from '@domain/rules/BidDeckRules.js'
 import { shuffleDeck } from '@domain/rules/DeckRules.js'
 import { createDeckShuffledEvent } from '@domain/events/GameEvents.js'
 import { v4 as uuidv4 } from 'uuid'
-import { PlayerId } from '@domain/interfaces'
+import type { PlayerId, Game, PlayingCard } from '@domain/interfaces'
+import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
+import { 
+  createCardReplacementSkippedEvent, 
+  createCardReplacementCompletedEvent,
+  createCardReplacedPrivateEvent 
+} from '@domain/events/PlayerEvents.js'
 
 export class GameService {
   
@@ -28,6 +34,7 @@ export class GameService {
       activePlayers: [hostPlayerId || 'player_1'],
       playerSessions,
       deck,
+      discardPile: [],
       bidDecks: {
         setCollectionBidDeck: bidDecks.setCollectionBidDeck,
         pointsBidDeck: bidDecks.pointsBidDeck,
@@ -256,5 +263,99 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     await game.save();
     
     return { game, winnerId: winnerId || null };
+  }
+
+  static advancePlayerTurn(game: Game): PlayerId {
+    const currentIndex = game.playerTurnOrder.indexOf(game.round.playerTurn!);
+    const nextIndex = (currentIndex + 1) % game.playerTurnOrder.length;
+    const nextPlayer = game.playerTurnOrder[nextIndex];
+    
+    game.round.playerTurn = nextPlayer;
+    
+    return nextPlayer;
+  }
+
+  static async skipCardReplacement(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    const validation = canSkipCardReplacement(playerId, game.round);
+    if (!validation.valid) {
+      throw new Error(validation.reason);
+    }
+    
+    const nextPlayer = this.advancePlayerTurn(game);
+    
+    const nextIndex = game.playerTurnOrder.indexOf(nextPlayer);
+    if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
+      game.round.roundPhase = 'back_to_hand';
+    }
+    
+    await game.save();
+    
+    const event = createCardReplacementSkippedEvent(
+      playerId,
+      game.round.round,
+      nextPlayer
+    );
+    
+    return { game, event };
+  }
+
+  static async replaceCard(gameId: string, playerId: PlayerId, cardId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    const playerHand = game.deck.filter(
+      (card: PlayingCard) => card.owner === playerId && 
+      (card.state === 'in_hand_visible' || card.state === 'in_hand_hidden')
+    );
+    
+    const validation = canReplaceCard(
+      playerId,
+      cardId,
+      playerHand,
+      game.round,
+      game.deck.filter((c: PlayingCard) => c.state === 'in_deck').length
+    );
+    if (!validation.valid) {
+      throw new Error(validation.reason);
+    }
+    
+    const cardToDiscard = game.deck.find((c: PlayingCard) => c.id === cardId);
+    if (!cardToDiscard) throw new Error('Card not found');
+    
+    cardToDiscard.state = 'in_discard_pile';
+    cardToDiscard.owner = null;
+    game.discardPile.push(cardToDiscard);
+    
+    const deckCards = game.deck.filter((c: PlayingCard) => c.state === 'in_deck');
+    const randomIndex = Math.floor(Math.random() * deckCards.length);
+    const newCard = deckCards[randomIndex];
+    
+    newCard.state = 'in_hand_hidden';
+    newCard.owner = playerId;
+    
+    const nextPlayer = this.advancePlayerTurn(game);
+    
+    const nextIndex = game.playerTurnOrder.indexOf(nextPlayer);
+    if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
+      game.round.roundPhase = 'back_to_hand';
+    }
+    
+    await game.save();
+    
+    const publicEvent = createCardReplacementCompletedEvent(
+      playerId,
+      game.round.round,
+      nextPlayer
+    );
+    const privateEvent = createCardReplacedPrivateEvent(
+      playerId,
+      cardToDiscard,
+      newCard
+    );
+    
+    return { game, publicEvent, privateEvent };
   }
 }

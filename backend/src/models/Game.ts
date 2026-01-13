@@ -17,7 +17,7 @@ const CardSchema = new Schema({
     onSuit: { type: Number }
   },
   owner: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
-  state: { type: String, enum: ['in_deck', 'in_hand_visible', 'in_hand_hidden', 'played'], required: true },
+  state: { type: String, enum: ['in_deck', 'in_hand_visible', 'in_hand_hidden', 'played', 'in_discard_pile'], required: true },
   points: { type: Number, required: true },
   spritePos: {
     row: { type: Number, required: true },
@@ -116,6 +116,11 @@ const GameSchema = new Schema<GameDocument>({
     required: false
   },
   deck: [CardSchema],
+  discardPile: {
+    type: [CardSchema],
+    default: [],
+    required: false
+  },
   bidDecks: {
     setCollectionBidDeck: [BidSchema],
     pointsBidDeck: [BidSchema],

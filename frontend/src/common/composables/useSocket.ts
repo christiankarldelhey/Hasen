@@ -54,11 +54,6 @@ class SocketManager {
       'game:event': (event: any) => {
         console.log('🎮 Game event received:', event);
         gameStore.handleGameEvent(event);
-      },
-      
-      'round:phase-changed': ({ phase }: any) => {
-        console.log('📍 Phase changed to:', phase);
-        gameStore.setCurrentPhase(phase);
       }
     };
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameAPI } from '../common/composables/useGameAPI';
+import { useSocketGame } from '../common/composables/useSocketGame';
 import { useGameStore } from '@/stores/gameStore';
 import { useHasenStore } from '@/stores/hasenStore';
 import { useLobbyStore } from '@/stores/lobbyStore';
@@ -10,15 +11,37 @@ import GameStats from '@/features/Game/GameStats.vue';
 import Deck from '@/features/Game/Deck.vue';
 import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
+import PlayerDrawingPhase from '@/features/Game/PlayerDrawingPhase.vue';
 import GameLayout from '../layout/GameLayout.vue';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
 const gameAPI = useGameAPI();
+const socketGame = useSocketGame();
 const gameStore = useGameStore();
 const hasenStore = useHasenStore();
 const lobbyStore = useLobbyStore();
 const playerHand = computed(() => gameStore.privateGameState?.hand || []);
+
+const isPlayerDrawingPhase = computed(() => 
+  gameStore.publicGameState?.round.roundPhase === 'player_drawing'
+);
+
+const isMyTurn = computed(() => 
+  gameStore.publicGameState?.round.playerTurn === hasenStore.currentPlayerId
+);
+
+const handMode = computed(() => {
+  return isPlayerDrawingPhase.value && isMyTurn.value ? 'card_replacement' : 'normal'
+});
+
+const handleSkipReplacement = () => {
+  socketGame.skipCardReplacement(gameId)
+};
+
+const handleConfirmReplacement = (cardId: string) => {
+  socketGame.replaceCard(gameId, cardId)
+};
 
 const loading = computed(() => lobbyStore.loading);
 const error = computed(() => lobbyStore.error);
@@ -69,10 +92,34 @@ onMounted(async () => {
   try {
     await gameAPI.fetchPlayerGameState(gameId);
     console.log('mounted game view');
+    
+    socketGame.onGameStateUpdate((data) => {
+      if (data.publicGameState) {
+        gameStore.setPublicGameState(data.publicGameState)
+      }
+      if (data.privateGameState) {
+        gameStore.setPrivateGameState(data.privateGameState)
+      }
+      if (data.event) {
+        gameStore.handleGameEvent(data.event)
+      }
+    });
+    
+    socketGame.onPrivateStateUpdate((data) => {
+      if (data.privateGameState) {
+        gameStore.setPrivateGameState(data.privateGameState)
+      }
+    });
+    
   } catch (err) {
     console.error('Error loading game:', err);
     lobbyStore.setError('Failed to load game');
   }
+});
+
+onUnmounted(() => {
+  socketGame.offGameStateUpdate();
+  socketGame.offPrivateStateUpdate();
 });
 
 </script>
@@ -89,6 +136,7 @@ onMounted(async () => {
     </div>
 
     <div v-else class="relative w-full h-screen">
+      <PlayerDrawingPhase />
       <Deck />
       <GameStats />
       <BidsPanel />
@@ -103,7 +151,12 @@ onMounted(async () => {
       />
       
       <!-- Mano del jugador (fixed en el bottom) -->
-      <PlayerHand :cards="playerHand" />
+      <PlayerHand 
+        :cards="playerHand" 
+        :mode="handMode"
+        @skip-replacement="handleSkipReplacement"
+        @confirm-replacement="handleConfirmReplacement"
+      />
     </div>
   </GameLayout>
 </template>

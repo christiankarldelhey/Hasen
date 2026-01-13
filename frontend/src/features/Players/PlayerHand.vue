@@ -1,13 +1,44 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import PlayingCard from '@/common/components/PlayingCard.vue';
 
 interface Props {
   cards: Card[];
+  mode?: 'normal' | 'card_replacement';
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  mode: 'normal'
+});
+
+const emit = defineEmits<{
+  skipReplacement: []
+  confirmReplacement: [cardId: string]
+}>();
+
+const selectedCardId = ref<string | null>(null);
+
+const isCardSelectable = (card: Card) => {
+  return props.mode === 'card_replacement' && card.state === 'in_hand_hidden'
+};
+
+const selectCard = (card: Card) => {
+  if (isCardSelectable(card)) {
+    selectedCardId.value = card.id
+  }
+};
+
+const handleSkip = () => {
+  emit('skipReplacement')
+};
+
+const handleConfirm = () => {
+  if (selectedCardId.value) {
+    emit('confirmReplacement', selectedCardId.value)
+    selectedCardId.value = null
+  }
+};
 
 const cardPositions = computed(() => {
   const totalCards = props.cards.length;
@@ -53,13 +84,40 @@ const cardPositions = computed(() => {
             transformOrigin: 'center bottom',
             zIndex: pos.zIndex
           }"
+          @click="selectCard(pos.card)"
         >
-          <PlayingCard 
-            :card="pos.card" 
-            class="cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-[60px] hover:scale-105 hover:!z-[1000]" 
-          />
+          <div :class="[
+            'relative',
+            selectedCardId === pos.card.id ? 'ring-4 ring-yellow-400 rounded-lg' : '',
+            pos.card.state === 'in_hand_visible' && mode === 'card_replacement' ? 'opacity-50' : ''
+          ]">
+            <PlayingCard 
+              :card="pos.card" 
+              :class="[
+                'transition-transform duration-200 ease-out',
+                isCardSelectable(pos.card) ? 'cursor-pointer hover:-translate-y-[60px] hover:scale-105 hover:!z-[1000]' : 'cursor-pointer hover:-translate-y-[60px] hover:scale-105 hover:!z-[1000]'
+              ]"
+            />
+          </div>
         </div>
       </TransitionGroup>
+    </div>
+    
+    <!-- Botones para card replacement -->
+    <div v-if="mode === 'card_replacement'" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
+      <button
+        @click="handleConfirm"
+        :disabled="!selectedCardId"
+        class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
+      >
+        Confirm
+      </button>
+      <button
+        @click="handleSkip"
+        class="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg shadow-lg hover:bg-gray-700 transition-colors"
+      >
+        Skip
+      </button>
     </div>
   </div>
 </template>
