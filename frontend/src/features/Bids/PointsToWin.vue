@@ -11,7 +11,7 @@ defineProps<{
     <img
       :src="WinSymbol"
       alt="Win Symbol"
-      class="w-28"
+      class="w-12"
     />
 
     <span

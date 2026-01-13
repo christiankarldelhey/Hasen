@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div v-if="bid" class="bg-hasen-base rounded-2xl px-2 py-3 shadow-lg">
+  <div v-if="bid" class="bg-hasen-base rounded-2xl px-2 py-3 shadow-lg max-h-20 cursor-pointer">
     <div class="flex flex-row">
        <div class="avatar avatar-placeholder">
         <div class="bg-hasen-green w-12 h-12 rounded-full border-2 border-hasen-dark">
@@ -17,7 +17,6 @@ defineProps<{
         </div>
       </div>
       <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
-      <Hare playerId="player_1"/>
     </div>
   </div>
 </template>
