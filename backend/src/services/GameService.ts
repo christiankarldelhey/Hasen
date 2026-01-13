@@ -101,15 +101,20 @@ export class GameService {
     publicState.publicCards[card.id] = card;
   });
 
-  // Crear opponentsPublicInfo con referencias y conteo de cartas
-  publicState.opponentsPublicInfo = visibleCards.map((card: any) => ({
-    playerId: card.owner,
-    publicCardId: card.id,
-    handCardsCount: game.deck.filter((c: any) => 
-      c.owner === card.owner && 
+  // Crear opponentsPublicInfo para todos los jugadores activos
+  publicState.opponentsPublicInfo = game.activePlayers.map((activePlayerId: PlayerId) => {
+    const visibleCard = visibleCards.find((card: any) => card.owner === activePlayerId);
+    const handCardsCount = game.deck.filter((c: any) => 
+      c.owner === activePlayerId && 
       (c.state === 'in_hand_visible' || c.state === 'in_hand_hidden')
-    ).length
-  }));
+    ).length;
+    
+    return {
+      playerId: activePlayerId,
+      publicCardId: visibleCard ? visibleCard.id : null,
+      handCardsCount
+    };
+  });
 
   // Si se proporciona userId, buscar su playerId y agregar su mano privada
   let playerHand = null;
@@ -275,6 +280,15 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     return nextPlayer;
   }
 
+  private static hideAllPlayersCards(game: Game): void {
+    // Convertir todas las cartas visibles a hidden
+    game.deck.forEach((card: PlayingCard) => {
+      if (card.state === 'in_hand_visible') {
+        card.state = 'in_hand_hidden';
+      }
+    });
+  }
+
   static async skipCardReplacement(gameId: string, playerId: PlayerId) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
@@ -288,7 +302,9 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     
     const nextIndex = game.playerTurnOrder.indexOf(nextPlayer);
     if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
-      game.round.roundPhase = 'back_to_hand';
+      this.hideAllPlayersCards(game);
+          // Cambiar fase a playing
+      game.round.roundPhase = 'playing';
     }
     
     await game.save();
@@ -340,7 +356,8 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     
     const nextIndex = game.playerTurnOrder.indexOf(nextPlayer);
     if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
-      game.round.roundPhase = 'back_to_hand';
+      this.hideAllPlayersCards(game);
+      game.round.roundPhase = 'playing';
     }
     
     await game.save();

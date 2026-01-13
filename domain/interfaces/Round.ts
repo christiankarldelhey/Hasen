@@ -5,7 +5,6 @@ import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondit
 export type RoundPhase = 
   | 'round_setup'
   | 'player_drawing'
-  | 'back_to_hand'
   | 'playing'
   | 'scoring'
 

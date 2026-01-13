@@ -60,7 +60,7 @@ const RoundSchema = new Schema({
   playerTurn: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
   roundPhase: { 
     type: String, 
-    enum: ['round_setup', 'player_drawing', 'back_to_hand', 'playing', 'scoring'],
+    enum: ['round_setup', 'player_drawing', 'playing', 'scoring'],
     required: true 
   },
   roundBids: {

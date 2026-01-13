@@ -7,7 +7,7 @@ import Hare from '@/common/components/Hare.vue'
 
 interface Props {
   playerId: string
-  publicCardId: string
+  publicCardId: string | null
   handCardsCount: number
   position: 'top' | 'left' | 'right'
 }
@@ -20,6 +20,7 @@ const privateHandsCount = computed(() => {
 })
 
 const publicCard = computed(() => {
+  if (!props.publicCardId) return null
   return gameStore.publicGameState?.publicCards[props.publicCardId] || null
 })
 

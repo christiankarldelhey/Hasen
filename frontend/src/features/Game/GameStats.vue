@@ -9,7 +9,6 @@ const currentPhase = computed(() => gameStore.currentPhase)
 const phaseLabels: Record<string, string> = {
   'round_setup': 'Round setup',
   'player_drawing': 'Player drawing',
-  'back_to_hand': 'Back to hand',
   'playing': 'Playing',
   'scoring': 'Scoring'
 }

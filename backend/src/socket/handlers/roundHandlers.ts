@@ -62,23 +62,6 @@ socket.on('round:start', async ({ gameId }) => {
       case 'player_drawing':
         // Esperar a que los jugadores hagan draw...
         break;
-        
-      case 'back_to_hand':
-        // Transición a playing
-        await RoundService.updateRoundPhase(gameId, 'playing');
-        
-        // Enviar estado actualizado con nueva fase
-        for (const [socketId, data] of socketToPlayer.entries()) {
-          if (data.gameId === gameId) {
-            const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
-            io.to(socketId).emit('game:stateUpdate', {
-              publicGameState: publicState,
-              privateGameState: privateState
-            });
-          }
-        }
-        break;
-        
     }
   });
 

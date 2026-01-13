@@ -65,7 +65,7 @@ export interface PublicGameState {
   publicCards: Record<string, PlayingCard>
   opponentsPublicInfo: {
     playerId: PlayerId
-    publicCardId: string
+    publicCardId: string | null
     handCardsCount: number
   }[]
   playerTurnOrder: PlayerId[]
