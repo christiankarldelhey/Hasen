@@ -43,6 +43,10 @@ const handleConfirmReplacement = (cardId: string, position: number) => {
   socketGame.replaceCard(gameId, cardId, position)
 };
 
+const handlePlayCard = (cardId: string) => {
+  socketGame.playCard(gameId, cardId)
+};
+
 const loading = computed(() => lobbyStore.loading);
 const error = computed(() => lobbyStore.error);
 
@@ -86,6 +90,23 @@ const opponentPositions = computed(() => {
   }
   
   return []
+})
+
+const trickCards = computed(() => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick
+  if (!currentTrick || !currentTrick.cards.length) return []
+  
+  const publicCards = gameStore.publicGameState?.publicCards || {}
+  
+  // Mapear los IDs de las cartas a las cartas completas
+  return currentTrick.cards
+    .map(cardId => publicCards[cardId])
+    .filter(card => card !== undefined)
+})
+
+const winningCardId = computed(() => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick
+  return currentTrick?.winning_card || null
 })
 
 onMounted(async () => {
@@ -150,7 +171,7 @@ onUnmounted(() => {
       />
       
       <!-- Trick en el centro exacto de la pantalla -->
-      <Trick />
+      <Trick :cards="trickCards" :winning-card-id="winningCardId" />
       
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 
@@ -158,6 +179,7 @@ onUnmounted(() => {
         :mode="handMode"
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"
+        @play-card="handlePlayCard"
       />
     </div>
   </GameLayout>

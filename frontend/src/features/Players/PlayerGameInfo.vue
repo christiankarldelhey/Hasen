@@ -60,7 +60,7 @@ const turnMessage = computed(() => {
   <div v-if="shouldShowTurnInfo">
     <div 
       class="rounded-tl-2xl rounded-tr-2xl rounded-br-2xl px-6 py-4 shadow-lg transition-colors duration-300 w-full"
-      :class="isMyTurn ? 'bg-green-600' : 'bg-gray-700'"
+      :class="isMyTurn ? 'bg-hasen-green' : 'bg-gray-700'"
     >
       <div class="text-white">
         <p class="font-bold text-lg">{{ turnMessage.title }}</p>

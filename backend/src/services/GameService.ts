@@ -96,7 +96,9 @@ export class GameService {
   };
 
   // Agregar las cartas públicas visibles al mapa
-  const visibleCards = game.deck.filter((card: any) => card.state === 'in_hand_visible');
+  const visibleCards = game.deck.filter((card: any) => 
+    card.state === 'in_hand_visible' || card.state === 'in_trick'
+  );
   
   visibleCards.forEach((card: any) => {
     publicState.publicCards[card.id] = card;

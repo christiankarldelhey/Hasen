@@ -153,6 +153,32 @@ export function createTrickStartedEvent(
     payload: { trick_id, trickNumber, leadPlayer }
   }
 }
+// CARD PLAYED EVENT
+/**
+ * Event emitted when a player plays a card in a trick
+ */
+export interface CardPlayedEvent {
+  type: 'CARD_PLAYED'
+  payload: {
+    trick_id: string
+    playerId: PlayerId
+    card: PlayingCard
+    trickNumber: 1 | 2 | 3 | 4 | 5
+    nextPlayer: PlayerId | null
+  }
+}
+export function createCardPlayedEvent(
+  trick_id: string,
+  playerId: PlayerId,
+  card: PlayingCard,
+  trickNumber: 1 | 2 | 3 | 4 | 5,
+  nextPlayer: PlayerId | null
+): CardPlayedEvent {
+  return {
+    type: 'CARD_PLAYED',
+    payload: { trick_id, playerId, card, trickNumber, nextPlayer }
+  }
+}
 // TRICK COMPLETED EVENT
 /**
  * Event emitted when a trick is completed
@@ -205,6 +231,7 @@ export type GameEvent =
   | CardReplacedPublicEvent
   | FirstCardHiddenEvent
   | TrickStartedEvent
+  | CardPlayedEvent
   | TrickCompletedEvent
   | RoundEndedEvent
   | RoundSetupCompletedEvent

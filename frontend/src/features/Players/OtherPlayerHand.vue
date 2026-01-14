@@ -15,13 +15,19 @@ interface Props {
 const props = defineProps<Props>()
 const gameStore = useGameStore()
 
-const privateHandsCount = computed(() => {
-  return props.publicCardId ? props.handCardsCount - 1 : props.handCardsCount
-})
-
 const publicCard = computed(() => {
   if (!props.publicCardId) return null
-  return gameStore.publicGameState?.publicCards[props.publicCardId] || null
+  const card = gameStore.publicGameState?.publicCards[props.publicCardId]
+  // Solo mostrar la carta si está en estado 'in_hand_visible'
+  if (card && card.state === 'in_hand_visible') {
+    return card
+  }
+  return null
+})
+
+const privateHandsCount = computed(() => {
+  // Solo restar 1 si realmente hay una carta visible
+  return publicCard.value ? props.handCardsCount - 1 : props.handCardsCount
 })
 
 const positionClasses = computed(() => {

@@ -7,6 +7,7 @@ import type {
   FirstCardDealtEvent,
   RemainingCardsDealtEvent,
   TrickStartedEvent,
+  CardPlayedEvent,
   TrickCompletedEvent,
   RoundEndedEvent
 } from '@domain/events/GameEvents'
@@ -91,6 +92,18 @@ const handleTrickStarted: GameEventHandler = (event, _context) => {
   console.log('🎯 Trick started:', (event as TrickStartedEvent).payload)
 }
 
+const handleCardPlayed: GameEventHandler = (event, context) => {
+  if (event.type !== 'CARD_PLAYED') return
+  if (!context.publicGameState) return
+  
+  const payload = (event as CardPlayedEvent).payload
+  
+  // Agregar la carta jugada al mapa de cartas públicas
+  context.publicGameState.publicCards[payload.card.id] = payload.card
+  
+  console.log(`🃏 Card played by ${payload.playerId}:`, payload.card.char, payload.card.suit)
+}
+
 const handleTrickCompleted: GameEventHandler = (event, _context) => {
   if (event.type !== 'TRICK_COMPLETED') return
   console.log('✅ Trick completed:', (event as TrickCompletedEvent).payload)
@@ -107,6 +120,7 @@ export const gameEventHandlers: Record<string, GameEventHandler> = {
   'FIRST_CARD_DEALT': handleFirstCardDealt,
   'REMAINING_CARDS_DEALT_PRIVATE': handleRemainingCardsDealtPrivate,
   'TRICK_STARTED': handleTrickStarted,
+  'CARD_PLAYED': handleCardPlayed,
   'TRICK_COMPLETED': handleTrickCompleted,
   'ROUND_ENDED': handleRoundEnded,
 }

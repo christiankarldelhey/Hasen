@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   skipReplacement: []
   confirmReplacement: [cardId: string, position: number]
+  playCard: [cardId: string]
 }>();
 
 const selectedCardId = ref<string | null>(null);
@@ -24,8 +25,13 @@ const isCardSelectable = (card: Card) => {
 };
 
 const selectCard = (card: Card) => {
-  if (isCardSelectable(card)) {
+  // Modo card_replacement: seleccionar carta para reemplazo
+  if (props.mode === 'card_replacement' && isCardSelectable(card)) {
     selectedCardId.value = card.id
+  }
+  // Modo normal: jugar carta directamente
+  else if (props.mode === 'normal') {
+    emit('playCard', card.id)
   }
 };
 

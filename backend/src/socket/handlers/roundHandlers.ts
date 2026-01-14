@@ -1,5 +1,6 @@
 import { RoundService } from '@/services/RoundService';
 import { GameService } from '@/services/GameService';
+import { TrickService } from '@/services/TrickService';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
@@ -131,6 +132,43 @@ socket.on('round:start', async ({ gameId }) => {
       
     } catch (error: any) {
       console.error('Error in replaceCard:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
+  socket.on('player:playCard', async ({ gameId, cardId }: { gameId: string; cardId: string }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, event } = await TrickService.playCard(
+        gameId,
+        playerData.playerId,
+        cardId
+      );
+
+      // Emitir el evento CARD_PLAYED a todos los jugadores en la sala
+      io.to(gameId).emit('game:event', event);
+
+      // Enviar estado actualizado a cada jugador (público + privado)
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState
+          });
+        }
+      }
+
+      console.log(`✅ Player ${playerData.playerId} played card ${cardId}`);
+      
+    } catch (error: any) {
+      console.error('Error in playCard:', error);
       socket.emit('error', { message: error.message });
     }
   });

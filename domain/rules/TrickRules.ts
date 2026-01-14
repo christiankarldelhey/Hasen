@@ -1,4 +1,4 @@
-import { PlayingCard, LeadSuit, Trick, PlayerId, TrickScore, ActivePlayers } from "../interfaces";
+import type { PlayingCard, LeadSuit, Trick, PlayerId, TrickScore, ActivePlayers } from "../interfaces";
 import { compareCards } from "./CardRules";
 
 // Orden de acciones en Trick
@@ -10,7 +10,7 @@ import { compareCards } from "./CardRules";
 
 
 /**
- * Generally the first card determines the lead suit of th trick except for the flowers.
+ * Generally the first card determines the lead suit of the trick except for the flowers.
  */
 export function determineLeadSuit(firstCard: PlayingCard): LeadSuit | null {
     // Flowers don't establish lead suit

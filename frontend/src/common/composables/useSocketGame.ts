@@ -37,6 +37,11 @@ export function useSocketGame() {
       socket.emit('player:replaceCard', { gameId, cardId, position });
     },
 
+    // Play card in trick
+    playCard: (gameId: string, cardId: string) => {
+      socket.emit('player:playCard', { gameId, cardId });
+    },
+
     onGameStateUpdate: (callback: (data: any) => void) => {
       socket.on('game:stateUpdate', callback);
     },

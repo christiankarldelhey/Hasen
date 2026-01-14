@@ -22,7 +22,7 @@ export function canPlayCard(
       return { valid: false, reason: 'Card not in player hand' }
     }
     // 3. Verify card is in correct state
-    if (card.state !== 'in_hand') {
+    if (card.state !== 'in_hand_visible' && card.state !== 'in_hand_hidden') {
       return { valid: false, reason: 'Card not available to play' }
     }
     // 4. Check if trick is complete (max 4 cards)
