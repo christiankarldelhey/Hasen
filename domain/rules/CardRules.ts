@@ -1,4 +1,4 @@
-import { PlayingCard, LeadSuit, PlayerId, Trick, TrickNumber } from "../interfaces";
+import type { PlayingCard, LeadSuit, PlayerId, Trick, TrickNumber } from "../interfaces";
 
 export type CardValidationResult = {
   valid: boolean;

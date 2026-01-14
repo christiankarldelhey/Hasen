@@ -7,11 +7,10 @@ import { useGameStore } from '@/stores/gameStore';
 import { useHasenStore } from '@/stores/hasenStore';
 import { useLobbyStore } from '@/stores/lobbyStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
-import GameStats from '@/features/Game/GameStats.vue';
+import GameInfo from '@/features/Game/GameInfo.vue';
 import Deck from '@/features/Game/Deck.vue';
 import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
-import PlayerDrawingPhase from '@/features/Game/PlayerDrawingPhase.vue';
 import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
 
@@ -137,9 +136,8 @@ onUnmounted(() => {
     </div>
 
     <div v-else class="relative w-full h-screen">
-      <PlayerDrawingPhase />
+      <GameInfo />
       <Deck />
-      <GameStats />
       <BidsPanel />
       <!-- Oponentes en diferentes posiciones -->
       <OtherPlayerHand
