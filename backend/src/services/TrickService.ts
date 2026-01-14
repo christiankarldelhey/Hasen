@@ -1,11 +1,48 @@
 import { GameModel } from '../models/Game.js'
-import { createTrickStartedEvent, createCardPlayedEvent } from '@domain/events/GameEvents.js'
+import { createTrickStartedEvent, createCardPlayedEvent, createTrickCompletedEvent } from '@domain/events/GameEvents.js'
 import type { PlayerId, Trick, TrickNumber, PlayingCard, LeadSuit } from '@domain/interfaces'
 import { canPlayCard, compareCards } from '@domain/rules/CardRules.js'
-import { determineLeadSuit, hasTrickEnded, determineTrickWinner } from '@domain/rules/TrickRules.js'
+import { determineLeadSuit, hasTrickEnded, determineTrickWinner, scoreCardsInTrick } from '@domain/rules/TrickRules.js'
 import { randomUUID } from 'crypto'
 
 export class TrickService {
+  static updateRoundPlayerScore(game: any, winnerId: PlayerId, trickNumber: TrickNumber, trickScore: any) {
+    // Buscar o crear el score del jugador en playerScores
+    let playerScore = game.playerScores.find((ps: any) => ps.playerId === winnerId);
+    
+    if (!playerScore) {
+      // Crear nuevo score para el jugador si no existe
+      playerScore = {
+        playerId: winnerId,
+        points: 0,
+        tricksWon: [],
+        setCollection: {
+          acorns: 0,
+          leaves: 0,
+          berries: 0,
+          flowers: 0
+        }
+      };
+      game.playerScores.push(playerScore);
+    }
+    
+    // Agregar el número del trick ganado
+    playerScore.tricksWon.push(trickNumber);
+    
+    // Sumar los puntos
+    playerScore.points += trickScore.trick_points;
+    
+    // Sumar las colecciones de suits
+    if (trickScore.trick_collections) {
+      playerScore.setCollection.acorns += trickScore.trick_collections.acorns || 0;
+      playerScore.setCollection.leaves += trickScore.trick_collections.leaves || 0;
+      playerScore.setCollection.berries += trickScore.trick_collections.berries || 0;
+      playerScore.setCollection.flowers += trickScore.trick_collections.flowers || 0;
+    }
+    
+    console.log(`📊 Updated score for ${winnerId}: ${playerScore.points} points, ${playerScore.tricksWon.length} tricks won`);
+  }
+
   static async startTrick(gameId: string, leadPlayer?: PlayerId) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
@@ -119,6 +156,7 @@ export class TrickService {
     const trickIsComplete = hasTrickEnded(currentTrick, game.activePlayers);
     
     let nextPlayer: PlayerId | null = null;
+    let trickCompletedEvent = null;
     
     if (trickIsComplete) {
       // Cambiar estado del trick a 'resolve'
@@ -135,9 +173,33 @@ export class TrickService {
         currentTrick.lead_suit
       );
       
-      currentTrick.score.trick_winner = trickWinner;
+      // Obtener todas las cartas del trick
+      const trickCards = currentTrick.cards
+        .map(cardId => game.deck.find(c => c.id === cardId))
+        .filter(c => c !== undefined) as PlayingCard[];
       
-      console.log(`🏆 Trick ${currentTrick.trick_number} completed! Winner: ${trickWinner}`);
+      // Calcular el score del trick
+      const trickScore = scoreCardsInTrick(trickCards);
+      
+      // Actualizar el score del trick con el ganador
+      currentTrick.score = {
+        trick_winner: trickWinner,
+        trick_points: trickScore.trick_points,
+        trick_collections: trickScore.trick_collections
+      };
+      
+      // Actualizar el score del jugador ganador en la ronda
+      TrickService.updateRoundPlayerScore(game, trickWinner, currentTrick.trick_number, trickScore);
+      
+      console.log(`🏆 Trick ${currentTrick.trick_number} completed! Winner: ${trickWinner}, Points: ${trickScore.trick_points}`);
+      
+      // Crear evento TRICK_COMPLETED
+      trickCompletedEvent = createTrickCompletedEvent(
+        currentTrick.trick_number,
+        trickWinner,
+        trickScore.trick_points,
+        trickCards
+      );
       
       // No hay próximo jugador porque el trick terminó
       nextPlayer = null;
@@ -155,7 +217,7 @@ export class TrickService {
 
     console.log(`✅ Card ${cardId} played by ${playerId} in trick ${currentTrick.trick_number}`);
 
-    const event = createCardPlayedEvent(
+    const cardPlayedEvent = createCardPlayedEvent(
       currentTrick.trick_id,
       playerId,
       card as PlayingCard,
@@ -163,6 +225,6 @@ export class TrickService {
       nextPlayer
     );
 
-    return { game, event };
+    return { game, event: cardPlayedEvent, trickCompletedEvent };
   }
 }

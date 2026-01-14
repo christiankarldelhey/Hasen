@@ -22,18 +22,22 @@ export function determineLeadSuit(firstCard: PlayingCard): LeadSuit | null {
 }
 
 /**
- * Calculates the total points and suit collection in a card to be added to the trickScore.
+ * Calculates the total points and suit collection from all cards in a trick.
  */
-export function scoreCardInTrick(card: PlayingCard): TrickScore {
+export function scoreCardsInTrick(cards: PlayingCard[]): TrickScore {
+  const totalPoints = cards.reduce((sum, card) => sum + card.points, 0);
+  
+  const collections = {
+    acorns: cards.filter(card => card.suit === 'acorns').length,
+    leaves: cards.filter(card => card.suit === 'leaves').length,
+    berries: cards.filter(card => card.suit === 'berries').length,
+    flowers: cards.filter(card => card.suit === 'flowers').length
+  };
+  
   return {
     trick_winner: null,
-    trick_points: card.points,
-    trick_collections: {
-      acorns: card.suit === 'acorns' ? 1 : 0,
-      leaves: card.suit === 'leaves' ? 1 : 0,
-      berries: card.suit === 'berries' ? 1 : 0,
-      flowers: card.suit === 'flowers' ? 1 : 0
-    }
+    trick_points: totalPoints,
+    trick_collections: collections
   };
 }
 

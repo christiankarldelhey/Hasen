@@ -144,7 +144,7 @@ socket.on('round:start', async ({ gameId }) => {
         return;
       }
 
-      const { game, event } = await TrickService.playCard(
+      const { game, event, trickCompletedEvent } = await TrickService.playCard(
         gameId,
         playerData.playerId,
         cardId
@@ -152,6 +152,11 @@ socket.on('round:start', async ({ gameId }) => {
 
       // Emitir el evento CARD_PLAYED a todos los jugadores en la sala
       io.to(gameId).emit('game:event', event);
+
+      // Si el trick está completo, emitir evento TRICK_COMPLETED
+      if (trickCompletedEvent) {
+        io.to(gameId).emit('game:event', trickCompletedEvent);
+      }
 
       // Enviar estado actualizado a cada jugador (público + privado)
       for (const [socketId, data] of socketToPlayer.entries()) {

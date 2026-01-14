@@ -84,10 +84,14 @@ const RoundSchema = new Schema({
 // Schema para PlayerRoundScore
 const PlayerRoundScoreSchema = new Schema({
   playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
-  points: { type: Number, required: true },
-  totalScore: { type: Number, required: true },
-  tricksWon: { type: Number, required: true },
-  win_condition: { type: Schema.Types.Mixed, required: true }
+  points: { type: Number, required: true, default: 0 },
+  tricksWon: [{ type: Number, enum: [1, 2, 3, 4, 5] }],
+  setCollection: {
+    acorns: { type: Number, required: true, default: 0 },
+    leaves: { type: Number, required: true, default: 0 },
+    berries: { type: Number, required: true, default: 0 },
+    flowers: { type: Number, required: true, default: 0 }
+  }
 }, { _id: false });
 
 const GameSchema = new Schema<GameDocument>({

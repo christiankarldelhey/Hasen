@@ -1,6 +1,6 @@
 import type { PlayerId } from './Player'
-import type { Trick } from './Trick'
-import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from './Bid'
+import type { Trick, TrickNumber } from './Trick'
+import type { Bid } from './Bid'
 
 export type RoundPhase = 
   | 'round_setup'
@@ -25,7 +25,11 @@ export interface Round {
 export interface PlayerRoundScore {
   playerId: PlayerId
   points: number
-  totalScore: number
-  tricksWon: number
-  win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
+  tricksWon: TrickNumber[]
+  setCollection: {
+    acorns: number,
+    leaves: number,
+    berries: number,
+    flowers: number
+  }
 }

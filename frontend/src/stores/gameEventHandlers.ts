@@ -106,7 +106,16 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
 
 const handleTrickCompleted: GameEventHandler = (event, _context) => {
   if (event.type !== 'TRICK_COMPLETED') return
-  console.log('✅ Trick completed:', (event as TrickCompletedEvent).payload)
+  
+  const payload = (event as TrickCompletedEvent).payload
+  
+  console.log(`🏆 Trick ${payload.trickNumber} completed!`)
+  console.log(`   Winner: ${payload.winner}`)
+  console.log(`   Points: ${payload.points}`)
+  console.log(`   Cards: ${payload.cards.length}`)
+  
+  // Los scores se actualizarán automáticamente cuando llegue el game:stateUpdate
+  // que incluye los playerScores actualizados desde el backend
 }
 
 const handleRoundEnded: GameEventHandler = (event, _context) => {
