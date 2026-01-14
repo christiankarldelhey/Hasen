@@ -73,14 +73,18 @@ socket.on('round:start', async ({ gameId }) => {
         return;
       }
 
-      const { game, event } = await GameService.skipCardReplacement(gameId, playerData.playerId);
+      const result = await GameService.skipCardReplacement(gameId, playerData.playerId);
       
       const { publicState, privateState } = await GameService.getPlayerGameState(gameId, playerData.userId);
       
       io.to(gameId).emit('game:stateUpdate', {
         publicGameState: publicState,
-        event
+        event: result.event
       });
+      
+      if (result.trickEvent) {
+        io.to(gameId).emit('game:event', result.trickEvent);
+      }
 
       console.log(`✅ Player ${playerData.playerId} skipped card replacement`);
       
@@ -98,7 +102,7 @@ socket.on('round:start', async ({ gameId }) => {
         return;
       }
 
-      const { game, publicEvent, privateEvent } = await GameService.replaceCard(
+      const result = await GameService.replaceCard(
         gameId, 
         playerData.playerId, 
         cardId,
@@ -113,13 +117,17 @@ socket.on('round:start', async ({ gameId }) => {
           io.to(socketId).emit('game:stateUpdate', {
             publicGameState: publicState,
             privateGameState: privateState,
-            event: publicEvent
+            event: result.publicEvent
           });
         }
       }
 
       // Enviar evento privado solo al jugador que reemplazó
-      io.to(socket.id).emit('game:event', privateEvent);
+      io.to(socket.id).emit('game:event', result.privateEvent);
+      
+      if (result.trickEvent) {
+        io.to(gameId).emit('game:event', result.trickEvent);
+      }
       
     } catch (error: any) {
       console.error('Error in replaceCard:', error);

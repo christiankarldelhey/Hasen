@@ -45,13 +45,23 @@ const BidSchema = new Schema({
   win_condition: { type: Schema.Types.Mixed, required: true }
 }, { _id: false });
 
+// Schema para TrickScore
+const TrickScoreSchema = new Schema({
+  trick_winner: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null], default: null },
+  trick_points: { type: Number, required: true, default: 0 },
+  trick_collections: { type: Schema.Types.Mixed, default: null }
+}, { _id: false });
+
 // Schema para Trick
 const TrickSchema = new Schema({
-  trickNumber: { type: Number, required: true },
-  leadPlayer: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
-  cardsPlayed: { type: Schema.Types.Mixed, required: true },
-  winner: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'] },
-  points: { type: Number }
+  trick_id: { type: String, required: true },
+  trick_state: { type: String, enum: ['in_progress', 'resolve', 'ended'], required: true },
+  trick_number: { type: Number, required: true },
+  lead_player: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+  winning_card: { type: String, default: null },
+  lead_suit: { type: String, enum: ['acorns', 'leaves', 'berries', null], default: null },
+  cards: [{ type: String }],
+  score: { type: TrickScoreSchema, required: true }
 }, { _id: false });
 
 // Schema para Round

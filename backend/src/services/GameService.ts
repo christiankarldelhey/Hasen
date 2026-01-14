@@ -11,6 +11,7 @@ import {
   createCardReplacementCompletedEvent,
   createCardReplacedPrivateEvent 
 } from '@domain/events/PlayerEvents.js'
+import { TrickService } from './TrickService.js'
 
 export class GameService {
   
@@ -303,8 +304,19 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     const nextIndex = game.playerTurnOrder.indexOf(nextPlayer);
     if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
       this.hideAllPlayersCards(game);
-          // Cambiar fase a playing
       game.round.roundPhase = 'playing';
+      
+      await game.save();
+      
+      const { game: updatedGame, event: trickEvent } = await TrickService.startTrick(gameId);
+      
+      const event = createCardReplacementSkippedEvent(
+        playerId,
+        game.round.round,
+        nextPlayer
+      );
+      
+      return { game: updatedGame, event, trickEvent };
     }
     
     await game.save();
@@ -359,6 +371,23 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     if (game.round.roundPhase === 'player_drawing' && nextIndex === 0) {
       this.hideAllPlayersCards(game);
       game.round.roundPhase = 'playing';
+      
+      await game.save();
+      
+      const { game: updatedGame, event: trickEvent } = await TrickService.startTrick(gameId);
+      
+      const publicEvent = createCardReplacementCompletedEvent(
+        playerId,
+        game.round.round,
+        nextPlayer
+      );
+      const privateEvent = createCardReplacedPrivateEvent(
+        playerId,
+        cardToDiscard,
+        newCard
+      );
+      
+      return { game: updatedGame, publicEvent, privateEvent, trickEvent };
     }
     
     await game.save();

@@ -138,17 +138,19 @@ export function createFirstCardHiddenEvent(
 export interface TrickStartedEvent {
   type: 'TRICK_STARTED'
   payload: {
+    trick_id: string
     trickNumber: 1 | 2 | 3 | 4 | 5
     leadPlayer: PlayerId
   }
 }
 export function createTrickStartedEvent(
+  trick_id: string,
   trickNumber: 1 | 2 | 3 | 4 | 5,
   leadPlayer: PlayerId
 ): TrickStartedEvent {
   return {
     type: 'TRICK_STARTED',
-    payload: { trickNumber, leadPlayer }
+    payload: { trick_id, trickNumber, leadPlayer }
   }
 }
 // TRICK COMPLETED EVENT
