@@ -33,8 +33,8 @@ export function useSocketGame() {
       socket.emit('player:skipCardReplacement', { gameId });
     },
 
-    replaceCard: (gameId: string, cardId: string) => {
-      socket.emit('player:replaceCard', { gameId, cardId });
+    replaceCard: (gameId: string, cardId: string, position: number) => {
+      socket.emit('player:replaceCard', { gameId, cardId, position });
     },
 
     onGameStateUpdate: (callback: (data: any) => void) => {

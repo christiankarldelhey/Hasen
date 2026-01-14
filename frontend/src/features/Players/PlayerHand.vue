@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   skipReplacement: []
-  confirmReplacement: [cardId: string]
+  confirmReplacement: [cardId: string, position: number]
 }>();
 
 const selectedCardId = ref<string | null>(null);
@@ -35,7 +35,8 @@ const handleSkip = () => {
 
 const handleConfirm = () => {
   if (selectedCardId.value) {
-    emit('confirmReplacement', selectedCardId.value)
+    const position = props.cards.findIndex(card => card.id === selectedCardId.value)
+    emit('confirmReplacement', selectedCardId.value, position)
     selectedCardId.value = null
   }
 };

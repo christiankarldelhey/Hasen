@@ -318,7 +318,7 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     return { game, event };
   }
 
-  static async replaceCard(gameId: string, playerId: PlayerId, cardId: string) {
+  static async replaceCard(gameId: string, playerId: PlayerId, cardId: string, position: number) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
     
@@ -351,6 +351,7 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     
     newCard.state = 'in_hand_hidden';
     newCard.owner = playerId;
+    newCard.position = position;
     
     const nextPlayer = this.advancePlayerTurn(game);
     

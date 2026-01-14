@@ -39,8 +39,8 @@ const handleSkipReplacement = () => {
   socketGame.skipCardReplacement(gameId)
 };
 
-const handleConfirmReplacement = (cardId: string) => {
-  socketGame.replaceCard(gameId, cardId)
+const handleConfirmReplacement = (cardId: string, position: number) => {
+  socketGame.replaceCard(gameId, cardId, position)
 };
 
 const loading = computed(() => lobbyStore.loading);

@@ -90,7 +90,7 @@ socket.on('round:start', async ({ gameId }) => {
     }
   });
 
-  socket.on('player:replaceCard', async ({ gameId, cardId }: { gameId: string; cardId: string }) => {
+  socket.on('player:replaceCard', async ({ gameId, cardId, position }: { gameId: string; cardId: string; position: number }) => {
     try {
       const playerData = socketToPlayer.get(socket.id);
       if (!playerData) {
@@ -101,7 +101,8 @@ socket.on('round:start', async ({ gameId }) => {
       const { game, publicEvent, privateEvent } = await GameService.replaceCard(
         gameId, 
         playerData.playerId, 
-        cardId
+        cardId,
+        position
       );
       
       // Enviar estado actualizado a cada jugador (público + privado)

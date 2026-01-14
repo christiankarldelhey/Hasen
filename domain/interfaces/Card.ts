@@ -27,5 +27,6 @@ export interface PlayingCard {
   owner: PlayerId | null
   state: State
   points: CardPoints
-  spritePos: SpritePosition 
+  spritePos: SpritePosition
+  position?: number
 }

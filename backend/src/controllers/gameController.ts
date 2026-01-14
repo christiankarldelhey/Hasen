@@ -156,14 +156,22 @@ export const startGame = async (req: Request, res: Response) => {
       
       if (playerSocketId) {
         io.to(playerSocketId).emit('game:event', privateEvent);
-        console.log(`🃏 Sent private cards to ${playerId}`);
+        console.log(`🎴 Sent private cards to ${playerId}`);
       } else {
         console.warn(`⚠️ Socket not found for player ${playerId}`);
       }
     }
     
-    // Emitir cambio de fase a player_drawing
-    io.to(gameId).emit('round:phase-changed', { phase: 'player_drawing' });
+    // Enviar estado actualizado del juego con playerTurn y fase player_drawing
+    for (const [socketId, data] of socketToPlayer.entries()) {
+      if (data.gameId === gameId) {
+        const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+        io.to(socketId).emit('game:stateUpdate', {
+          publicGameState: publicState,
+          privateGameState: privateState
+        });
+      }
+    }
 
     res.status(200).json({
       success: true,
