@@ -20,7 +20,7 @@ const sizeClasses = computed(() => {
       return 'w-[135px] h-[225px]'
     case 'large':
     default:
-      return 'w-[180px] h-[300px]'
+      return 'w-[160px] h-[280px]'
   }
 })
 

@@ -13,6 +13,7 @@ import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import PlayerDrawingPhase from '@/features/Game/PlayerDrawingPhase.vue';
 import GameLayout from '../layout/GameLayout.vue';
+import Trick from '@/features/Trick/Trick.vue';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
@@ -149,6 +150,9 @@ onUnmounted(() => {
         :hand-cards-count="opponent.handCardsCount"
         :position="opponent.position"
       />
+      
+      <!-- Trick en el centro exacto de la pantalla -->
+      <Trick />
       
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 
