@@ -2,16 +2,17 @@
 import WinSymbol from '@/assets/symbols/win-symbol.png'
 
 defineProps<{
+  size?: 'small' | 'medium'
   points: number
 }>()
 </script>
 
 <template>
-  <div class="relative inline-flex items-center justify-center px-2">
+  <div :class="['relative', 'inline-flex', 'items-center', 'justify-center', size === 'small' ? 'px-0' : 'px-2']">
     <img
       :src="WinSymbol"
       alt="Win Symbol"
-      class="w-12"
+      :class="size === 'small' ? 'w-8' : 'w-12'"
     />
 
     <span

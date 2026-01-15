@@ -55,6 +55,7 @@ export interface PublicRoundState {
   playerTurn: PlayerId
   currentTrick: Trick | null
   roundBids: RoundBids
+  roundScore: PlayerRoundScore[]
 }
 export interface PublicGameState {
   gameId: string
