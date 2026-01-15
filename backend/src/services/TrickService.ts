@@ -7,39 +7,50 @@ import { randomUUID } from 'crypto'
 
 export class TrickService {
   static updateRoundPlayerScore(game: any, winnerId: PlayerId, trickNumber: TrickNumber, trickScore: any) {
-    // Buscar o crear el score del jugador en playerScores
-    let playerScore = game.playerScores.find((ps: any) => ps.playerId === winnerId);
+    // Inicializar roundScore si no existe
+    if (!game.round.roundScore) {
+      game.round.roundScore = [];
+    }
     
-    if (!playerScore) {
+    // Buscar el índice del score del jugador en round.roundScore
+    const playerScoreIndex = game.round.roundScore.findIndex((ps: any) => ps.playerId === winnerId);
+    
+    if (playerScoreIndex === -1) {
       // Crear nuevo score para el jugador si no existe
-      playerScore = {
+      game.round.roundScore.push({
         playerId: winnerId,
-        points: 0,
-        tricksWon: [],
+        points: trickScore.trick_points,
+        tricksWon: [trickNumber],
         setCollection: {
-          acorns: 0,
-          leaves: 0,
-          berries: 0,
-          flowers: 0
+          acorns: trickScore.trick_collections?.acorns || 0,
+          leaves: trickScore.trick_collections?.leaves || 0,
+          berries: trickScore.trick_collections?.berries || 0,
+          flowers: trickScore.trick_collections?.flowers || 0
         }
-      };
-      game.playerScores.push(playerScore);
+      });
+    } else {
+      // Actualizar score existente
+      const playerScore = game.round.roundScore[playerScoreIndex];
+      
+      // Agregar el número del trick ganado
+      playerScore.tricksWon.push(trickNumber);
+      
+      // Sumar los puntos
+      playerScore.points += trickScore.trick_points;
+      
+      // Sumar las colecciones de suits
+      if (trickScore.trick_collections) {
+        playerScore.setCollection.acorns += trickScore.trick_collections.acorns || 0;
+        playerScore.setCollection.leaves += trickScore.trick_collections.leaves || 0;
+        playerScore.setCollection.berries += trickScore.trick_collections.berries || 0;
+        playerScore.setCollection.flowers += trickScore.trick_collections.flowers || 0;
+      }
     }
     
-    // Agregar el número del trick ganado
-    playerScore.tricksWon.push(trickNumber);
+    // Marcar el array como modificado para que Mongoose persista los cambios
+    game.markModified('round.roundScore');
     
-    // Sumar los puntos
-    playerScore.points += trickScore.trick_points;
-    
-    // Sumar las colecciones de suits
-    if (trickScore.trick_collections) {
-      playerScore.setCollection.acorns += trickScore.trick_collections.acorns || 0;
-      playerScore.setCollection.leaves += trickScore.trick_collections.leaves || 0;
-      playerScore.setCollection.berries += trickScore.trick_collections.berries || 0;
-      playerScore.setCollection.flowers += trickScore.trick_collections.flowers || 0;
-    }
-    
+    const playerScore = game.round.roundScore.find((ps: any) => ps.playerId === winnerId);
     console.log(`📊 Updated score for ${winnerId}: ${playerScore.points} points, ${playerScore.tricksWon.length} tricks won`);
   }
 
@@ -201,7 +212,76 @@ export class TrickService {
         trickCards
       );
       
-      // No hay próximo jugador porque el trick terminó
+      // Cambiar estado de las cartas del trick a 'in_finished_trick'
+      trickCards.forEach(trickCard => {
+        const deckCard = game.deck.find((c: any) => c.id === trickCard.id);
+        if (deckCard) {
+          deckCard.state = 'in_finished_trick';
+        }
+      });
+      
+      // Guardar el trick completado en tricksHistory
+      if (!game.tricksHistory) {
+        game.tricksHistory = [];
+      }
+      
+      // Cambiar estado del trick a 'ended' antes de guardarlo
+      currentTrick.trick_state = 'ended';
+      
+      // Crear una copia plana del trick para guardar en history
+      const trickToSave = {
+        trick_id: currentTrick.trick_id,
+        trick_state: currentTrick.trick_state,
+        trick_number: currentTrick.trick_number,
+        lead_player: currentTrick.lead_player,
+        winning_card: currentTrick.winning_card,
+        lead_suit: currentTrick.lead_suit,
+        cards: [...currentTrick.cards],
+        score: {
+          trick_winner: currentTrick.score.trick_winner,
+          trick_points: currentTrick.score.trick_points,
+          trick_collections: currentTrick.score.trick_collections
+        }
+      };
+      
+      game.tricksHistory.push(trickToSave);
+      
+      console.log(`📚 Trick ${currentTrick.trick_number} saved to tricksHistory`);
+      
+      // Resetear currentTrick
+      game.round.currentTrick = null;
+      
+      // Verificar si debemos iniciar un nuevo trick (máximo 5 tricks por round)
+      if (currentTrick.trick_number < 5) {
+        // Iniciar nuevo trick con el ganador como lead_player
+        const newTrickNumber = (currentTrick.trick_number + 1) as TrickNumber;
+        
+        const newTrick: Trick = {
+          trick_id: randomUUID(),
+          trick_state: 'in_progress',
+          trick_number: newTrickNumber,
+          lead_player: trickWinner,
+          winning_card: null,
+          lead_suit: null,
+          cards: [],
+          score: {
+            trick_winner: null,
+            trick_points: 0,
+            trick_collections: null
+          }
+        };
+        
+        game.round.currentTrick = newTrick;
+        game.round.playerTurn = trickWinner;
+        
+        console.log(`🎯 New trick ${newTrickNumber} started with lead player: ${trickWinner}`);
+      } else {
+        // Todos los tricks completados, la ronda pasa a fase de scoring
+        game.round.roundPhase = 'scoring';
+        console.log(`🏁 All 5 tricks completed! Round ${game.round.round} moving to scoring phase`);
+      }
+      
+      // No hay próximo jugador inmediato porque el trick terminó
       nextPlayer = null;
     } else {
       // Determinar el próximo jugador

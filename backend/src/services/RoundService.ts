@@ -14,8 +14,9 @@ export class RoundService {
     // 1. Incrementar ronda
     game.round.round += 1;
     
-    // 2. Reset discard pile
+    // 2. Reset discard pile y roundScore (tricksHistory NO se resetea, es el historial del juego completo)
     game.discardPile = [];
+    game.round.roundScore = [];
     
     // 3. Shuffle deck de cartas
     game.deck = shuffleDeck(game.deck);
@@ -102,6 +103,22 @@ export class RoundService {
     await game.save();
     
     return { game };
+  }
+
+  static async finishRoundAndStartNext(gameId: string) {
+    console.log(`🏁 Finishing round and starting next for game ${gameId}`);
+    
+    // Simplemente llamar a startNewRound que ya hace todo:
+    // - Incrementa round number
+    // - Resetea roundScore
+    // - Devuelve cartas al deck y hace shuffle
+    // - Reparte 5 cartas a cada jugador
+    // - Cambia fase a 'player_drawing'
+    const result = await RoundService.startNewRound(gameId);
+    
+    console.log(`✅ Round ${result.game.round.round} started successfully`);
+    
+    return result;
   }
 
 }

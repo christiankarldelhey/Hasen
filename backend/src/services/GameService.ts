@@ -84,7 +84,8 @@ export class GameService {
       roundPhase: game.round.roundPhase,
       playerTurn: game.round.playerTurn,
       currentTrick: game.round.currentTrick,
-      roundBids: game.round.roundBids
+      roundBids: game.round.roundBids,
+      roundScore: game.round.roundScore || []
     },
     bidDecks: {
       setCollectionBidDeck: game.bidDecks.setCollectionBidDeck,

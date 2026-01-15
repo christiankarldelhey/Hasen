@@ -64,6 +64,19 @@ const TrickSchema = new Schema({
   score: { type: TrickScoreSchema, required: true }
 }, { _id: false });
 
+// Schema para PlayerRoundScore
+const PlayerRoundScoreSchema = new Schema({
+  playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+  points: { type: Number, required: true, default: 0 },
+  tricksWon: [{ type: Number, enum: [1, 2, 3, 4, 5] }],
+  setCollection: {
+    acorns: { type: Number, required: true, default: 0 },
+    leaves: { type: Number, required: true, default: 0 },
+    berries: { type: Number, required: true, default: 0 },
+    flowers: { type: Number, required: true, default: 0 }
+  }
+}, { _id: false });
+
 // Schema para Round
 const RoundSchema = new Schema({
   round: { type: Number, required: true },
@@ -78,20 +91,8 @@ const RoundSchema = new Schema({
     set_collection: { type: BidSchema, default: null },
     trick: { type: BidSchema, default: null }
   },
-  currentTrick: { type: TrickSchema, default: null }
-}, { _id: false });
-
-// Schema para PlayerRoundScore
-const PlayerRoundScoreSchema = new Schema({
-  playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
-  points: { type: Number, required: true, default: 0 },
-  tricksWon: [{ type: Number, enum: [1, 2, 3, 4, 5] }],
-  setCollection: {
-    acorns: { type: Number, required: true, default: 0 },
-    leaves: { type: Number, required: true, default: 0 },
-    berries: { type: Number, required: true, default: 0 },
-    flowers: { type: Number, required: true, default: 0 }
-  }
+  currentTrick: { type: TrickSchema, default: null },
+  roundScore: [{ type: PlayerRoundScoreSchema }]
 }, { _id: false });
 
 const GameSchema = new Schema<GameDocument>({

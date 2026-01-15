@@ -20,6 +20,7 @@ export interface Round {
   roundBids: RoundBids
   roundPhase: RoundPhase
   currentTrick: Trick | null
+  roundScore: PlayerRoundScore[]
 }
 
 export interface PlayerRoundScore {
