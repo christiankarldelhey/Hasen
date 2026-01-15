@@ -47,6 +47,10 @@ const handlePlayCard = (cardId: string) => {
   socketGame.playCard(gameId, cardId)
 };
 
+const handleFinishTurn = () => {
+  socketGame.finishTurn(gameId)
+};
+
 const loading = computed(() => lobbyStore.loading);
 const error = computed(() => lobbyStore.error);
 
@@ -177,9 +181,11 @@ onUnmounted(() => {
       <PlayerHand 
         :cards="playerHand" 
         :mode="handMode"
+        :is-my-turn="isMyTurn"
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"
         @play-card="handlePlayCard"
+        @finish-turn="handleFinishTurn"
       />
     </div>
   </GameLayout>

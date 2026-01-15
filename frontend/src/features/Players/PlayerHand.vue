@@ -1,24 +1,34 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import PlayingCard from '@/common/components/PlayingCard.vue';
 
 interface Props {
   cards: Card[];
   mode?: 'normal' | 'card_replacement';
+  isMyTurn?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'normal'
+  mode: 'normal',
+  isMyTurn: false
 });
 
 const emit = defineEmits<{
   skipReplacement: []
   confirmReplacement: [cardId: string, position: number]
   playCard: [cardId: string]
+  finishTurn: []
 }>();
 
 const selectedCardId = ref<string | null>(null);
+const hasPlayedCard = ref<boolean>(false);
+
+watch(() => props.isMyTurn, (newVal) => {
+  if (newVal) {
+    hasPlayedCard.value = false;
+  }
+});
 
 const isCardSelectable = (card: Card) => {
   return props.mode === 'card_replacement' && card.state === 'in_hand_hidden'
@@ -30,8 +40,9 @@ const selectCard = (card: Card) => {
     selectedCardId.value = card.id
   }
   // Modo normal: jugar carta directamente
-  else if (props.mode === 'normal') {
+  else if (props.mode === 'normal' && !hasPlayedCard.value) {
     emit('playCard', card.id)
+    hasPlayedCard.value = true
   }
 };
 
@@ -45,6 +56,11 @@ const handleConfirm = () => {
     emit('confirmReplacement', selectedCardId.value, position)
     selectedCardId.value = null
   }
+};
+
+const handleFinishTurn = () => {
+  emit('finishTurn')
+  hasPlayedCard.value = false
 };
 
 const cardPositions = computed(() => {
@@ -124,6 +140,17 @@ const cardPositions = computed(() => {
         class="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg shadow-lg hover:bg-gray-700 transition-colors"
       >
         Skip
+      </button>
+    </div>
+    
+    <!-- Botón para finish turn -->
+    <div v-if="mode === 'normal' && isMyTurn" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
+      <button
+        @click="handleFinishTurn"
+        :disabled="!hasPlayedCard"
+        class="px-6 py-3 bg-hasen-green text-white font-bold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
+      >
+        Finish Turn
       </button>
     </div>
   </div>

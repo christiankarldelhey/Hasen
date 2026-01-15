@@ -258,4 +258,36 @@ socket.on('round:start', async ({ gameId }) => {
     }
   });
 
+  socket.on('player:finishTurn', async ({ gameId }: { gameId: string }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, nextPlayer } = await TrickService.finishTurn(
+        gameId,
+        playerData.playerId
+      );
+
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState
+          });
+        }
+      }
+
+      console.log(`✅ Player ${playerData.playerId} finished turn, next player: ${nextPlayer}`);
+      
+    } catch (error: any) {
+      console.error('Error in finishTurn:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
 }

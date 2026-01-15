@@ -284,13 +284,9 @@ export class TrickService {
       // No hay próximo jugador inmediato porque el trick terminó
       nextPlayer = null;
     } else {
-      // Determinar el próximo jugador
-      const currentPlayerIndex = game.playerTurnOrder.indexOf(playerId);
-      const nextPlayerIndex = (currentPlayerIndex + 1) % game.playerTurnOrder.length;
-      nextPlayer = game.playerTurnOrder[nextPlayerIndex];
-      
-      // Actualizar el turno del jugador
-      game.round.playerTurn = nextPlayer;
+      // NO avanzar el turno automáticamente
+      // El jugador debe hacer click en "Finish Turn" para avanzar
+      nextPlayer = null;
     }
 
     await game.save();
@@ -306,5 +302,42 @@ export class TrickService {
     );
 
     return { game, event: cardPlayedEvent, trickCompletedEvent };
+  }
+
+  static async finishTurn(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+
+    const currentTrick = game.round.currentTrick;
+    if (!currentTrick) throw new Error('No active trick');
+
+    if (game.round.playerTurn !== playerId) {
+      throw new Error('Not your turn');
+    }
+
+    if (currentTrick.trick_state !== 'in_progress') {
+      throw new Error('Trick is not in progress');
+    }
+
+    const playerHasPlayedCard = currentTrick.cards.some(cardId => {
+      const card = game.deck.find(c => c.id === cardId);
+      return card && card.owner === playerId;
+    });
+
+    if (!playerHasPlayedCard) {
+      throw new Error('You must play a card before finishing your turn');
+    }
+
+    const currentPlayerIndex = game.playerTurnOrder.indexOf(playerId);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % game.playerTurnOrder.length;
+    const nextPlayer = game.playerTurnOrder[nextPlayerIndex];
+
+    game.round.playerTurn = nextPlayer;
+
+    await game.save();
+
+    console.log(`✅ Player ${playerId} finished turn, next player: ${nextPlayer}`);
+
+    return { game, nextPlayer };
   }
 }
