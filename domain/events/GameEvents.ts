@@ -223,6 +223,32 @@ export function createRoundEndedEvent(
     payload: { round, scores }
   }
 }
+// BID MADE EVENT
+/**
+ * Event emitted when a player makes a bid
+ */
+export interface BidMadeEvent {
+  type: 'BID_MADE'
+  payload: {
+    playerId: PlayerId
+    bidId: string
+    bidType: 'points' | 'set_collection' | 'trick'
+    trickNumber: 1 | 2 | 3
+    bidScore: number
+  }
+}
+export function createBidMadeEvent(
+  playerId: PlayerId,
+  bidId: string,
+  bidType: 'points' | 'set_collection' | 'trick',
+  trickNumber: 1 | 2 | 3,
+  bidScore: number
+): BidMadeEvent {
+  return {
+    type: 'BID_MADE',
+    payload: { playerId, bidId, bidType, trickNumber, bidScore }
+  }
+}
 // UNION TYPE
 export type GameEvent = 
   | DeckShuffledEvent
@@ -235,3 +261,4 @@ export type GameEvent =
   | TrickCompletedEvent
   | RoundEndedEvent
   | RoundSetupCompletedEvent
+  | BidMadeEvent

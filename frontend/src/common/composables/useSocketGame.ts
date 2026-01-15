@@ -42,6 +42,11 @@ export function useSocketGame() {
       socket.emit('player:playCard', { gameId, cardId });
     },
 
+    // Make bid
+    makeBid: (gameId: string, bidType: 'points' | 'set_collection' | 'trick', trickNumber: 1 | 2 | 3 | 4 | 5) => {
+      socket.emit('player:makeBid', { gameId, bidType, trickNumber });
+    },
+
     onGameStateUpdate: (callback: (data: any) => void) => {
       socket.on('game:stateUpdate', callback);
     },

@@ -1,6 +1,7 @@
 import { RoundService } from '@/services/RoundService';
 import { GameService } from '@/services/GameService';
 import { TrickService } from '@/services/TrickService';
+import { BidService } from '@/services/BidService';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
@@ -217,6 +218,42 @@ socket.on('round:start', async ({ gameId }) => {
       
     } catch (error: any) {
       console.error('Error in playCard:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
+  socket.on('player:makeBid', async ({ gameId, bidType, trickNumber }: { gameId: string; bidType: 'points' | 'set_collection' | 'trick'; trickNumber: 1 | 2 | 3 | 4 | 5 }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, event } = await BidService.makeBid(
+        gameId,
+        playerData.playerId,
+        bidType,
+        trickNumber
+      );
+
+      io.to(gameId).emit('game:event', event);
+
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState
+          });
+        }
+      }
+
+      console.log(`✅ Player ${playerData.playerId} made bid ${bidType} on trick ${trickNumber}`);
+      
+    } catch (error: any) {
+      console.error('Error in makeBid:', error);
       socket.emit('error', { message: error.message });
     }
   });
