@@ -212,74 +212,11 @@ export class TrickService {
         trickCards
       );
       
-      // Cambiar estado de las cartas del trick a 'in_finished_trick'
-      trickCards.forEach(trickCard => {
-        const deckCard = game.deck.find((c: any) => c.id === trickCard.id);
-        if (deckCard) {
-          deckCard.state = 'in_finished_trick';
-        }
-      });
+      // NO cambiar el estado de las cartas todavía - se mantendrán en 'in_trick'
+      // hasta que el jugador presione "Finish Trick"
       
-      // Guardar el trick completado en tricksHistory
-      if (!game.tricksHistory) {
-        game.tricksHistory = [];
-      }
-      
-      // Cambiar estado del trick a 'ended' antes de guardarlo
-      currentTrick.trick_state = 'ended';
-      
-      // Crear una copia plana del trick para guardar en history
-      const trickToSave = {
-        trick_id: currentTrick.trick_id,
-        trick_state: currentTrick.trick_state,
-        trick_number: currentTrick.trick_number,
-        lead_player: currentTrick.lead_player,
-        winning_card: currentTrick.winning_card,
-        lead_suit: currentTrick.lead_suit,
-        cards: [...currentTrick.cards],
-        score: {
-          trick_winner: currentTrick.score.trick_winner,
-          trick_points: currentTrick.score.trick_points,
-          trick_collections: currentTrick.score.trick_collections
-        }
-      };
-      
-      game.tricksHistory.push(trickToSave);
-      
-      console.log(`📚 Trick ${currentTrick.trick_number} saved to tricksHistory`);
-      
-      // Resetear currentTrick
-      game.round.currentTrick = null;
-      
-      // Verificar si debemos iniciar un nuevo trick (máximo 5 tricks por round)
-      if (currentTrick.trick_number < 5) {
-        // Iniciar nuevo trick con el ganador como lead_player
-        const newTrickNumber = (currentTrick.trick_number + 1) as TrickNumber;
-        
-        const newTrick: Trick = {
-          trick_id: randomUUID(),
-          trick_state: 'in_progress',
-          trick_number: newTrickNumber,
-          lead_player: trickWinner,
-          winning_card: null,
-          lead_suit: null,
-          cards: [],
-          score: {
-            trick_winner: null,
-            trick_points: 0,
-            trick_collections: null
-          }
-        };
-        
-        game.round.currentTrick = newTrick;
-        game.round.playerTurn = trickWinner;
-        
-        console.log(`🎯 New trick ${newTrickNumber} started with lead player: ${trickWinner}`);
-      } else {
-        // Todos los tricks completados, la ronda pasa a fase de scoring
-        game.round.roundPhase = 'scoring';
-        console.log(`🏁 All 5 tricks completed! Round ${game.round.round} moving to scoring phase`);
-      }
+      // NO mover el trick a history ni iniciar nuevo trick aquí
+      // Eso se hará cuando el jugador haga click en "Finish Trick"
       
       // No hay próximo jugador inmediato porque el trick terminó
       nextPlayer = null;
@@ -339,5 +276,87 @@ export class TrickService {
     console.log(`✅ Player ${playerId} finished turn, next player: ${nextPlayer}`);
 
     return { game, nextPlayer };
+  }
+
+  static async finishTrick(gameId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+
+    const currentTrick = game.round.currentTrick;
+    if (!currentTrick) throw new Error('No active trick');
+
+    if (currentTrick.trick_state !== 'resolve') {
+      throw new Error('Trick is not in resolve state');
+    }
+
+    const trickWinner = currentTrick.score.trick_winner;
+    if (!trickWinner) throw new Error('Trick winner not determined');
+
+    // Guardar el trick completado en tricksHistory
+    if (!game.tricksHistory) {
+      game.tricksHistory = [];
+    }
+
+    // Cambiar estado del trick a 'ended' antes de guardarlo
+    currentTrick.trick_state = 'ended';
+
+    // Crear una copia plana del trick para guardar en history
+    const trickToSave = {
+      trick_id: currentTrick.trick_id,
+      trick_state: currentTrick.trick_state,
+      trick_number: currentTrick.trick_number,
+      lead_player: currentTrick.lead_player,
+      winning_card: currentTrick.winning_card,
+      lead_suit: currentTrick.lead_suit,
+      cards: [...currentTrick.cards],
+      score: {
+        trick_winner: currentTrick.score.trick_winner,
+        trick_points: currentTrick.score.trick_points,
+        trick_collections: currentTrick.score.trick_collections
+      }
+    };
+
+    game.tricksHistory.push(trickToSave);
+
+    console.log(`📚 Trick ${currentTrick.trick_number} saved to tricksHistory`);
+
+    // Resetear currentTrick
+    game.round.currentTrick = null;
+
+    // Verificar si debemos iniciar un nuevo trick (máximo 5 tricks por round)
+    if (currentTrick.trick_number < 5) {
+      // Iniciar nuevo trick con el ganador como lead_player
+      const newTrickNumber = (currentTrick.trick_number + 1) as TrickNumber;
+
+      const newTrick: Trick = {
+        trick_id: randomUUID(),
+        trick_state: 'in_progress',
+        trick_number: newTrickNumber,
+        lead_player: trickWinner,
+        winning_card: null,
+        lead_suit: null,
+        cards: [],
+        score: {
+          trick_winner: null,
+          trick_points: 0,
+          trick_collections: null
+        }
+      };
+
+      game.round.currentTrick = newTrick;
+      game.round.playerTurn = trickWinner;
+
+      console.log(`🎯 New trick ${newTrickNumber} started with lead player: ${trickWinner}`);
+    } else {
+      // Todos los tricks completados, la ronda pasa a fase de scoring
+      game.round.roundPhase = 'scoring';
+      console.log(`🏁 All 5 tricks completed! Round ${game.round.round} moving to scoring phase`);
+    }
+
+    await game.save();
+
+    console.log(`✅ Trick finished, moving to next trick or scoring phase`);
+
+    return { game };
   }
 }

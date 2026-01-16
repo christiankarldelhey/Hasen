@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { PlayingCard as Card } from '@domain/interfaces';
+import type { PlayingCard as Card, TrickState } from '@domain/interfaces';
 import PlayingCard from '@/common/components/PlayingCard.vue';
 
 const props = defineProps<{
   cards: Card[];
   winningCardId?: string | null;
+  trickState?: TrickState | null;
 }>();
 
 const cardPositions = computed(() => {
@@ -24,8 +25,8 @@ const cardPositions = computed(() => {
     const totalWidth = (totalCards - 1) * cardSpacing;
     const translateX = index * cardSpacing - totalWidth / 2 - cardWidth / 2;
     
-    // Elevar la carta ganadora
-    const isWinning = props.winningCardId && card.id === props.winningCardId;
+    // Elevar la carta ganadora solo cuando el trick está en estado 'resolve'
+    const isWinning = props.trickState === 'resolve' && props.winningCardId && card.id === props.winningCardId;
     const translateY = isWinning ? -30 : 0;
     
     return {

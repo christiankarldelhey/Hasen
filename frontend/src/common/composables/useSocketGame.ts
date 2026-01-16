@@ -52,6 +52,11 @@ export function useSocketGame() {
       socket.emit('player:finishTurn', { gameId });
     },
 
+    // Finish trick
+    finishTrick: (gameId: string) => {
+      socket.emit('player:finishTrick', { gameId });
+    },
+
     onGameStateUpdate: (callback: (data: any) => void) => {
       socket.on('game:stateUpdate', callback);
     },

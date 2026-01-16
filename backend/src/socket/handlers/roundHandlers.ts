@@ -290,4 +290,27 @@ socket.on('round:start', async ({ gameId }) => {
     }
   });
 
+  socket.on('player:finishTrick', async ({ gameId }: { gameId: string }) => {
+    try {
+      const { game } = await TrickService.finishTrick(gameId);
+
+      for (const [socketId, data] of socketToPlayer.entries()) {
+        if (data.gameId === gameId) {
+          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+          
+          io.to(socketId).emit('game:stateUpdate', {
+            publicGameState: publicState,
+            privateGameState: privateState
+          });
+        }
+      }
+
+      console.log(`✅ Trick finished, moved to history and next trick started`);
+      
+    } catch (error: any) {
+      console.error('Error in finishTrick:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
 }

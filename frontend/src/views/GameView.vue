@@ -49,6 +49,10 @@ const handlePlayCard = (cardId: string) => {
 
 const handleFinishTurn = () => {
   socketGame.finishTurn(gameId)
+}
+
+const handleFinishTrick = () => {
+  socketGame.finishTrick(gameId)
 };
 
 const loading = computed(() => lobbyStore.loading);
@@ -113,6 +117,15 @@ const winningCardId = computed(() => {
   return currentTrick?.winning_card || null
 })
 
+const trickState = computed(() => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick
+  return currentTrick?.trick_state || null
+})
+
+const isTrickInResolve = computed(() => {
+  return trickState.value === 'resolve'
+})
+
 onMounted(async () => {
   try {
     await gameAPI.fetchPlayerGameState(gameId);
@@ -175,7 +188,17 @@ onUnmounted(() => {
       />
       
       <!-- Trick en el centro exacto de la pantalla -->
-      <Trick :cards="trickCards" :winning-card-id="winningCardId" />
+      <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
+      
+      <!-- Botón para finish trick cuando está en estado 'resolve' -->
+      <div v-if="isTrickInResolve" class="absolute top-1/2 right-8 transform -translate-y-1/2 pointer-events-auto z-[2000]">
+        <button
+          @click="handleFinishTrick"
+          class="px-6 py-3 bg-hasen-green text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-colors"
+        >
+          Finish Trick
+        </button>
+      </div>
       
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 
