@@ -8,11 +8,13 @@ interface Props {
   cards: Card[];
   mode?: 'normal' | 'card_replacement';
   isMyTurn?: boolean;
+  isTrickInResolve?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   mode: 'normal',
-  isMyTurn: false
+  isMyTurn: false,
+  isTrickInResolve: false
 });
 
 const emit = defineEmits<{
@@ -98,7 +100,7 @@ const handleFinishTurn = () => {
     </div>
     
     <!-- Botón para finish turn -->
-    <div v-if="mode === 'normal' && isMyTurn" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
+    <div v-if="mode === 'normal' && isMyTurn && !isTrickInResolve" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
       <button
         @click="handleFinishTurn"
         :disabled="!hasPlayedCard"

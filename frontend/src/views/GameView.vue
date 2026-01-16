@@ -191,7 +191,7 @@ onUnmounted(() => {
       <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
       
       <!-- Botón para finish trick cuando está en estado 'resolve' -->
-      <div v-if="isTrickInResolve" class="absolute top-1/2 right-8 transform -translate-y-1/2 pointer-events-auto z-[2000]">
+      <div v-if="isTrickInResolve" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
         <button
           @click="handleFinishTrick"
           class="px-6 py-3 bg-hasen-green text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-colors"
@@ -205,6 +205,7 @@ onUnmounted(() => {
         :cards="playerHand" 
         :mode="handMode"
         :is-my-turn="isMyTurn"
+        :is-trick-in-resolve="isTrickInResolve"
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"
         @play-card="handlePlayCard"

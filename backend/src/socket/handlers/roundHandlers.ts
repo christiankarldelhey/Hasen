@@ -294,14 +294,58 @@ socket.on('round:start', async ({ gameId }) => {
     try {
       const { game } = await TrickService.finishTrick(gameId);
 
-      for (const [socketId, data] of socketToPlayer.entries()) {
-        if (data.gameId === gameId) {
-          const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
-          
-          io.to(socketId).emit('game:stateUpdate', {
-            publicGameState: publicState,
-            privateGameState: privateState
-          });
+      // Verificar si el round pasó a fase 'scoring' (todos los tricks completados)
+      if (game.round.roundPhase === 'scoring') {
+        console.log(`🏁 Round ${game.round.round} completed! Starting next round...`);
+        
+        // Dar un pequeño delay para que los clientes procesen el cambio de estado
+        setTimeout(async () => {
+          try {
+            const { game: newGame, setupEvent, firstCardsEvent, privateCards } = 
+              await RoundService.finishRoundAndStartNext(gameId);
+            
+            // Emitir eventos del nuevo round
+            io.to(gameId).emit('game:event', setupEvent);
+            io.to(gameId).emit('game:event', firstCardsEvent);
+            
+            // Enviar cartas privadas a cada jugador
+            for (const [playerId, cards] of privateCards) {
+              const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
+              const playerSocketId = Array.from(socketToPlayer.entries())
+                .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
+              
+              if (playerSocketId) {
+                io.to(playerSocketId).emit('game:event', privateEvent);
+              }
+            }
+            
+            // Enviar estado actualizado del nuevo round
+            for (const [socketId, data] of socketToPlayer.entries()) {
+              if (data.gameId === gameId) {
+                const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+                io.to(socketId).emit('game:stateUpdate', {
+                  publicGameState: publicState,
+                  privateGameState: privateState
+                });
+              }
+            }
+            
+            console.log(`✅ Round ${newGame.round.round} started automatically`);
+          } catch (error: any) {
+            console.error('Error starting next round:', error);
+          }
+        }, 2000); // 2 segundos de delay
+      } else {
+        // Si no es el último trick, solo enviar estado actualizado
+        for (const [socketId, data] of socketToPlayer.entries()) {
+          if (data.gameId === gameId) {
+            const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+            
+            io.to(socketId).emit('game:stateUpdate', {
+              publicGameState: publicState,
+              privateGameState: privateState
+            });
+          }
         }
       }
 

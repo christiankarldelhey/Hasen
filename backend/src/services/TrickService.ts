@@ -292,6 +292,18 @@ export class TrickService {
     const trickWinner = currentTrick.score.trick_winner;
     if (!trickWinner) throw new Error('Trick winner not determined');
 
+    // Cambiar estado de las cartas del trick a 'in_finished_trick'
+    const trickCards = currentTrick.cards
+      .map(cardId => game.deck.find(c => c.id === cardId))
+      .filter(c => c !== undefined);
+
+    trickCards.forEach(trickCard => {
+      const deckCard = game.deck.find((c: any) => c.id === trickCard.id);
+      if (deckCard) {
+        deckCard.state = 'in_finished_trick';
+      }
+    });
+
     // Guardar el trick completado en tricksHistory
     if (!game.tricksHistory) {
       game.tricksHistory = [];
