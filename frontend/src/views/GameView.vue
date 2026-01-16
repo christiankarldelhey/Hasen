@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameAPI } from '../common/composables/useGameAPI';
-import { useSocketGame } from '../common/composables/useSocketGame';
-import { useGameStore } from '@/stores/gameStore';
-import { useHasenStore } from '@/stores/hasenStore';
-import { useLobbyStore } from '@/stores/lobbyStore';
+import { useGameControls } from '../common/composables/useGameControls';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
 import Deck from '@/features/Game/Deck.vue';
@@ -16,148 +12,28 @@ import Trick from '@/features/Trick/Trick.vue';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
-const gameAPI = useGameAPI();
-const socketGame = useSocketGame();
-const gameStore = useGameStore();
-const hasenStore = useHasenStore();
-const lobbyStore = useLobbyStore();
-const playerHand = computed(() => gameStore.privateGameState?.hand || []);
 
-const isPlayerDrawingPhase = computed(() => 
-  gameStore.publicGameState?.round.roundPhase === 'player_drawing'
-);
+const {
+  playerHand,
+  opponentPositions,
+  trickCards,
+  winningCardId,
+  trickState,
+  isTrickInResolve,
+  loading,
+  error,
+  handMode,
+  isMyTurn,
+  handleSkipReplacement,
+  handleConfirmReplacement,
+  handlePlayCard,
+  handleFinishTurn,
+  handleFinishTrick,
+  initialize
+} = useGameControls(gameId);
 
-const isMyTurn = computed(() => 
-  gameStore.publicGameState?.round.playerTurn === hasenStore.currentPlayerId
-);
-
-const handMode = computed(() => {
-  return isPlayerDrawingPhase.value && isMyTurn.value ? 'card_replacement' : 'normal'
-});
-
-const handleSkipReplacement = () => {
-  socketGame.skipCardReplacement(gameId)
-};
-
-const handleConfirmReplacement = (cardId: string, position: number) => {
-  socketGame.replaceCard(gameId, cardId, position)
-};
-
-const handlePlayCard = (cardId: string) => {
-  socketGame.playCard(gameId, cardId)
-};
-
-const handleFinishTurn = () => {
-  socketGame.finishTurn(gameId)
-}
-
-const handleFinishTrick = () => {
-  socketGame.finishTrick(gameId)
-};
-
-const loading = computed(() => lobbyStore.loading);
-const error = computed(() => lobbyStore.error);
-
-const opponentsCards = computed(() => {
-  if (!gameStore.publicGameState?.opponentsPublicInfo || !hasenStore.currentPlayerId) {
-    return []
-  }
-  
-  // Filtrar la info de los oponentes (excluir la del jugador actual)
-  return gameStore.publicGameState.opponentsPublicInfo.filter(
-    (info) => info.playerId !== hasenStore.currentPlayerId
-  )
-})
-
-const opponentPositions = computed(() => {
-  const opponents = opponentsCards.value
-  const totalOpponents = opponents.length
-  
-  if (totalOpponents === 0) return []
-  
-  // 1 oponente: solo top
-  if (totalOpponents === 1 && opponents[0]) {
-    return [{ ...opponents[0], position: 'top' as const }]
-  }
-  
-  // 2 oponentes: top + left
-  if (totalOpponents === 2 && opponents[0] && opponents[1]) {
-    return [
-      { ...opponents[0], position: 'top' as const },
-      { ...opponents[1], position: 'left' as const }
-    ]
-  }
-  
-  // 3 oponentes: top + left + right
-  if (totalOpponents === 3 && opponents[0] && opponents[1] && opponents[2]) {
-    return [
-      { ...opponents[0], position: 'top' as const },
-      { ...opponents[1], position: 'left' as const },
-      { ...opponents[2], position: 'right' as const }
-    ]
-  }
-  
-  return []
-})
-
-const trickCards = computed(() => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick
-  if (!currentTrick || !currentTrick.cards.length) return []
-  
-  const publicCards = gameStore.publicGameState?.publicCards || {}
-  
-  // Mapear los IDs de las cartas a las cartas completas
-  return currentTrick.cards
-    .map(cardId => publicCards[cardId])
-    .filter(card => card !== undefined)
-})
-
-const winningCardId = computed(() => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick
-  return currentTrick?.winning_card || null
-})
-
-const trickState = computed(() => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick
-  return currentTrick?.trick_state || null
-})
-
-const isTrickInResolve = computed(() => {
-  return trickState.value === 'resolve'
-})
-
-onMounted(async () => {
-  try {
-    await gameAPI.fetchPlayerGameState(gameId);
-    console.log('mounted game view');
-    
-    socketGame.onGameStateUpdate((data) => {
-      if (data.publicGameState) {
-        gameStore.setPublicGameState(data.publicGameState)
-      }
-      if (data.privateGameState) {
-        gameStore.setPrivateGameState(data.privateGameState)
-      }
-      if (data.event) {
-        gameStore.handleGameEvent(data.event)
-      }
-    });
-    
-    socketGame.onPrivateStateUpdate((data) => {
-      if (data.privateGameState) {
-        gameStore.setPrivateGameState(data.privateGameState)
-      }
-    });
-    
-  } catch (err) {
-    console.error('Error loading game:', err);
-    lobbyStore.setError('Failed to load game');
-  }
-});
-
-onUnmounted(() => {
-  socketGame.offGameStateUpdate();
-  socketGame.offPrivateStateUpdate();
+onMounted(() => {
+  initialize();
 });
 
 </script>

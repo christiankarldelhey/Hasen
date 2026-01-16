@@ -70,7 +70,7 @@ const handleFinishTurn = () => {
 <template>
   <div class="fixed bottom-0 left-0 right-0 flex justify-center items-end pointer-events-none h-[300px]">
     <!-- PlayerScore a la izquierda -->
-    <div class="absolute left-8 bottom-8 pointer-events-auto">
+    <div class="absolute left-4 bottom-8 pointer-events-auto">
       <PlayerScore />
     </div>
     
