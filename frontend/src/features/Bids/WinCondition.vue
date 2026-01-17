@@ -41,12 +41,12 @@ function getSymbol(collect: string) {
             <img
             :src="getSymbol(props.win_condition.win_suit)"
             alt="symbol collect"
-            class="px-2 h-12"
+            class="px-2 h-10"
             />
 
-            <div class="relative h-12 w-12 flex-none inline-block">
+            <div class="relative h-10 w-12 flex-none inline-block">
                 <img
-                class="absolute inset-0 left-2 h-12"
+                class="absolute inset-0 left-2 h-10"
                 :src="getSymbol(props.win_condition.avoid_suit)"
                 alt="symbol avoid"
                 />

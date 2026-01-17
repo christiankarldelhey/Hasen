@@ -87,9 +87,9 @@ const RoundSchema = new Schema({
     required: true 
   },
   roundBids: {
-    points: { type: BidSchema, default: null },
-    set_collection: { type: BidSchema, default: null },
-    trick: { type: BidSchema, default: null }
+    pointsBids: { type: [BidSchema], default: [] },
+    setCollectionBids: { type: [BidSchema], default: [] },
+    trickBids: { type: [BidSchema], default: [] }
   },
   currentTrick: { type: TrickSchema, default: null },
   roundScore: [{ type: PlayerRoundScoreSchema }]

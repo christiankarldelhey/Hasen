@@ -43,8 +43,8 @@ export function useSocketGame() {
     },
 
     // Make bid
-    makeBid: (gameId: string, bidType: 'points' | 'set_collection' | 'trick', trickNumber: 1 | 2 | 3 | 4 | 5) => {
-      socket.emit('player:makeBid', { gameId, bidType, trickNumber });
+    makeBid: (gameId: string, bidType: 'points' | 'set_collection' | 'trick', trickNumber: 1 | 2 | 3 | 4 | 5, bidId?: string) => {
+      socket.emit('player:makeBid', { gameId, bidType, trickNumber, bidId });
     },
 
     // Finish turn

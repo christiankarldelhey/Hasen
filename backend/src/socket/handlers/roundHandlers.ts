@@ -222,7 +222,7 @@ socket.on('round:start', async ({ gameId }) => {
     }
   });
 
-  socket.on('player:makeBid', async ({ gameId, bidType, trickNumber }: { gameId: string; bidType: 'points' | 'set_collection' | 'trick'; trickNumber: 1 | 2 | 3 | 4 | 5 }) => {
+  socket.on('player:makeBid', async ({ gameId, bidType, trickNumber, bidId }: { gameId: string; bidType: 'points' | 'set_collection' | 'trick'; trickNumber: 1 | 2 | 3 | 4 | 5; bidId?: string }) => {
     try {
       const playerData = socketToPlayer.get(socket.id);
       if (!playerData) {
@@ -234,7 +234,8 @@ socket.on('round:start', async ({ gameId }) => {
         gameId,
         playerData.playerId,
         bidType,
-        trickNumber
+        trickNumber,
+        bidId
       );
 
       io.to(gameId).emit('game:event', event);

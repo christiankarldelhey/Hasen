@@ -1,6 +1,6 @@
 import { GameModel } from '../models/Game.js'
 import { shuffleDeck } from '@domain/rules/DeckRules.js'
-import { shuffleBidDeck } from '@domain/rules/BidDeckRules'
+import { shuffleBidDeck, updateBidsPool } from '@domain/rules/BidDeckRules'
 import { createFirstCardDealtEvent } from '@domain/events/GameEvents.js'
 import { createRoundSetupCompletedEvent } from '@domain/events/GameEvents.js'
 import type { RoundPhase, Bid, PlayerId, PlayingCard } from '@domain/interfaces'
@@ -34,11 +34,8 @@ export class RoundService {
     game.bidDecks.pointsBidDeck = shuffledPoints;
     game.bidDecks.tricksBidDeck = shuffledTricks;
     
-    game.round.roundBids = {
-      points: shuffledPoints[0] || null,
-      set_collection: shuffledSetCollection[0] || null,
-      trick: shuffledTricks[0] || null
-    };
+    const bidPool = updateBidsPool(shuffledSetCollection, shuffledPoints, shuffledTricks);
+    game.round.roundBids = bidPool;
 
     // 4. Deal first card to each player (visible/público)
   const firstCards: { playerId: PlayerId; card: PlayingCard }[] = [];

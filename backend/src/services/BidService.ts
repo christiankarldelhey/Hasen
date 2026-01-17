@@ -10,7 +10,8 @@ export class BidService {
     gameId: string,
     playerId: PlayerId,
     bidType: BidType,
-    trickNumber: TrickNumber
+    trickNumber: TrickNumber,
+    bidId?: string
   ) {
     const game = await GameModel.findOne({ gameId })
     if (!game) {
@@ -26,8 +27,16 @@ export class BidService {
       throw new Error(validation.reason || 'Cannot make bid')
     }
 
-    const bidKey = bidType === 'points' ? 'points' : bidType === 'set_collection' ? 'set_collection' : 'trick'
-    const currentBid = game.round.roundBids[bidKey]
+    const bidArrayKey = bidType === 'points' ? 'pointsBids' : bidType === 'set_collection' ? 'setCollectionBids' : 'trickBids'
+    const bidsArray = game.round.roundBids[bidArrayKey] as any
+    
+    if (!bidsArray || bidsArray.length === 0) {
+      throw new Error('No bids available')
+    }
+
+    const currentBid = bidId 
+      ? bidsArray.find((bid: any) => bid.bid_id === bidId)
+      : bidsArray[0]
     
     if (!currentBid) {
       throw new Error('Bid not found')

@@ -65,25 +65,25 @@ export function shuffleBidDeck(deck: Bid[]): Bid[] {
 }
 
 /**
- * Deals 1 bid from each shuffled deck to create a BidPool for the round.
- * Takes the first bid from each deck array.
+ * Deals 2 bids from each shuffled deck to create a BidPool for the round.
+ * Takes the first 2 bids from each deck array.
  */
 export function updateBidsPool(
   shuffledSetCollection: Bid[],
   shuffledPoints: Bid[],
   shuffledTricks: Bid[]
 ): BidPool {
-  const setCollectionBid = shuffledSetCollection[0];
-  const pointsBid = shuffledPoints[0];
-  const trickBid = shuffledTricks[0];
+  const setCollectionBids = shuffledSetCollection.slice(0, 2);
+  const pointsBids = shuffledPoints.slice(0, 2);
+  const trickBids = shuffledTricks.slice(0, 2);
   
-  if (!setCollectionBid || !pointsBid || !trickBid) {
-    throw new Error('Bid decks must have at least one bid each');
+  if (setCollectionBids.length < 2 || pointsBids.length < 2 || trickBids.length < 2) {
+    throw new Error('Bid decks must have at least 2 bids each');
   }
   
   return {
-    setCollectionBid,
-    pointsBid,
-    trickBid
+    setCollectionBids,
+    pointsBids,
+    trickBids
   }
 }

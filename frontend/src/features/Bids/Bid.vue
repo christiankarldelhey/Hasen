@@ -55,36 +55,19 @@ const handleBidClick = () => {
   
   const trickNumber = currentTrick.trick_number
   
-  socketGame.makeBid(gameId, props.type, trickNumber)
-  console.log(`🎯 Making bid: ${props.type} on trick ${trickNumber}`)
+  socketGame.makeBid(gameId, props.type, trickNumber, props.bid.bid_id)
+  console.log(`🎯 Making bid: ${props.type} (${props.bid.bid_id}) on trick ${trickNumber}`)
 }
 </script>
 
 <template>
-  <div v-if="bid" class="flex flex-row items-center gap-2">
-    <!-- Hares de los jugadores que han hecho apuestas -->
-    <div v-if="bidders.length > 0" class="flex flex-row items-center">
-      <div 
-        v-for="(bidder, index) in bidders" 
-        :key="`${bidder.playerId}-${bidder.trickNumber}`"
-        class="relative"
-        :style="{ marginLeft: index > 0 ? '-8px' : '0' }"
-      >
-        <Hare :player-id="bidder.playerId" class="w-10 h-10" />
-        <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-white text-sm font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-            {{ bidder.trickNumber }}
-          </span>
-        </div>
-      </div>
-    </div>
-    
+  <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
-    <div class="bg-hasen-base rounded-2xl px-2 py-3 shadow-lg max-h-20 min-w-55 cursor-pointer" @click="handleBidClick">
+    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-55 cursor-pointer" @click="handleBidClick">
       <div class="flex flex-row">
         <div class="avatar avatar-placeholder">
-          <div class="bg-hasen-green w-12 h-12 rounded-full border-2 border-hasen-dark">
-            <span class="text-2xl text-hasen-base">{{ bid?.bid_score }}</span>
+          <div class="bg-hasen-green w-10 h-10 rounded-full border-2 border-hasen-dark">
+            <span class="text-xl text-hasen-base">{{ bid?.bid_score }}</span>
           </div>
         </div>
         <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />

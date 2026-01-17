@@ -42,7 +42,7 @@ export interface Bid {
 }
 
 export interface BidPool {
-  setCollectionBid: Bid
-  pointsBid: Bid
-  trickBid: Bid
+  setCollectionBids: Bid[]
+  pointsBids: Bid[]
+  trickBids: Bid[]
 }
