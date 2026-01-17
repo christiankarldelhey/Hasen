@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ActionButton from '@/common/components/ActionButton.vue';
 
 const emit = defineEmits<{
   createGame: [gameName: string, playerId: string];
@@ -15,11 +16,13 @@ const handleCreateGame = () => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <button @click="emit('back')" class="btn bg-gray-500 text-white w-full">
-      ← Back to menu
-    </button>
+    <ActionButton 
+      label="← Back to menu" 
+      variant="primary"
+      @click="emit('back')"
+    />
 
-    <form @submit.prevent="handleCreateGame" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4">
       <div class="form-control">
         <label class="label">
           <span class="label-text text-black font-semibold">Game Name</span>
@@ -33,12 +36,11 @@ const handleCreateGame = () => {
         />
       </div>
 
-      <button 
-        type="submit"
-        class="btn bg-hasen-dark text-white w-full"
-      >
-        Create Game
-      </button>
-    </form>
+      <ActionButton 
+        label="Create Game"
+        variant="tertiary"
+        @click="handleCreateGame"
+      />
+    </div>
   </div>
 </template>

@@ -14,7 +14,7 @@ watch(roundBids, (newVal) => {
 
 <template>
   <div class="fixed top-4 right-4 z-10">
-    <div v-if="roundBids" class="flex flex-col gap-1">
+    <div v-if="roundBids" class="flex flex-col gap-2">
       <Bid 
         :bid="roundBids.points"
         type="points"

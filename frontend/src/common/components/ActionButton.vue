@@ -2,7 +2,7 @@
 interface Props {
   label: string
   disabled?: boolean
-  variant?: 'primary' | 'secondary'
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'danger'
 }
 
 withDefaults(defineProps<Props>(), {
@@ -13,6 +13,13 @@ withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   click: []
 }>()
+
+const variantClasses = {
+  primary: 'bg-hasen-green text-white hover:bg-hasen-green-700',
+  secondary: 'bg-hasen-base text-hasen-dark hover:bg-opacity-80',
+  tertiary: 'bg-hasen-dark text-white hover:bg-opacity-80',
+  danger: 'bg-hasen-red text-white hover:bg-opacity-80'
+}
 </script>
 
 <template>
@@ -20,10 +27,8 @@ const emit = defineEmits<{
     @click="emit('click')"
     :disabled="disabled"
     :class="[
-      'px-6 py-3 font-bold rounded-lg shadow-lg transition-colors',
-      variant === 'primary' 
-        ? 'bg-hasen-green text-white hover:bg-hasen-green-700 disabled:opacity-50 disabled:cursor-not-allowed'
-        : 'bg-gray-600 text-white hover:bg-gray-700'
+      'px-6 py-3 font-semibold rounded-lg shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+      variantClasses[variant]
     ]"
   >
     {{ label }}

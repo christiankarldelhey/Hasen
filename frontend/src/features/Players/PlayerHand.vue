@@ -64,13 +64,13 @@ const handleFinishTurn = () => {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-8 pointer-events-none h-[300px]">
+  <div class="fixed bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-4 pointer-events-none h-[300px]">
     <div class="pointer-events-auto">
       <PlayerScore />
     </div>
     
     <PlayerCards 
-      :cards="cards" 
+      :cards="cards"
       :mode="mode"
       :selected-card-id="selectedCardId"
       @select-card="selectCard"

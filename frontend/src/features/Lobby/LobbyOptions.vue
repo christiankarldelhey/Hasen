@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { LobbyGame } from '@domain/interfaces/Game';
+import ActionButton from '@/common/components/ActionButton.vue';
 
 defineProps<{
   games: LobbyGame[];
@@ -16,9 +17,11 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex flex-col gap-4">
-    <button @click="emit('gameSettings')" class="btn bg-hasen-green text-white w-full">
-      Create new game
-    </button>
+    <ActionButton 
+      label="Create new game"
+      variant="primary"
+      @click="emit('gameSettings')"
+    />
     
     <h2 class="text-center text-md font-semibold text-black mt-4">Join game</h2>
     
@@ -34,18 +37,17 @@ const emit = defineEmits<{
       There are no available games at the moment.
     </div>
     
-    <button 
+    <div 
       v-for="game in games" 
       :key="game.gameId"
-      @click="emit('joinGame', game.gameId)"
-      class="btn bg-hasen-green text-white w-full flex flex-row justify-between items-center"
-      :disabled="!game.hasSpace || joiningGameId === game.gameId"
-      :class="{ 'opacity-50 cursor-not-allowed': !game.hasSpace || joiningGameId === game.gameId }"
+      class="w-full"
     >
-      <span class="font-semibold">{{ game.gameName }}</span>
-      <span class="text-sm">
-        {{ joiningGameId === game.gameId ? 'Joining...' : `${game.currentPlayers}/${game.maxPlayers} players` }}
-      </span>
-    </button>
+      <ActionButton 
+        :label="`${game.gameName} - ${joiningGameId === game.gameId ? 'Joining...' : game.currentPlayers + '/' + game.maxPlayers + ' players'}`"
+        variant="primary"
+        :disabled="!game.hasSpace || joiningGameId === game.gameId"
+        @click="emit('joinGame', game.gameId)"
+      />
+    </div>
   </div>
 </template>

@@ -80,11 +80,11 @@ const handleBidClick = () => {
     </div>
     
     <!-- Bid card -->
-    <div class="bg-hasen-base rounded-2xl px-2 py-3 shadow-lg max-h-20 min-w-60 cursor-pointer" @click="handleBidClick">
+    <div class="bg-hasen-base rounded-2xl px-2 py-3 shadow-lg max-h-20 min-w-55 cursor-pointer" @click="handleBidClick">
       <div class="flex flex-row">
         <div class="avatar avatar-placeholder">
           <div class="bg-hasen-green w-12 h-12 rounded-full border-2 border-hasen-dark">
-            <span class="text-2xl text-hasen-base text-hasen-dark">{{ bid?.bid_score }}</span>
+            <span class="text-2xl text-hasen-base">{{ bid?.bid_score }}</span>
           </div>
         </div>
         <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />

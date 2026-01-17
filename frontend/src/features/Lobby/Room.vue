@@ -4,6 +4,7 @@ import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { useLobbyStore } from '../../stores/lobbyStore';
 import { userIdService } from '../../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
+import ActionButton from '@/common/components/ActionButton.vue';
 
 const props = defineProps<{
   currentGame: LobbyGame;
@@ -48,9 +49,11 @@ onUnmounted(() => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <button @click="emit('back')" class="btn bg-gray-500 text-white w-full">
-      ← Back to menu
-    </button>
+    <ActionButton 
+      label="← Back to menu" 
+      variant="primary"
+      @click="emit('back')"
+    />
     
     <div class="text-center">
       <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
@@ -64,22 +67,18 @@ onUnmounted(() => {
       Waiting for other players to join...
     </div>
 
-    <!-- Solo el host puede iniciar el juego -->
-    <button 
+    <ActionButton 
       v-if="lobbyStore.isHost(playerId)"
+      label="Start Game"
+      variant="primary"
       :disabled="currentPlayers < currentGame.minPlayers"
-      class="btn w-full text-white"
-      :class="currentPlayers < currentGame.minPlayers ? 'bg-gray-400 cursor-not-allowed' : 'bg-hasen-green'"
       @click="emit('startGame')"
-    >
-      Start Game
-    </button>
+    />
 
-    <button 
-      class="btn bg-hasen-red text-white w-full"
+    <ActionButton 
+      :label="lobbyStore.isHost(playerId) ? 'Delete Game' : 'Leave Game'"
+      variant="danger"
       @click="emit('leaveGame')"
-    >
-      {{ lobbyStore.isHost(playerId) ? 'Delete Game' : 'Leave Game' }}
-    </button>
+    />
   </div>
 </template>
