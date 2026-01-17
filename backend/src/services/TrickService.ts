@@ -140,7 +140,7 @@ export class TrickService {
     currentTrick.cards.push(cardId);
 
     // Determinar lead_suit si es la primera carta y no hay lead_suit
-    if (!currentTrick.lead_suit && currentTrick.cards.length === 1) {
+    if (!currentTrick.lead_suit) {
       currentTrick.lead_suit = determineLeadSuit(card as PlayingCard);
     }
 

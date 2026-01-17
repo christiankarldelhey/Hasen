@@ -3,7 +3,7 @@ import deckImage from '@/assets/decks/deck-2.png'
 </script>
 
 <template>
-  <div class="fixed top-4 left-4 z-10">
+  <div class="z-10">
     <img 
       :src="deckImage" 
       alt="Deck" 

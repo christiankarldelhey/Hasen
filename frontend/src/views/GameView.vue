@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router';
 import { useGameControls } from '../common/composables/useGameControls';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
-import Deck from '@/features/Game/Deck.vue';
 import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
@@ -51,7 +50,7 @@ onMounted(() => {
 
     <div v-else class="relative w-full h-screen">
       <GameInfo />
-      <Deck />
+      
       <BidsPanel />
       <!-- Oponentes en diferentes posiciones -->
       <OtherPlayerHand
@@ -66,16 +65,6 @@ onMounted(() => {
       <!-- Trick en el centro exacto de la pantalla -->
       <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
       
-      <!-- Botón para finish trick cuando está en estado 'resolve' -->
-      <div v-if="isTrickInResolve" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
-        <button
-          @click="handleFinishTrick"
-          class="px-6 py-3 bg-hasen-green text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-colors"
-        >
-          Finish Trick
-        </button>
-      </div>
-      
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 
         :cards="playerHand" 
@@ -86,6 +75,7 @@ onMounted(() => {
         @confirm-replacement="handleConfirmReplacement"
         @play-card="handlePlayCard"
         @finish-turn="handleFinishTurn"
+        @finish-trick="handleFinishTrick"
       />
     </div>
   </GameLayout>

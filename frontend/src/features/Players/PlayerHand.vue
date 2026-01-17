@@ -3,6 +3,8 @@ import { ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import PlayerScore from './PlayerScore.vue';
 import PlayerCards from './PlayerCards.vue';
+import PlayerGameInfo from './PlayerGameInfo.vue';
+import ActionButton from '@/common/components/ActionButton.vue';
 
 interface Props {
   cards: Card[];
@@ -22,6 +24,7 @@ const emit = defineEmits<{
   confirmReplacement: [cardId: string, position: number]
   playCard: [cardId: string]
   finishTurn: []
+  finishTrick: []
 }>();
 
 const selectedCardId = ref<string | null>(null);
@@ -38,19 +41,12 @@ const isCardSelectable = (card: Card) => {
 };
 
 const selectCard = (card: Card) => {
-  // Modo card_replacement: seleccionar carta para reemplazo
   if (props.mode === 'card_replacement' && isCardSelectable(card)) {
     selectedCardId.value = card.id
-  }
-  // Modo normal: jugar carta directamente
-  else if (props.mode === 'normal' && !hasPlayedCard.value) {
+  } else if (props.mode === 'normal' && !hasPlayedCard.value) {
     emit('playCard', card.id)
     hasPlayedCard.value = true
   }
-};
-
-const handleSkip = () => {
-  emit('skipReplacement')
 };
 
 const handleConfirm = () => {
@@ -68,13 +64,11 @@ const handleFinishTurn = () => {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0 right-0 flex justify-center items-end pointer-events-none h-[300px]">
-    <!-- PlayerScore a la izquierda -->
-    <div class="absolute left-4 bottom-8 pointer-events-auto">
+  <div class="fixed bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-8 pointer-events-none h-[300px]">
+    <div class="pointer-events-auto">
       <PlayerScore />
     </div>
     
-    <!-- PlayerCards con su propio transform -->
     <PlayerCards 
       :cards="cards" 
       :mode="mode"
@@ -82,32 +76,34 @@ const handleFinishTurn = () => {
       @select-card="selectCard"
     />
     
-    <!-- Botones para card replacement -->
-    <div v-if="mode === 'card_replacement'" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
-      <button
-        @click="handleConfirm"
-        :disabled="!selectedCardId"
-        class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
-      >
-        Confirm
-      </button>
-      <button
-        @click="handleSkip"
-        class="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg shadow-lg hover:bg-gray-700 transition-colors"
-      >
-        Skip
-      </button>
-    </div>
-    
-    <!-- Botón para finish turn -->
-    <div v-if="mode === 'normal' && isMyTurn && !isTrickInResolve" class="absolute right-8 bottom-32 flex flex-col gap-3 pointer-events-auto z-[2000]">
-      <button
-        @click="handleFinishTurn"
+    <div class="flex flex-col gap-3 pointer-events-auto">
+      <PlayerGameInfo />
+      
+      <template v-if="mode === 'card_replacement'">
+        <ActionButton 
+          label="Confirm" 
+          :disabled="!selectedCardId"
+          @click="handleConfirm"
+        />
+        <ActionButton 
+          label="Skip" 
+          variant="secondary"
+          @click="$emit('skipReplacement')"
+        />
+      </template>
+
+      <ActionButton 
+        v-else-if="mode === 'normal' && isMyTurn && !isTrickInResolve"
+        label="Finish Turn"
         :disabled="!hasPlayedCard"
-        class="px-6 py-3 bg-hasen-green text-white font-bold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
-      >
-        Finish Turn
-      </button>
+        @click="handleFinishTurn"
+      />
+
+      <ActionButton 
+        v-else-if="isTrickInResolve"
+        label="Finish Trick"
+        @click="$emit('finishTrick')"
+      />
     </div>
   </div>
 </template>

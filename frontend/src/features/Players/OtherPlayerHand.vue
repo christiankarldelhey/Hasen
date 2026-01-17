@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import PlayingCard from '@/common/components/PlayingCard.vue'
 import { useGameStore } from '@/stores/gameStore'
-import cardBack from '@/assets/decks/card-back.png'
-import Hare from '@/common/components/Hare.vue'
-import OtherPlayerScore from './OtherPlayerScore.vue'
+import OtherPlayerInfo from '@/common/components/OtherPlayerInfo.vue'
+import StackedCards from '@/common/components/StackedCards.vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 
 interface Props {
@@ -43,94 +41,49 @@ const positionClasses = computed(() => {
   }
 })
 
-const stackedCards = computed(() => {
-  return Array.from({ length: privateHandsCount.value }, (_, index) => index)
-})
-
-const stackedCardsWidth = computed(() => {
-  // 90px base width + (number of cards - 1) * 18px offset
-  return privateHandsCount.value > 0 ? 90 + (privateHandsCount.value - 1) * 18 : 0
-})
 </script>
 
 <template>
   <div 
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
-    <!-- Layout for top position: OtherPlayerScore to the left, then cards -->
+    <!-- Layout for top position: cards only -->
     <template v-if="position === 'top'">
       <div class="flex flex-row gap-2 items-center">
-        <OtherPlayerScore :player-id="playerId" />
-        
-        <div class="flex flex-row">
-          <!-- Stacked face-down cards -->
-          <div 
-            class="relative flex justify-center h-[150px]"
-            :style="{ width: `${stackedCardsWidth}px` }"
-          >
-            <div 
-              v-for="(card, index) in stackedCards" 
-              :key="index"
-              class="absolute rounded-lg w-[90px] h-[150px]"
-              :style="{
-                backgroundImage: `url(${cardBack})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transform: `translate(${index * 18}px, 0px)`,
-                zIndex: privateHandsCount - index
-              }"
-            />
-          </div>
-          
-          <div v-if="publicCard" class="flex justify-center z-10">
-            <PlayingCard :card="publicCard" size="small" />
-          </div>
+        <div class="flex flex-row gap-2">
+          <OtherPlayerInfo :player-id="playerId" />
+          <StackedCards 
+            :count="privateHandsCount" 
+            :public-card="publicCard || undefined" 
+            :player-id="playerId" 
+          />
         </div>
       </div>
     </template>
 
-    <!-- Layout for left/right positions: OtherPlayerScore on top, then cards below -->
+    <!-- Layout for left/right positions: cards only -->
     <template v-else>
-      <div class="flex flex-col gap-3 items-center">
-        <OtherPlayerScore :player-id="playerId" />
+      <div class="flex flex-col gap-2">
+
+        <template v-if="position === 'right'">
+          <OtherPlayerInfo :player-id="playerId" />
+          <StackedCards 
+            :public-card="publicCard || undefined"
+            :count="privateHandsCount" 
+            :player-id="playerId" 
+          />
+        </template>
+
+        <template v-if="position === 'left'">
+          <OtherPlayerInfo :player-id="playerId" />
+          <StackedCards 
+            :public-card="publicCard || undefined"
+            :count="privateHandsCount" 
+            :player-id="playerId" 
+          />
+        </template>
         
-        <div class="flex flex-row">
-          <!-- Stacked face-down cards -->
-          <div v-if="position === 'right'" class="relative flex justify-center h-[150px]">
-            <div 
-              v-for="(card, index) in stackedCards" 
-              :key="index"
-              class="absolute rounded-lg w-[90px] h-[150px]"
-              :style="{
-                backgroundImage: `url(${cardBack})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transform: `translate(${index * 18}px, 0px)`,
-                zIndex: privateHandsCount - index
-              }"
-            />
-          </div>
-          
-          <div v-if="publicCard" class="flex justify-center z-10">
-            <PlayingCard :card="publicCard" size="small" />
-          </div>
-          
-          <!-- Stacked face-down cards for left position -->
-          <div v-if="position === 'left'" class="relative flex justify-center h-[150px]">
-            <div 
-              v-for="(card, index) in stackedCards" 
-              :key="index"
-              class="absolute rounded-lg w-[90px] h-[150px]"
-              :style="{
-                backgroundImage: `url(${cardBack})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transform: `translate(${index * 18}px, 0px)`,
-                zIndex: privateHandsCount - index
-              }"
-            />
-          </div>
-        </div>
+        
       </div>
     </template>
 
