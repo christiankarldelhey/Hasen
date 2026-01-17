@@ -7,7 +7,7 @@ import deckImage from '@/assets/decks/deck-2.png'
     <img 
       :src="deckImage" 
       alt="Deck" 
-      class="h-[182px] object-contain"
+      class="h-[160px] object-contain"
     />
   </div>
 </template>

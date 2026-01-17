@@ -5,7 +5,7 @@ import Deck from './Deck.vue'
 
 <template>
   <div class="fixed top-4 left-4 z-10">
-    <div class=" flex flex-row gap-4">
+    <div class="flex flex-row gap-4">
       <Deck />
       <RoundInfo />
     </div>

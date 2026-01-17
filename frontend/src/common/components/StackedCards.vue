@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import cardBack from '@/assets/decks/card-back.png'
-import OtherPlayerInfo from '@/common/components/OtherPlayerInfo.vue'
 import PlayingCard from '@/common/components/PlayingCard.vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { PlayingCard as DomainPlayingCard } from '@domain/interfaces'
@@ -30,7 +29,7 @@ const stackedCardsWidth = computed(() => {
 
 <template>
   <div 
-    class="relative flex h-[150px]"
+    class="relative flex h-[120px]"
     :style="{ width: `${stackedCardsWidth}px` }"
   >
     <div v-if="publicCard" class="flex justify-center z-10">
@@ -40,7 +39,7 @@ const stackedCardsWidth = computed(() => {
     <div 
       v-for="(_, index) in stackedCards" 
       :key="index"
-      class="absolute rounded-lg w-[90px] h-[150px]"
+      class="absolute rounded-lg w-[70px] h-[120px]"
       :style="{
         backgroundImage: `url(${cardBack})`,
         backgroundSize: 'cover',

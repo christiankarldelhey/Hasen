@@ -30,7 +30,7 @@ const cardPositions = computed(() => {
   if (totalCards === 0) return [];
   
   const cardWidth = 180;
-  const maxRotation = Math.min(30, totalCards * 3);
+  const maxRotation = Math.min(45, totalCards * 4);
   const cardSpacing = Math.min(80, 400 / totalCards);
   
   return props.cards.map((card, index) => {
@@ -56,7 +56,7 @@ const cardPositions = computed(() => {
 </script>
 
 <template>
-  <div class="relative h-[260px]" style="transform: translateY(20%);">
+  <div class="relative h-[260px]" style="transform: translateY(40%);">
     <TransitionGroup name="card">
       <div
         v-for="(pos, index) in cardPositions"
