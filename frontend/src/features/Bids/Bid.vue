@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import type { Bid, BidType } from '@domain/interfaces/Bid'
 import type { PlayerId } from '@domain/interfaces/Player'
-import type { TrickNumber } from '@domain/interfaces/Trick'
 import WinCondition from './WinCondition.vue'
+import BidScore from './BidScore.vue'
 import Hare from '@/common/components/Hare.vue'
 import { useSocketGame } from '@/common/composables/useSocketGame'
 import { useGameStore } from '@/stores/gameStore'
@@ -16,27 +16,14 @@ const props = defineProps<{
 const socketGame = useSocketGame()
 const gameStore = useGameStore()
 
-interface BidderInfo {
-  playerId: PlayerId
-  trickNumber: TrickNumber
-}
-
-const bidders = computed<BidderInfo[]>(() => {
+const bidders = computed<PlayerId[]>(() => {
   if (!props.bid?.current_bids) return []
   
-  const biddersArray: BidderInfo[] = []
+  const biddersArray: PlayerId[] = []
   
-  // Iterar sobre trick_1, trick_2, trick_3
-  Object.entries(props.bid.current_bids).forEach(([key, playerBid]) => {
+  Object.values(props.bid.current_bids).forEach((playerBid) => {
     if (playerBid.bidder) {
-      const parts = key.split('_')
-      if (parts[1]) {
-        const trickNum = parseInt(parts[1]) as TrickNumber
-        biddersArray.push({
-          playerId: playerBid.bidder,
-          trickNumber: trickNum
-        })
-      }
+      biddersArray.push(playerBid.bidder)
     }
   })
   
@@ -64,18 +51,29 @@ const handleBidClick = () => {
 <template>
   <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
-    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-60 cursor-pointer" @click="handleBidClick">
+    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-64 cursor-pointer 
+            transition-all duration-150
+            hover:bg-opacity-80 hover:shadow-xl hover:scale-[1.02]
+            active:scale-100" 
+     @click="handleBidClick">
       <div class="flex flex-row items-stretch">
-        <div class="w-[20%] min-w-0 flex items-center justify-center avatar avatar-placeholder">
-          <div class="bg-hasen-base w-10 h-10 rounded-full border-1 border-hasen-dark flex items-center justify-center">
-            <span class="text-xl font-semibold text-hasen-dark">{{ bid?.bid_score }}</span>
-          </div>
-        </div>
-        <div class="w-[60%] min-w-0 flex items-center">
+        <BidScore :score="bid.bid_score" :bidders="bidders" />
+        <div class="w-[60%] flex flex-row items-center justify-center gap-2 min-w-0">
           <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
         </div>
         <div class="border-l border-hasen-dark w-[20%] min-w-0 flex items-center justify-center">
-            <Hare player-id="player_1" size="32px" />
+          <div class="relative w-12 h-12 flex justify-center items-center">
+            <Hare 
+              v-if="bidders.length >= 2 && bidders[1]" 
+              class="hare-2 absolute top-1 left-2 z-10" 
+              :player-id="bidders[1]" 
+              size="32" />
+            <Hare 
+              v-if="bidders.length >= 1 && bidders[0]" 
+              class="hare-1 absolute top-1 left-4 z-0" 
+              :player-id="bidders[0]" 
+              size="32px" />
+          </div>
         </div>
       </div>
     </div>

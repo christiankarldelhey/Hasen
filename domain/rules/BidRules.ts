@@ -35,10 +35,10 @@ export function canMakeBid(
     }
   }
 
-  const bidKey = bidType === 'points' ? 'points' : bidType === 'set_collection' ? 'set_collection' : 'trick'
-  const currentBid = game.round.roundBids[bidKey]
+  const bidArrayKey = bidType === 'points' ? 'pointsBids' : bidType === 'set_collection' ? 'setCollectionBids' : 'trickBids'
+  const bidsArray = game.round.roundBids[bidArrayKey]
   
-  if (!currentBid) {
+  if (!bidsArray || bidsArray.length === 0) {
     return {
       canMakeBid: false,
       reason: 'No hay bid disponible de este tipo'
@@ -46,12 +46,27 @@ export function canMakeBid(
   }
 
   const trickKey = `trick_${trickNumber}` as 'trick_1' | 'trick_2' | 'trick_3'
-  const playerBid = currentBid.current_bids[trickKey]
   
-  if (playerBid && playerBid.bidder === playerId) {
+  for (const bid of bidsArray) {
+    const playerBid = bid.current_bids[trickKey]
+    
+    if (playerBid && playerBid.bidder === playerId) {
+      return {
+        canMakeBid: false,
+        reason: 'Ya tienes un bid de este tipo en este trick'
+      }
+    }
+  }
+
+  const anyBidFull = bidsArray.every(bid => {
+    const biddersCount = Object.values(bid.current_bids).filter(pb => pb.bidder !== null).length
+    return biddersCount >= 2
+  })
+  
+  if (anyBidFull) {
     return {
       canMakeBid: false,
-      reason: 'Ya tienes un bid de este tipo en este trick'
+      reason: 'Todos los bids de este tipo ya tienen el máximo de 2 jugadores'
     }
   }
 
