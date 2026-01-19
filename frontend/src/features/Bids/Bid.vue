@@ -17,17 +17,20 @@ const socketGame = useSocketGame()
 const gameStore = useGameStore()
 
 const bidders = computed<PlayerId[]>(() => {
-  if (!props.bid?.current_bids) return []
+  if (!props.bid) return []
   
-  const biddersArray: PlayerId[] = []
+  const playerBids = gameStore.publicGameState?.round.roundBids.playerBids
+  if (!playerBids) return []
   
-  Object.values(props.bid.current_bids).forEach((playerBid) => {
-    if (playerBid.bidder) {
-      biddersArray.push(playerBid.bidder)
+  const biddersSet = new Set<PlayerId>()
+  
+  Object.entries(playerBids).forEach(([playerId, bids]) => {
+    if (bids.some(b => b.bidId === props.bid!.bid_id)) {
+      biddersSet.add(playerId as PlayerId)
     }
   })
   
-  return biddersArray
+  return Array.from(biddersSet)
 })
 
 const handleBidClick = () => {

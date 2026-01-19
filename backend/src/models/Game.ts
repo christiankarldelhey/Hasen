@@ -25,9 +25,10 @@ const CardSchema = new Schema({
   }
 }, { _id: false });
 
-// Schema para PlayerBid
-const PlayerBidSchema = new Schema({
-  bidder: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4', null] },
+// Schema para PlayerBidEntry
+const PlayerBidEntrySchema = new Schema({
+  bidId: { type: String, required: true },
+  trickNumber: { type: Number, required: true, enum: [1, 2, 3] },
   onLose: { type: Number, required: true }
 }, { _id: false });
 
@@ -36,11 +37,6 @@ const BidSchema = new Schema({
   bid_id: { type: String, required: true },
   bid_type: { type: String, enum: ['points', 'set_collection', 'trick'], required: true },
   bid_score: { type: Number, required: true },
-  current_bids: {
-    trick_1: { type: PlayerBidSchema, required: true },
-    trick_2: { type: PlayerBidSchema, required: true },
-    trick_3: { type: PlayerBidSchema, required: true }
-  },
   bid_winner: [{ type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'] }],
   win_condition: { type: Schema.Types.Mixed, required: true }
 }, { _id: false });
@@ -87,9 +83,13 @@ const RoundSchema = new Schema({
     required: true 
   },
   roundBids: {
-    pointsBids: { type: [BidSchema], default: [] },
-    setCollectionBids: { type: [BidSchema], default: [] },
-    trickBids: { type: [BidSchema], default: [] }
+    bids: { type: [BidSchema], default: [] },
+    playerBids: {
+      player_1: { type: [PlayerBidEntrySchema], default: [] },
+      player_2: { type: [PlayerBidEntrySchema], default: [] },
+      player_3: { type: [PlayerBidEntrySchema], default: [] },
+      player_4: { type: [PlayerBidEntrySchema], default: [] }
+    }
   },
   currentTrick: { type: TrickSchema, default: null },
   roundScore: [{ type: PlayerRoundScoreSchema }]

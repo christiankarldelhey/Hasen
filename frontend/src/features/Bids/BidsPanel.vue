@@ -5,7 +5,15 @@ import Bid from './Bid.vue'
 
 const gameStore = useGameStore()
 
-const roundBids = computed(() => gameStore.publicGameState?.round.roundBids)
+const roundBids = computed(() => {
+  const allBids = gameStore.publicGameState?.round.roundBids.bids || []
+  
+  return {
+    pointsBids: allBids.filter(b => b.bid_type === 'points'),
+    setCollectionBids: allBids.filter(b => b.bid_type === 'set_collection'),
+    trickBids: allBids.filter(b => b.bid_type === 'trick')
+  }
+})
 
 watch(roundBids, (newVal) => {
   console.log('🎯 BidsPanel - roundBids:', newVal)

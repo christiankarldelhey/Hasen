@@ -1,6 +1,16 @@
 import { BID_DEFINITIONS } from '../data/bidDefinitions'
 import type { Bid, BidPool } from '../interfaces'
 
+/**
+ * Genera un UUID v4 simple compatible con frontend y backend
+ */
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
 
 export interface BidDecks {
   setCollectionBidDeck: Bid[]
@@ -18,14 +28,9 @@ export function createBidDeck(): BidDecks {
   const tricksBidDeck: Bid[] = []
   BID_DEFINITIONS.forEach((def: any) => {
     const bid: Bid = {
-      bid_id: def.type + '_' + def.score,
+      bid_id: generateUUID(),
       bid_type: def.type,
       bid_score: def.score,
-      current_bids: {
-        trick_1: { bidder: null, onLose: def.type === 'set_collection' ? -10 : -5 },
-        trick_2: { bidder: null, onLose: def.type === 'set_collection' ? -15 : -10 },
-        trick_3: { bidder: null, onLose: def.type === 'set_collection' ? -20 : -15 }
-      },
       win_condition: def.win_condition,
       bid_winner: null
     }
@@ -82,8 +87,7 @@ export function updateBidsPool(
   }
   
   return {
-    setCollectionBids,
-    pointsBids,
-    trickBids
+    bids: [...setCollectionBids, ...pointsBids, ...trickBids],
+    playerBids: {}
   }
 }

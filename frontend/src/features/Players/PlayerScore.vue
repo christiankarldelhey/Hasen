@@ -33,10 +33,9 @@ const trickNumbers: TrickNumber[] = [1, 2, 3, 4, 5]
 </script>
 
 <template>
-  <div class="p-2 h-[200px] min-w-[260px] flex flex-col gap-2 shadow-lg fixed bottom-0 left-0 rounded-xl bg-black/60 p-4 z-10">
-
+  <div class="rounded-xl px-6 py-5 shadow-lg w-full bg-hasen-base flex flex-col gap-2">
     <!-- Row: Tricks Won -->
-    <div class="flex-1 flex flex-row items-center gap-1 rounded-xl px-6 py-2 shadow-lg w-full bg-hasen-base">
+    <div class="flex-1 flex flex-row items-center gap-1 border-b border-hasen-dark py-2">
       <div class="flex flex-row items-center gap-1">
         <div v-for="trickNum in trickNumbers" :key="trickNum" class="relative w-7 h-9 flex-none">
           <span 
@@ -56,7 +55,7 @@ const trickNumbers: TrickNumber[] = [1, 2, 3, 4, 5]
     </div>
 
     <!-- Row: Set Collection -->
-    <div class="flex-1 flex flex-row items-center gap-1 rounded-xl px-6 py-2 shadow-lg w-full bg-hasen-base">
+    <div class="flex-1 flex flex-row items-center gap-1">
       <div class="flex flex-row items-center gap-1">
         <img :src="AcornSymbol" alt="acorns" class="h-9 opacity-70" />
         <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollection.acorns }}</span>
@@ -68,7 +67,7 @@ const trickNumbers: TrickNumber[] = [1, 2, 3, 4, 5]
     </div>
 
     <!-- Row: Points -->
-    <div class="flex-1 flex flex-row items-center justify-between rounded-xl px-6 py-2 shadow-lg w-full bg-hasen-base">
+    <div class="flex-1 flex flex-row items-center justify-between">
       <span class="text-hasen-dark text-lg font-semibold opacity-30">0</span>
       <PointsToWin size="small" :points="points" />
       <span class="text-hasen-dark text-lg font-semibold opacity-30">100</span>

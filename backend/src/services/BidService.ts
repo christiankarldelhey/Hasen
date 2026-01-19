@@ -27,29 +27,35 @@ export class BidService {
       throw new Error(validation.reason || 'Cannot make bid')
     }
 
-    const bidArrayKey = bidType === 'points' ? 'pointsBids' : bidType === 'set_collection' ? 'setCollectionBids' : 'trickBids'
-    const bidsArray = game.round.roundBids[bidArrayKey] as any
+    const availableBids = game.round.roundBids.bids.filter((b: any) => b.bid_type === bidType)
     
-    if (!bidsArray || bidsArray.length === 0) {
+    if (!availableBids || availableBids.length === 0) {
       throw new Error('No bids available')
     }
 
     const currentBid = bidId 
-      ? bidsArray.find((bid: any) => bid.bid_id === bidId)
-      : bidsArray[0]
+      ? availableBids.find((bid: any) => bid.bid_id === bidId)
+      : availableBids[0]
     
     if (!currentBid) {
       throw new Error('Bid not found')
     }
 
-    const trickKey = `trick_${trickNumber}` as 'trick_1' | 'trick_2' | 'trick_3'
-    const existingOnLose = currentBid.current_bids[trickKey].onLose
-    
-    currentBid.current_bids[trickKey] = {
-      bidder: playerId,
-      onLose: existingOnLose
+    const onLose = bidType === 'set_collection' 
+      ? (trickNumber === 1 ? -10 : trickNumber === 2 ? -15 : -20)
+      : (trickNumber === 1 ? -5 : trickNumber === 2 ? -10 : -15)
+
+    if (!game.round.roundBids.playerBids[playerId]) {
+      game.round.roundBids.playerBids[playerId] = []
     }
 
+    game.round.roundBids.playerBids[playerId].push({
+      bidId: currentBid.bid_id,
+      trickNumber,
+      onLose
+    })
+
+    game.markModified('round.roundBids.playerBids')
     await game.save()
 
     const event = createBidMadeEvent(

@@ -4,7 +4,6 @@ import type { TrickNumber } from './Trick'
 
 export type BidType = 'points' | 'set_collection' | 'trick'
 export type BidScore = number
-export type WinThisTrick = boolean | null
 
 export interface PointsBidCondition {
   min_points: number
@@ -23,26 +22,28 @@ export interface TrickBidCondition {
   win_max_tricks?: TrickNumber
 }
 
-export interface PlayerBid {
-  bidder: PlayerId | null;
-  onLose: number;
+export interface PlayerBidEntry {
+  bidId: string
+  trickNumber: TrickNumber
+  onLose: number
+}
+
+export interface PlayerBidsMap {
+  player_1?: PlayerBidEntry[]
+  player_2?: PlayerBidEntry[]
+  player_3?: PlayerBidEntry[]
+  player_4?: PlayerBidEntry[]
 }
 
 export interface Bid {
   bid_id: string
   bid_type: BidType
   bid_score: BidScore
-  current_bids: {
-    trick_1: PlayerBid;
-    trick_2: PlayerBid;
-    trick_3: PlayerBid;
-  }
   bid_winner: PlayerId[] | null
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }
 
 export interface BidPool {
-  setCollectionBids: Bid[]
-  pointsBids: Bid[]
-  trickBids: Bid[]
+  bids: Bid[]
+  playerBids: PlayerBidsMap
 }

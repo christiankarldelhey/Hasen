@@ -1,6 +1,6 @@
 import type { PlayerId } from './Player'
 import type { Trick, TrickNumber } from './Trick'
-import type { Bid } from './Bid'
+import type { Bid, PlayerBidsMap } from './Bid'
 
 export type RoundPhase = 
   | 'round_setup'
@@ -9,9 +9,8 @@ export type RoundPhase =
   | 'scoring'
 
 export interface RoundBids {
-  pointsBids: Bid[]
-  setCollectionBids: Bid[]
-  trickBids: Bid[]
+  bids: Bid[]
+  playerBids: PlayerBidsMap
 }
 
 export interface Round {
