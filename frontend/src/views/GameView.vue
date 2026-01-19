@@ -8,6 +8,7 @@ import BidsPanel from '@/features/Bids/BidsPanel.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
+import RabbitLoader from '@/common/components/RabbitLoader.vue';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
@@ -39,8 +40,8 @@ onMounted(() => {
 
 <template>
   <GameLayout>
-    <div v-if="loading" class="text-center py-12">
-      <div class="text-xl text-black">Loading game...</div>
+    <div v-if="loading" class="py-12">
+      <RabbitLoader size="xl" />
     </div>
     
     <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-8">

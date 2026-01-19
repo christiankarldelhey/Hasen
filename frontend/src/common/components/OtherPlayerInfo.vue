@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import { ref } from 'vue'
+import { type PlayerId } from '@domain/interfaces/Player'
 import OtherPlayerScore from '@/features/Players/OtherPlayerScore.vue'
+import Hare from '@/common/components/Hare.vue'
 
 interface Props {
   playerId: PlayerId
@@ -9,11 +10,6 @@ interface Props {
 
 const props = defineProps<Props>()
 const showPopover = ref(false)
-
-const playerColor = computed(() => {
-  const player = AVAILABLE_PLAYERS.find(p => p.id === props.playerId)
-  return player?.color || '#000000'
-})
 
 const hardcodedScore = 28
 </script>
@@ -25,19 +21,7 @@ const hardcodedScore = 28
     @mouseleave="showPopover = false"
   >
     <div class="flex flex-col items-center justify-center bg-black/30 rounded-full p-3 cursor-pointer">
-      <svg 
-        id="Capa_2" 
-        data-name="Capa 2" 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 385.26 420.69"
-        :style="{ fill: playerColor, height: '40px', width: '40px' }"
-      >
-        <g id="Capa_1-2" data-name="Capa 1">
-          <g id="QTlxMR.tif">
-            <path d="M150.76,13.17c1.17.33.85-.31,1.14-.64,5.55-6.23,13.75-14.12,22.99-12.25,10.82,2.19,7.03,23.74,5.73,31.5-1.34,8.01-3.69,16.89-6.49,24.51-7.81,21.24-25.09,35.24-34.3,56.2-7.17,16.31-1.88,25.37-2.55,41.95-.18,4.54-1.55,10.17-1.56,14.48,0,3.66,1.92,4.96,5.27,5.27,4.96.46,10.23-.48,15-.54,24.64-.3,50.11-.54,74.39,3.66,48.82,8.44,99.22,35.91,120.73,82.27,11.21,24.16,13.97,50.78,10.16,77.09,7-5.19,14.93-9.85,24-9.5-2.38,12.62-4.17,27.41-11.49,38.26-7.6,11.27-18.85,13.6-30.12,19.38-14.34,7.36-26.15,19.06-40.71,25.79-11.98,5.54-24.83,8.12-37.91,9.59l-97.23-.31c-5.14-1.43-5.43-9.59-5.03-13.95,2.32-25.39,27.72-26.94,47.01-34.01.64-.24,1.31-.28,1.99-.25v-1.49c-5.37-1.25-10.68-3.68-15.51-6.25-15.5-8.24-27.37-23.13-47.01-17.53-5.53,1.58-9.08,5.58-11.21,10.79-6.74,16.44-13,60.34-34.5,63-13.68-1.24-30.18,1.61-43.52,0-8.51-1.03-7.13-13.68-4.83-19.36,3.93-9.74,11.35-9.12,18.33-14.67,9.54-7.58,15.53-27.39,13.14-39.12-2.71-13.31-23.3-32.47-31.29-45.21-14.27-22.77-12.32-59.6-13.6-85.9-.15-3.11-.38-8.25-1.55-10.95-2.45-5.67-9.67-6.51-14.78-8.72-14.88-6.45-32.89-22.2-22.18-39.85,5.89-9.7,30.02-35.97,39.06-42.94,11.47-8.85,22.8-8.37,36.08-10.41,4.35-.67,7.07-4.7,8.34-8.66,3.03-9.41,3.83-22.92,6.27-33.23,5.04-21.23,16.97-49.8,38.42-59.08,10.15-4.39,21.26-2.05,19.34,11.08Z"/>
-          </g>
-        </g>
-      </svg>
+      <Hare :player-id="playerId" />
       
       <div class="flex items-center gap-1 mt-1">
         <span class="text-lg">⭐</span>

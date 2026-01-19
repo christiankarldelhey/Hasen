@@ -4,6 +4,7 @@ import type { Bid, BidType } from '@domain/interfaces/Bid'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { TrickNumber } from '@domain/interfaces/Trick'
 import WinCondition from './WinCondition.vue'
+import Hare from '@/common/components/Hare.vue'
 import { useSocketGame } from '@/common/composables/useSocketGame'
 import { useGameStore } from '@/stores/gameStore'
 
@@ -63,14 +64,19 @@ const handleBidClick = () => {
 <template>
   <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
-    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-55 cursor-pointer" @click="handleBidClick">
-      <div class="flex flex-row">
-        <div class="avatar avatar-placeholder">
-          <div class="bg-hasen-base w-10 h-10 rounded-full border-1 border-hasen-dark">
+    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-60 cursor-pointer" @click="handleBidClick">
+      <div class="flex flex-row items-stretch">
+        <div class="w-[20%] min-w-0 flex items-center justify-center avatar avatar-placeholder">
+          <div class="bg-hasen-base w-10 h-10 rounded-full border-1 border-hasen-dark flex items-center justify-center">
             <span class="text-xl font-semibold text-hasen-dark">{{ bid?.bid_score }}</span>
           </div>
         </div>
-        <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
+        <div class="w-[60%] min-w-0 flex items-center">
+          <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
+        </div>
+        <div class="border-l border-hasen-dark w-[20%] min-w-0 flex items-center justify-center">
+            <Hare player-id="player_1" size="32px" />
+        </div>
       </div>
     </div>
   </div>

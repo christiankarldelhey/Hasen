@@ -13,7 +13,7 @@ watch(roundBids, (newVal) => {
 </script>
 
 <template>
-  <div class="fixed top-4 right-4 z-10">
+  <div class="fixed top-0 right-0 rounded-xl bg-black/60 p-4 z-10">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <!-- Fila de Points (2 bids) -->
       <div class="flex flex-row gap-2">

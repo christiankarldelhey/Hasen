@@ -36,15 +36,6 @@ const bidStatus = computed(() => {
 
 <template>
   <div class="bg-transparent flex flex-col gap-5">
-
-
-      <div v-if="trickNumber" class="relative w-12 h-16 flex items-center justify-center">
-        <img :src="trickIcon" alt="Trick" class="w-full h-full object-contain" />
-        <div class="absolute inset-0 flex items-center opacity-70 justify-center text-hasen-dark text-2xl font-semibold">
-          {{ trickNumber }}
-        </div>
-      </div>
-
       <div v-if="currentTrick" class="bg-hasen-base rounded-full px-2 py-2 shadow-lg flex items-center justify-center">
           <div v-if="leadSuitIcon" class="w-8 h-8 flex items-center justify-center">
             <img 
@@ -57,6 +48,15 @@ const bidStatus = computed(() => {
             ?
           </div>
       </div>
+
+      <div v-if="trickNumber" class="relative w-12 h-16 flex items-center justify-center">
+        <img :src="trickIcon" alt="Trick" class="w-full h-full object-contain" />
+        <div class="absolute inset-0 flex items-center opacity-70 justify-center text-hasen-dark text-2xl font-semibold">
+          {{ trickNumber }}
+        </div>
+      </div>
+
+
     
   </div>
 </template>

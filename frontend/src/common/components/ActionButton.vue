@@ -27,7 +27,7 @@ const variantClasses = {
     @click="emit('click')"
     :disabled="disabled"
     :class="[
-      'px-6 py-3 font-semibold rounded-lg shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+      'px-6 py-3 w-full font-semibold rounded-lg shadow-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
       variantClasses[variant]
     ]"
   >

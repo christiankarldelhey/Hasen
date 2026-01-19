@@ -41,12 +41,12 @@ function getSymbol(collect: string) {
             <img
             :src="getSymbol(props.win_condition.win_suit)"
             alt="symbol collect"
-            class="px-2 h-10"
+            class="px-2 h-8"
             />
 
-            <div class="relative h-10 w-12 flex-none inline-block">
+            <div class="relative h-8 w-12 flex-none inline-block">
                 <img
-                class="absolute inset-0 left-2 h-10"
+                class="absolute inset-0 left-2 h-8"
                 :src="getSymbol(props.win_condition.avoid_suit)"
                 alt="symbol avoid"
                 />
@@ -59,7 +59,7 @@ function getSymbol(collect: string) {
     </div>
 
     <!-- TRICK -->
-    <div v-if="props.type === 'trick'" class="flex flex-row px-2 mt-2 gap-1">
+    <div v-if="props.type === 'trick'" class="flex flex-row px-2 gap-0">
         <template v-if="props.win_condition?.lose_trick_position">
             <LoseTrick :tricks="props.win_condition.lose_trick_position" />
         </template>

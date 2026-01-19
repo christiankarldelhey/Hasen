@@ -64,19 +64,22 @@ const handleFinishTurn = () => {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0 right-0 flex justify-between items-end px-4 pb-4 pointer-events-none h-[300px]">
-    <div class="pointer-events-auto">
-      <PlayerScore />
+  <div class="fixed bottom-0 left-0 right-0 pointer-events-none h-[300px]">
+    <div class="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
+      <PlayerCards 
+        :cards="cards"
+        :mode="mode"
+        :selected-card-id="selectedCardId"
+        @select-card="selectCard"
+      />
     </div>
     
-    <PlayerCards 
-      :cards="cards"
-      :mode="mode"
-      :selected-card-id="selectedCardId"
-      @select-card="selectCard"
-    />
-    
-    <div class="flex flex-col gap-3 pointer-events-auto">
+    <div class="relative h-full flex justify-between items-end px-4 pb-4">
+      <div class="pointer-events-auto">
+        <PlayerScore />
+      </div>
+      
+      <div class="flex flex-col gap-3 pointer-events-auto">
       <PlayerGameInfo />
       
       <template v-if="mode === 'card_replacement'">
@@ -104,6 +107,7 @@ const handleFinishTurn = () => {
         label="Finish Trick"
         @click="$emit('finishTrick')"
       />
+      </div>
     </div>
   </div>
 </template>

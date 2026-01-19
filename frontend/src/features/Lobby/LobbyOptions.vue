@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { LobbyGame } from '@domain/interfaces/Game';
 import ActionButton from '@/common/components/ActionButton.vue';
+import RabbitLoader from '@/common/components/RabbitLoader.vue';
 
 defineProps<{
   games: LobbyGame[];
@@ -25,8 +26,8 @@ const emit = defineEmits<{
     
     <h2 class="text-center text-md font-semibold text-black mt-4">Join game</h2>
     
-    <div v-if="loading" class="text-center text-gray-600">
-      Fetching games...
+    <div v-if="loading">
+      <RabbitLoader size="xl" />
     </div>
     
     <div v-else-if="error" class="text-center text-red-600">
