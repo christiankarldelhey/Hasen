@@ -26,15 +26,15 @@ function getSymbol(collect: string) {
 
 <template>
     <!-- Version with avoid (crossed out) -->
-    <div v-if="props.avoid" class="relative flex flex-row w-10 flex-none pl-2">
+    <div v-if="props.avoid" class="relative h-8 w-8 flex-shrink-0">
         <img
-            class="absolute inset-0 h-8 w-8 object-contain"
+            class="h-8 w-8 object-contain"
             :src="getSymbol(props.suit)"
             alt="symbol avoid"
         />
         <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
             <line x1="0" y1="0" x2="100" y2="100" 
-                stroke="red" stroke-width="3" vector-effect="non-scaling-stroke" />
+                stroke="#dc2626" stroke-width="5" />
         </svg>
     </div>
 
@@ -43,6 +43,6 @@ function getSymbol(collect: string) {
         v-else
         :src="getSymbol(props.suit)"
         alt="symbol collect"
-        class="h-8"
+        class="h-8 w-8 object-contain"
     />
 </template>

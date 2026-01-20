@@ -3,9 +3,7 @@ import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayerScore } from '@/common/composables/usePlayerScore'
-import AcornSymbol from '@/assets/symbols/acorn.png'
-import BerrySymbol from '@/assets/symbols/berry.png'
-import LeaveSymbol from '@/assets/symbols/leave.png'
+import SuitSymbol from '@/common/components/SuitSymbol.vue'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
 
@@ -45,11 +43,12 @@ const allBids = computed(() =>
   gameStore.publicGameState?.round.roundBids.bids ?? []
 )
 
-const { trickDisplays, isBidLost } = usePlayerScore(
-  playerBids.value,
-  tricksWon.value,
-  currentTrick.value,
-  allBids.value
+const { trickDisplays, isBidLost, setCollectionDisplay, pointsDisplay } = usePlayerScore(
+  playerBids,
+  tricksWon,
+  currentTrick,
+  allBids,
+  setCollection
 )
 </script>
 
@@ -72,22 +71,24 @@ const { trickDisplays, isBidLost } = usePlayerScore(
     </div>
 
     <!-- Row: Set Collection -->
-    <div class="flex-1 flex flex-row items-center gap-1">
+    <div v-if="setCollectionDisplay" class="flex-1 flex flex-row items-center gap-1">
       <div class="flex flex-row items-center gap-1">
-        <img :src="AcornSymbol" alt="acorns" class="h-9 opacity-70" />
-        <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollection.acorns }}</span>
-        <img :src="LeaveSymbol" alt="leaves" class="h-9 opacity-70" />
-        <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollection.leaves }}</span>
-        <img :src="BerrySymbol" alt="berries" class="h-9 opacity-70" />
-        <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollection.berries }}</span>
+        <SuitSymbol :suit="setCollectionDisplay.winSuit" />
+        <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollectionDisplay.winScore }}</span>
+        <SuitSymbol :suit="setCollectionDisplay.avoidSuit" :avoid="true" />
+        <span class="text-hasen-red text-lg font-semibold pr-2">{{ setCollectionDisplay.avoidScore }}</span>
       </div>
     </div>
 
     <!-- Row: Points -->
     <div class="flex-1 flex flex-row items-center justify-between">
-      <span class="text-hasen-dark text-lg font-semibold opacity-30">0</span>
+      <span class="text-hasen-dark text-lg font-semibold" :class="pointsDisplay ? '' : 'opacity-30'">
+        {{ pointsDisplay ? pointsDisplay.minPoints : 0 }}
+      </span>
       <PointsToWin size="small" :points="points" />
-      <span class="text-hasen-dark text-lg font-semibold opacity-30">100</span>
+      <span class="text-hasen-dark text-lg font-semibold" :class="pointsDisplay ? '' : 'opacity-30'">
+        {{ pointsDisplay ? pointsDisplay.maxPoints : 100 }}
+      </span>
     </div>
   </div>
 </template>
