@@ -50,7 +50,8 @@ export class BidService {
     game.round.roundBids.playerBids[playerId].push({
       bidId: currentBid.bid_id,
       trickNumber,
-      onLose
+      onLose,
+      hasPlayerWon: null
     })
 
     game.markModified('round.roundBids.playerBids')

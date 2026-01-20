@@ -31,8 +31,7 @@ export function createBidDeck(): BidDecks {
       bid_id: generateUUID(),
       bid_type: def.type,
       bid_score: def.score,
-      win_condition: def.win_condition,
-      bid_winner: null
+      win_condition: def.win_condition
     }
     if (def.type === 'set_collection') {
       setCollectionBidDeck.push(bid)

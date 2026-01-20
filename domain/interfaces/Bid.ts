@@ -1,4 +1,3 @@
-import type { PlayerId } from './Player'
 import type { Suit } from './Card'
 import type { TrickNumber } from './Trick'
 
@@ -27,6 +26,7 @@ export interface PlayerBidEntry {
   bidId: string
   trickNumber: TrickNumber
   onLose: number
+  hasPlayerWon: boolean | null
 }
 
 export interface PlayerBidsMap {
@@ -40,7 +40,6 @@ export interface Bid {
   bid_id: string
   bid_type: BidType
   bid_score: BidScore
-  bid_winner: PlayerId[] | null
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }
 
