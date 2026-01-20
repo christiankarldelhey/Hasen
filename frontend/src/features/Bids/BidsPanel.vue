@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
+import { useHasenStore } from '@/stores/hasenStore'
+import { useBidValidation } from '@/common/composables/useBidValidation'
 import Bid from './Bid.vue'
 
 const gameStore = useGameStore()
+const hasenStore = useHasenStore()
+
+const game = computed(() => gameStore.publicGameState)
+const playerId = computed(() => hasenStore.currentPlayerId || null)
+
+const { isBidDisabled } = useBidValidation(game, playerId)
 
 const roundBids = computed(() => {
   const allBids = gameStore.publicGameState?.round.roundBids.bids || []
@@ -21,7 +29,7 @@ watch(roundBids, (newVal) => {
 </script>
 
 <template>
-  <div class="fixed top-0 right-0 rounded-xl bg-black/60 p-4 z-10">
+  <div class="fixed top-0 right-0 rounded-xl bg-black/70 p-4 z-10">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <!-- Fila de Points (2 bids) -->
       <div class="flex flex-row gap-2">
@@ -30,6 +38,7 @@ watch(roundBids, (newVal) => {
           :key="`points-${index}`"
           :bid="bid"
           type="points"
+          :disabled="isBidDisabled('points', bid)"
         />
       </div>
       
@@ -40,6 +49,7 @@ watch(roundBids, (newVal) => {
           :key="`set-collection-${index}`"
           :bid="bid"
           type="set_collection"
+          :disabled="isBidDisabled('set_collection', bid)"
         />
       </div>
       
@@ -50,6 +60,7 @@ watch(roundBids, (newVal) => {
           :key="`trick-${index}`"
           :bid="bid"
           type="trick"
+          :disabled="isBidDisabled('trick', bid)"
         />
       </div>
     </div>

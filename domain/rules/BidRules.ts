@@ -45,18 +45,38 @@ export function canMakeBid(
   }
 
   const playerBids = game.round.roundBids.playerBids[playerId] || []
-  const hasBidInTrick = playerBids.some(
-    pb => pb.trickNumber === trickNumber && 
-          availableBids.some(ab => ab.bid_id === pb.bidId && ab.bid_type === bidType)
-  )
   
-  if (hasBidInTrick) {
+  // Rule: Solo un bid por turno (por trick)
+  const hasBidInCurrentTrick = playerBids.some(pb => pb.trickNumber === trickNumber)
+  if (hasBidInCurrentTrick) {
     return {
       canMakeBid: false,
-      reason: 'Ya tienes un bid de este tipo en este trick'
+      reason: 'Solo puedes hacer un bid por turno'
     }
   }
 
+  // Rule: No se pueden hacer dos bids del mismo tipo en una ronda
+  const hasBidTypeInRound = playerBids.some(pb => {
+    const bid = game.round.roundBids.bids.find(b => b.bid_id === pb.bidId)
+    return bid?.bid_type === bidType
+  })
+  
+  if (hasBidTypeInRound) {
+    return {
+      canMakeBid: false,
+      reason: 'Ya tienes un bid de este tipo en esta ronda'
+    }
+  }
+
+  // Rule: Máximo 3 bids por ronda
+  if (playerBids.length >= 3) {
+    return {
+      canMakeBid: false,
+      reason: 'Ya tienes el máximo de 3 bids en esta ronda'
+    }
+  }
+
+  // Rule: Máximo 2 jugadores por bid específico
   const allBidsFull = availableBids.every(bid => {
     const biddersCount = Object.values(game.round.roundBids.playerBids)
       .flat()

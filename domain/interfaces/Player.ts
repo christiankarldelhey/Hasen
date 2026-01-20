@@ -7,9 +7,11 @@ export interface Player {
   defaultAvatar: string
 }
 
+
 export const AVAILABLE_PLAYERS: readonly Player[] = [
-  { id: 'player_1' as const, color: '#e39b4a' as const, defaultAvatar: 'avatar1.png' },
-  { id: 'player_2' as const, color: '#4b7c76' as const, defaultAvatar: 'avatar2.png' },
-  { id: 'player_3' as const, color: '#497e1a' as const, defaultAvatar: 'avatar3.png' },
-  { id: 'player_4' as const, color: '#8d3718' as const, defaultAvatar: 'avatar4.png' }
+{ id: 'player_1', color: '#B89B5E', defaultAvatar: 'avatar1.png' }, // Ocre dorado
+{ id: 'player_2', color: '#5E6F68', defaultAvatar: 'avatar2.png' }, // Verde pino apagado
+{ id: 'player_3', color: '#7A8450', defaultAvatar: 'avatar3.png' }, // Verde oliva
+{ id: 'player_4', color: '#7C4A34', defaultAvatar: 'avatar4.png' }, // Marrón rojizo / lacre
+
 ] as const
