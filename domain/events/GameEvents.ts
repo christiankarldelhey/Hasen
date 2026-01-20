@@ -235,6 +235,7 @@ export interface BidMadeEvent {
     bidType: 'points' | 'set_collection' | 'trick'
     trickNumber: 1 | 2 | 3
     bidScore: number
+    onLose: number
   }
 }
 export function createBidMadeEvent(
@@ -242,11 +243,12 @@ export function createBidMadeEvent(
   bidId: string,
   bidType: 'points' | 'set_collection' | 'trick',
   trickNumber: 1 | 2 | 3,
-  bidScore: number
+  bidScore: number,
+  onLose: number
 ): BidMadeEvent {
   return {
     type: 'BID_MADE',
-    payload: { playerId, bidId, bidType, trickNumber, bidScore }
+    payload: { playerId, bidId, bidType, trickNumber, bidScore, onLose }
   }
 }
 // UNION TYPE

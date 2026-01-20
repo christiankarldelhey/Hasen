@@ -137,14 +137,10 @@ const handleBidMade: GameEventHandler = (event, context) => {
     playerBids[payload.playerId] = []
   }
   
-  const onLose = payload.bidType === 'set_collection' 
-    ? (payload.trickNumber === 1 ? -10 : payload.trickNumber === 2 ? -15 : -20)
-    : (payload.trickNumber === 1 ? -5 : payload.trickNumber === 2 ? -10 : -15)
-  
   playerBids[payload.playerId]?.push({
     bidId: payload.bidId,
     trickNumber: payload.trickNumber,
-    onLose
+    onLose: payload.onLose
   })
   
   console.log(`🎯 Bid made by ${payload.playerId}: ${payload.bidType} on trick ${payload.trickNumber} (${payload.bidScore} points)`)

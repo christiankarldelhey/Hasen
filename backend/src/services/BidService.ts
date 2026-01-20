@@ -2,7 +2,7 @@ import { GameModel } from '@/models/Game.js'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { BidType } from '@domain/interfaces/Bid'
 import type { TrickNumber } from '@domain/interfaces/Trick'
-import { canMakeBid } from '@domain/rules/BidRules'
+import { canMakeBid, calculateBidOnLose } from '@domain/rules/BidRules'
 import { createBidMadeEvent } from '@domain/events/GameEvents'
 
 export class BidService {
@@ -41,9 +41,7 @@ export class BidService {
       throw new Error('Bid not found')
     }
 
-    const onLose = bidType === 'set_collection' 
-      ? (trickNumber === 1 ? -10 : trickNumber === 2 ? -15 : -20)
-      : (trickNumber === 1 ? -5 : trickNumber === 2 ? -10 : -15)
+    const onLose = calculateBidOnLose(bidType, trickNumber)
 
     if (!game.round.roundBids.playerBids[playerId]) {
       game.round.roundBids.playerBids[playerId] = []
@@ -63,7 +61,8 @@ export class BidService {
       currentBid.bid_id,
       bidType,
       trickNumber as 1 | 2 | 3,
-      currentBid.bid_score
+      currentBid.bid_score,
+      onLose
     )
 
     return {

@@ -76,3 +76,29 @@ export function canMakeBid(
     canMakeBid: true
   }
 }
+
+/**
+ * Calcula la penalización (onLose) por fallar un bid según las reglas del juego
+ * 
+ * Reglas:
+ * - set_collection: -10 (trick 1), -15 (trick 2), -20 (trick 3)
+ * - trick/points: -20 (trick 1), -25 (trick 2), -30 (trick 3)
+ */
+export function calculateBidOnLose(
+  bidType: BidType,
+  trickNumber: TrickNumber
+): number {
+  if (bidType === 'set_collection') {
+    if (trickNumber === 1) return -10
+    if (trickNumber === 2) return -15
+    if (trickNumber === 3) return -20
+  }
+  
+  if (bidType === 'trick' || bidType === 'points') {
+    if (trickNumber === 1) return -20
+    if (trickNumber === 2) return -25
+    if (trickNumber === 3) return -30
+  }
+  
+  return 0
+}
