@@ -33,7 +33,7 @@ watch(roundBids, (newVal) => {
         />
       </div>
       
-      <!-- Fila de Set Collection / Carrots (2 bids) -->
+      <!-- Fila de Set Collection / set collection (2 bids) -->
       <div class="flex flex-row gap-2">
         <Bid 
           v-for="(bid, index) in roundBids.setCollectionBids"
@@ -43,7 +43,7 @@ watch(roundBids, (newVal) => {
         />
       </div>
       
-      <!-- Fila de Tricks / Lettuce (2 bids) -->
+      <!-- Fila de Tricks / tricks (2 bids) -->
       <div class="flex flex-row gap-2">
         <Bid 
           v-for="(bid, index) in roundBids.trickBids"

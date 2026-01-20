@@ -25,8 +25,8 @@ export const BID_DEFINITIONS: BidDefinition[] = [
   { type: 'points', score: 35, win_condition: { min_points: 22, max_points: 40 } },
 
   // TRICKS
-  { type: 'trick', score: 40, win_condition: { win_trick_position: [4, 5], lose_trick_position: [1, 2, 3] } },
-  { type: 'trick', score: 30, win_condition: { win_trick_position: [4, 5] } },
+  { type: 'trick', score: 40, win_condition: { lose_trick_position: [1, 2, 3], win_trick_position: [4, 5] } },
+  { type: 'trick', score: 30, win_condition: { may_win_trick_position: [1, 2, 3], win_trick_position: [4, 5] } },
   { type: 'trick', score: 55, win_condition: { win_trick_position: [1, 2, 3, 4, 5] } },
   { type: 'trick', score: 45, win_condition: { win_min_tricks: 4, win_max_tricks: 5 } },
   { type: 'trick', score: 45, win_condition: { win_min_tricks: 1, win_max_tricks: 1 } },

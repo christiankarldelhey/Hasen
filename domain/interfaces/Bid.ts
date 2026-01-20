@@ -18,6 +18,7 @@ export interface SetCollectionBidCondition {
 export interface TrickBidCondition {
   win_trick_position?: TrickNumber[]
   lose_trick_position?: TrickNumber[]
+  may_win_trick_position?: TrickNumber[]
   win_min_tricks?: TrickNumber
   win_max_tricks?: TrickNumber
 }

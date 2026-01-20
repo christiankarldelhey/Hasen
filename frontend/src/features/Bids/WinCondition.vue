@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { BidType, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
@@ -8,6 +9,27 @@ const props = defineProps<{
   type: BidType
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }>()
+
+const sortedTricks = computed(() => {
+  if (props.type !== 'trick') return []
+  
+  const tricks: Array<{ position: number, state: 'win' | 'lose' | 'neutral' }> = []
+  const condition = props.win_condition as TrickBidCondition
+  
+  condition.lose_trick_position?.forEach(pos => {
+    tricks.push({ position: pos, state: 'lose' })
+  })
+  
+  condition.win_trick_position?.forEach(pos => {
+    tricks.push({ position: pos, state: 'win' })
+  })
+  
+  condition.may_win_trick_position?.forEach(pos => {
+    tricks.push({ position: pos, state: 'neutral' })
+  })
+  
+  return tricks.sort((a, b) => a.position - b.position)
+})
 
 </script>
 <template>
@@ -36,19 +58,19 @@ const props = defineProps<{
 
     <!-- TRICK -->
     <div v-if="props.type === 'trick'" class="flex flex-row px-1 gap-1">
-        <template v-if="props.win_condition?.lose_trick_position">
-            <TrickSymbol v-for="num in props.win_condition.lose_trick_position" avoid :char="num" />
-        </template>
-        <template v-if="props.win_condition?.win_trick_position">
-            <TrickSymbol v-for="num in props.win_condition.win_trick_position" :char="num" />
-        </template>
+        <TrickSymbol 
+            v-for="trick in sortedTricks" 
+            :key="trick.position"
+            :state="trick.state" 
+            :char="trick.position" 
+        />
         <!-- Ganar determinado truco -->
         <template v-if="props.win_condition.win_min_tricks && props.win_condition.win_min_tricks < props.win_condition.win_max_tricks">
-            <TrickSymbol v-for="num in props.win_condition.win_min_tricks" />
+            <TrickSymbol state="win" v-for="num in props.win_condition.win_min_tricks" />
         </template>
         <template v-if="props.win_condition?.win_max_tricks && props.win_condition?.win_min_tricks === props.win_condition?.win_max_tricks">
-            <TrickSymbol v-for="(_, i) in props.win_condition.win_max_tricks" :key="i"  />
-            <TrickSymbol v-for="(_, i) in (5 - props.win_condition.win_max_tricks)" :key="i" avoid />
+            <TrickSymbol v-for="(_, i) in props.win_condition.win_max_tricks" state="win" :key="i" />
+            <TrickSymbol v-for="(_, i) in (5 - props.win_condition.win_max_tricks)" state="lose" :key="i" />
         </template>
     </div>
 </template>

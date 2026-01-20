@@ -11,6 +11,7 @@ import { useGameStore } from '@/stores/gameStore'
 const props = defineProps<{
   bid: Bid | null
   type: BidType
+  disabled?: boolean
 }>()
 
 const socketGame = useSocketGame()
@@ -34,7 +35,7 @@ const bidders = computed<PlayerId[]>(() => {
 })
 
 const handleBidClick = () => {
-  if (!props.bid) return
+  if (!props.bid || props.disabled) return
   
   const gameId = gameStore.publicGameState?.gameId
   const currentTrick = gameStore.publicGameState?.round.currentTrick
@@ -54,10 +55,12 @@ const handleBidClick = () => {
 <template>
   <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
-    <div class="bg-hasen-base rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-64 cursor-pointer 
-            transition-all duration-150
-            hover:bg-opacity-80 hover:shadow-xl hover:scale-[1.02]
-            active:scale-100" 
+    <div :class="[
+      'rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-64 transition-all duration-150',
+      disabled 
+        ? 'bg-gray-400 cursor-not-allowed opacity-75' 
+        : 'bg-hasen-base cursor-pointer hover:bg-opacity-80 hover:shadow-xl hover:scale-[1.02] active:scale-100'
+    ]" 
      @click="handleBidClick">
       <div class="flex flex-row items-stretch">
         <BidScore :score="bid.bid_score" :bidders="bidders" />
