@@ -9,7 +9,8 @@ import type {
   TrickStartedEvent,
   CardPlayedEvent,
   TrickCompletedEvent,
-  RoundEndedEvent
+  RoundEndedEvent,
+  BidMadeEvent
 } from '@domain/events/GameEvents'
 
 export interface GameEventContext {
@@ -123,6 +124,32 @@ const handleRoundEnded: GameEventHandler = (event, _context) => {
   console.log('🏁 Round ended:', (event as RoundEndedEvent).payload)
 }
 
+const handleBidMade: GameEventHandler = (event, context) => {
+  if (event.type !== 'BID_MADE') return
+  if (!context.publicGameState) return
+  
+  const payload = (event as BidMadeEvent).payload
+  const playerBids = context.publicGameState.round.roundBids.playerBids
+  
+  if (!playerBids) return
+  
+  if (!playerBids[payload.playerId]) {
+    playerBids[payload.playerId] = []
+  }
+  
+  const onLose = payload.bidType === 'set_collection' 
+    ? (payload.trickNumber === 1 ? -10 : payload.trickNumber === 2 ? -15 : -20)
+    : (payload.trickNumber === 1 ? -5 : payload.trickNumber === 2 ? -10 : -15)
+  
+  playerBids[payload.playerId]?.push({
+    bidId: payload.bidId,
+    trickNumber: payload.trickNumber,
+    onLose
+  })
+  
+  console.log(`🎯 Bid made by ${payload.playerId}: ${payload.bidType} on trick ${payload.trickNumber} (${payload.bidScore} points)`)
+}
+
 export const gameEventHandlers: Record<string, GameEventHandler> = {
   'DECK_SHUFFLED': handleDeckShuffled,
   'ROUND_SETUP_COMPLETED': handleRoundSetupCompleted,
@@ -132,6 +159,7 @@ export const gameEventHandlers: Record<string, GameEventHandler> = {
   'CARD_PLAYED': handleCardPlayed,
   'TRICK_COMPLETED': handleTrickCompleted,
   'ROUND_ENDED': handleRoundEnded,
+  'BID_MADE': handleBidMade,
 }
 
 export function processGameEvent(

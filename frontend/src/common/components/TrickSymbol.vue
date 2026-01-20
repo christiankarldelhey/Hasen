@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import TrickSymbol from '@/assets/symbols/trick.svg'
 
-defineProps<{
+const props = withDefaults(defineProps<{
     state?: 'win' | 'lose' | 'neutral' | 'blank'
     char?: number | string
-}>()
+}>(), {
+    state: 'blank',
+    char: undefined
+})
 
 </script>
 
@@ -22,6 +25,5 @@ defineProps<{
         <div v-if="state === 'lose'" class="absolute inset-0 bg-hasen-red opacity-50 pointer-events-none"></div>
         <div v-if="state === 'win'" class="absolute inset-0 bg-hasen-green opacity-60 pointer-events-none"></div>
         <div v-if="state === 'neutral'" class="absolute inset-0 pointer-events-none" style="background: linear-gradient(to bottom right, rgba(47, 99, 16, 0.6) 50%, rgba(155, 44, 0, 0.5) 50%);"></div>
-        <div v-if="state === 'blank'" class="absolute inset-0 bg-hasen-base pointer-events-none"></div>
     </div>
 </template>
