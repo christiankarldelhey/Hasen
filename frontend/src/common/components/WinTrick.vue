@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import TrickSymbol from '@/assets/symbols/trick.png'
-import CrownSymbol from '@/assets/symbols/crown.svg'
 
 defineProps<{
     tricks: number | number[]
@@ -19,10 +18,5 @@ defineProps<{
         :src="TrickSymbol"
         alt="trick symbol"
         />
-        <!-- <img
-        class="absolute inset-0 h-9 w-6 top-[-25px]"
-        :src="CrownSymbol"
-        alt="crown symbol"
-        /> -->
     </div>
 </template>

@@ -1,29 +1,13 @@
 <script setup lang="ts">
 import type { BidType, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
-import AcornSymbol from '@/assets/symbols/acorn.png'
-import BerrySymbol from '@/assets/symbols/berry.png'
-import LeaveSymbol from '@/assets/symbols/leave.png'
-import WinTrick from './WinTrick.vue'
-import LoseTrick from './LoseTrick.vue'
-import PointsToWin from './PointsToWin.vue'
+import TrickSymbol from '@/common/components/TrickSymbol.vue'
+import PointsToWin from '@/common/components/PointsToWin.vue'
+import SuitSymbol from '@/common/components/SuitSymbol.vue'
 
 const props = defineProps<{
   type: BidType
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }>()
-
-function getSymbol(collect: string) {
-    switch (collect) {
-    case 'acorns':
-        return AcornSymbol
-    case 'berries':
-        return BerrySymbol
-    case 'leaves':
-        return LeaveSymbol    
-    default:
-        return 'acorns'
-}
-}
 
 </script>
 <template>
@@ -39,26 +23,12 @@ function getSymbol(collect: string) {
         class="px-1">
             <div class="flex flex-row justify-center">
                 <div class="flex flex-row pr-2">
-                    <img
-                    :src="getSymbol(props.win_condition.win_suit)"
-                    alt="symbol collect"
-                    class="h-8"
-                    />
+                    <SuitSymbol :suit="props.win_condition.win_suit" />
                     <span class="text-hasen-green text-md pt-1">10</span>
                 </div>
 
                 <div class="flex flex-row">
-                    <div class="relative flex flex-row w-10 flex-none pl-2">
-                        <img
-                        class="absolute inset-0 h-8 w-8 object-contain"
-                        :src="getSymbol(props.win_condition.avoid_suit)"
-                        alt="symbol avoid"
-                        />
-                        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <line x1="0" y1="0" x2="100" y2="100" 
-                                stroke="red" stroke-width="3" vector-effect="non-scaling-stroke" />
-                        </svg>
-                    </div>
+                    <SuitSymbol :suit="props.win_condition.avoid_suit" :avoid="true" />
                     <span class="text-hasen-red text-md pt-1">-10</span>
                 </div>
             </div> 
@@ -67,18 +37,18 @@ function getSymbol(collect: string) {
     <!-- TRICK -->
     <div v-if="props.type === 'trick'" class="flex flex-row px-1 gap-1">
         <template v-if="props.win_condition?.lose_trick_position">
-            <LoseTrick :tricks="props.win_condition.lose_trick_position" />
+            <TrickSymbol v-for="num in props.win_condition.lose_trick_position" avoid :char="num" />
         </template>
         <template v-if="props.win_condition?.win_trick_position">
-            <WinTrick :tricks="props.win_condition.win_trick_position" />
+            <TrickSymbol v-for="num in props.win_condition.win_trick_position" :char="num" />
         </template>
         <!-- Ganar determinado truco -->
         <template v-if="props.win_condition.win_min_tricks && props.win_condition.win_min_tricks < props.win_condition.win_max_tricks">
-            <WinTrick :tricks="props.win_condition.win_min_tricks"  />
+            <TrickSymbol v-for="num in props.win_condition.win_min_tricks" />
         </template>
         <template v-if="props.win_condition?.win_max_tricks && props.win_condition?.win_min_tricks === props.win_condition?.win_max_tricks">
-            <WinTrick :tricks="props.win_condition.win_min_tricks"  />
-            <LoseTrick :tricks="1"  />
+            <TrickSymbol v-for="(_, i) in props.win_condition.win_max_tricks" :key="i"  />
+            <TrickSymbol v-for="(_, i) in (5 - props.win_condition.win_max_tricks)" :key="i" avoid />
         </template>
     </div>
 </template>

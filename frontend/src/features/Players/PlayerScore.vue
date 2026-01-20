@@ -7,7 +7,7 @@ import AcornSymbol from '@/assets/symbols/acorn.png'
 import BerrySymbol from '@/assets/symbols/berry.png'
 import LeaveSymbol from '@/assets/symbols/leave.png'
 import TrickSymbol from '@/assets/symbols/trick.png'
-import PointsToWin from '@/features/Bids/PointsToWin.vue'
+import PointsToWin from '@/common/components/PointsToWin.vue'
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
@@ -28,6 +28,14 @@ const setCollection = computed(() => playerRoundScore.value?.setCollection ?? {
 })
 
 const tricksWon = computed(() => playerRoundScore.value?.tricksWon ?? [])
+
+const playerBids = computed(() => {
+  const currentPlayerId = hasenStore.currentPlayerId
+  if (!currentPlayerId || !gameStore.publicGameState?.round.roundBids.playerBids) {
+    return []
+  }
+  return gameStore.publicGameState.round.roundBids.playerBids[currentPlayerId] || []
+})
 
 const trickNumbers: TrickNumber[] = [1, 2, 3, 4, 5]
 </script>

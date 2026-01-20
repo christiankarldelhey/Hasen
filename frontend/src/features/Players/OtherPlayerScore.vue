@@ -7,7 +7,7 @@ import AcornSymbol from '@/assets/symbols/acorn.png'
 import BerrySymbol from '@/assets/symbols/berry.png'
 import LeaveSymbol from '@/assets/symbols/leave.png'
 import TrickSymbol from '@/assets/symbols/trick.png'
-import PointsToWin from '@/features/Bids/PointsToWin.vue'
+import PointsToWin from '@/common/components/PointsToWin.vue'
 
 interface Props {
   playerId: PlayerId
