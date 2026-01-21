@@ -56,10 +56,10 @@ const handleBidClick = () => {
   <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
     <div :class="[
-      'rounded-xl px-1.5 py-2 shadow-lg max-h-16 min-w-64 transition-all duration-150',
+      'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-64 transition-all duration-150 relative',
       disabled 
-        ? 'bg-[#B8B2A6] cursor-normal' 
-        : 'bg-hasen-base cursor-pointer hover:bg-opacity-80 hover:shadow-xl hover:scale-[1.02] active:scale-100'
+        ? 'bg-hasen-base cursor-not-allowed' 
+        : 'bg-hasen-base cursor-pointer hover:bg-[#f6e9c4] hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
     ]" 
      @click="handleBidClick">
       <div class="flex flex-row items-stretch">
@@ -70,18 +70,49 @@ const handleBidClick = () => {
         <div class="border-l border-hasen-dark w-[20%] min-w-0 flex items-center justify-center">
           <div class="relative w-12 h-12 flex justify-center items-center">
             <Hare 
+              v-if="bidders.length >= 1 && bidders[0]" 
+              :class="'hare-1 absolute z-0 ' + (bidders.length === 2 ? 'top-1 left-4' : 'top-1 left-3')" 
+              :player-id="bidders[0]" 
+              size="32px" />
+            <Hare 
               v-if="bidders.length >= 2 && bidders[1]" 
               class="hare-2 absolute top-1 left-2 z-10" 
               :player-id="bidders[1]" 
               size="32" />
-            <Hare 
-              v-if="bidders.length >= 1 && bidders[0]" 
-              class="hare-1 absolute top-1 left-4 z-0" 
-              :player-id="bidders[0]" 
-              size="32px" />
+
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
+.bid-clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+</style>

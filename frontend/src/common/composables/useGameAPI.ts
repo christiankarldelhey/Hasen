@@ -3,13 +3,16 @@ import { useLobbyStore } from '../../stores/lobbyStore'
 import { useHasenStore } from '../../stores/hasenStore'
 import { useGameStore } from '../../stores/gameStore'
 import type { PlayerId } from '@domain/interfaces/Player'
+import { useMinimumLoadingTime } from './useMinimumLoadingTime'
 
 export function useGameAPI() {
   const lobbyStore = useLobbyStore()
   const hasenStore = useHasenStore()
   const gameStore = useGameStore()
+  const { startLoading, stopLoading } = useMinimumLoadingTime(1000)
 
   async function fetchGames() {
+    startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
@@ -19,11 +22,13 @@ export function useGameAPI() {
       lobbyStore.setError('Error when fetching games')
       console.error(err)
     } finally {
+      await stopLoading()
       lobbyStore.setLoading(false)
     }
   }
 
   async function createGame(gameName: string, hostPlayerId: PlayerId) {
+    startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
@@ -50,6 +55,7 @@ export function useGameAPI() {
       console.error('Error creating new game:', err)
       throw err
     } finally {
+      await stopLoading()
       lobbyStore.setLoading(false)
     }
   }
@@ -74,6 +80,7 @@ export function useGameAPI() {
   }
 
   async function deleteGame(gameId: string, hostPlayerId: string) {
+    startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
@@ -84,11 +91,13 @@ export function useGameAPI() {
       console.error('Error deleting game:', err)
       throw err
     } finally {
+      await stopLoading()
       lobbyStore.setLoading(false)
     }
   }
 
   async function fetchPlayerGameState(gameId: string) {
+    startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
@@ -109,11 +118,13 @@ export function useGameAPI() {
       console.error('Error fetching game state:', err)
       throw err
     } finally {
+      await stopLoading()
       lobbyStore.setLoading(false)
     }
   }
 
   async function startGame(gameId: string, hostPlayerId: string) {
+    startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
@@ -123,6 +134,7 @@ export function useGameAPI() {
       console.error('Error starting game:', err)
       throw err
     } finally {
+      await stopLoading()
       lobbyStore.setLoading(false)
     }
   }

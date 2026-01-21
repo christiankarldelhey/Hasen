@@ -50,6 +50,35 @@ const { trickDisplays, isBidLost, setCollectionDisplay, pointsDisplay } = usePla
   allBids,
   setCollection
 )
+
+const suitOrder = ['acorns', 'leaves', 'berries'] as const
+
+const suitDisplays = computed(() => {
+  return suitOrder.map(suit => {
+    const count = setCollection.value[suit] || 0
+    
+    if (!setCollectionDisplay.value) {
+      return {
+        suit,
+        count,
+        isWin: false,
+        isAvoid: false,
+        score: null
+      }
+    }
+    
+    const isWin = setCollectionDisplay.value.winSuit === suit
+    const isAvoid = setCollectionDisplay.value.avoidSuit === suit
+    
+    return {
+      suit,
+      count,
+      isWin,
+      isAvoid,
+      score: isWin ? setCollectionDisplay.value.winScore : (isAvoid ? setCollectionDisplay.value.avoidScore : null)
+    }
+  })
+})
 </script>
 
 <template>
@@ -71,12 +100,24 @@ const { trickDisplays, isBidLost, setCollectionDisplay, pointsDisplay } = usePla
     </div>
 
     <!-- Row: Set Collection -->
-    <div v-if="setCollectionDisplay" class="flex-1 flex flex-row items-center gap-1">
+    <div class="flex-1 flex flex-row items-center gap-1">
       <div class="flex flex-row items-center gap-1">
-        <SuitSymbol :suit="setCollectionDisplay.winSuit" />
-        <span class="text-hasen-dark text-lg font-semibold pr-2">{{ setCollectionDisplay.winScore }}</span>
-        <SuitSymbol :suit="setCollectionDisplay.avoidSuit" :avoid="true" />
-        <span class="text-hasen-red text-lg font-semibold pr-2">{{ setCollectionDisplay.avoidScore }}</span>
+        <template v-for="suitDisplay in suitDisplays" :key="suitDisplay.suit">
+          <SuitSymbol 
+            :suit="suitDisplay.suit" 
+            :avoid="suitDisplay.isAvoid"
+            :class="!suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''"
+          />
+          <span 
+            class="text-lg font-semibold pr-2"
+            :class="[
+              suitDisplay.isAvoid ? 'text-hasen-red' : 'text-hasen-dark',
+              !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+            ]"
+          >
+            {{ suitDisplay.score !== null ? suitDisplay.score : suitDisplay.count }}
+          </span>
+        </template>
       </div>
     </div>
 
