@@ -58,8 +58,8 @@ const handleBidClick = () => {
     <div :class="[
       'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-64 transition-all duration-150 relative',
       disabled 
-        ? 'bg-hasen-base cursor-not-allowed' 
-        : 'bg-hasen-base cursor-pointer hover:bg-[#f6e9c4] hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
+        ? 'bg-hasen-base cursor-not-allowed bg-color-hasen' 
+        : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
     ]" 
      @click="handleBidClick">
       <div class="flex flex-row items-stretch">

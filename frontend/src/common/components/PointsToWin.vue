@@ -16,7 +16,7 @@ defineProps<{
     />
 
     <span
-      class="absolute inset-0 text-black flex items-center justify-center font-semibold text-lg pointer-events-none pb-2"
+      class="absolute inset-0 text-hasen-dark flex items-center justify-center font-semibold text-lg pointer-events-none pb-2"
     >
       {{ points }}
     </span>

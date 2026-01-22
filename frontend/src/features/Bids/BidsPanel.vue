@@ -31,28 +31,7 @@ watch(roundBids, (newVal) => {
 <template>
   <div class="fixed top-0 right-0 rounded-xl bg-black/60 p-4 z-10 m-4">
     <div v-if="roundBids" class="flex flex-col gap-2">
-      <!-- Fila de Points (2 bids) -->
-      <div class="flex flex-row gap-2">
-        <Bid 
-          v-for="(bid, index) in roundBids.pointsBids"
-          :key="`points-${index}`"
-          :bid="bid"
-          type="points"
-          :disabled="isBidDisabled('points', bid)"
-        />
-      </div>
-      
-      <!-- Fila de Set Collection / set collection (2 bids) -->
-      <div class="flex flex-row gap-2">
-        <Bid 
-          v-for="(bid, index) in roundBids.setCollectionBids"
-          :key="`set-collection-${index}`"
-          :bid="bid"
-          type="set_collection"
-          :disabled="isBidDisabled('set_collection', bid)"
-        />
-      </div>
-      
+
       <!-- Fila de Tricks / tricks (2 bids) -->
       <div class="flex flex-row gap-2">
         <Bid 
@@ -63,6 +42,29 @@ watch(roundBids, (newVal) => {
           :disabled="isBidDisabled('trick', bid)"
         />
       </div>
+
+      <!-- Fila de Points (2 bids) -->
+      <div class="flex flex-row gap-2">
+        <Bid 
+          v-for="(bid, index) in roundBids.pointsBids"
+          :key="`points-${index}`"
+          :bid="bid"
+          type="points"
+          :disabled="isBidDisabled('points', bid)"
+        />
+      </div>
+
+      <!-- Fila de Set Collection / set collection (2 bids) -->
+      <div class="flex flex-row gap-2">
+        <Bid 
+          v-for="(bid, index) in roundBids.setCollectionBids"
+          :key="`set-collection-${index}`"
+          :bid="bid"
+          type="set_collection"
+          :disabled="isBidDisabled('set_collection', bid)"
+        />
+      </div>
+
     </div>
     <div v-else class="bg-red-500 text-white p-2 rounded">
       No round bids data

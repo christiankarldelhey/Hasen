@@ -3,8 +3,10 @@ import TrickSymbol from '@/assets/symbols/trick.svg'
 
 const props = withDefaults(defineProps<{
     state?: 'win' | 'lose' | 'neutral' | 'blank'
+    size?: 'small' | 'large'
     char?: number | string
 }>(), {
+    size: 'small',
     state: 'blank',
     char: undefined
 })
@@ -12,13 +14,14 @@ const props = withDefaults(defineProps<{
 </script>
 
 <template>
-    <div class="relative h-9 w-6 flex-none inline-block">
+    <div 
+        :class="['relative flex-none inline-block ' + (size === 'small' ? 'h-9 w-6' : 'h-11 w-8')]">
         <span v-if="char !== undefined && char !== null" 
-            class="absolute inset-0 left-1 text-xl pt-1 z-10 text-hasen-dark">
+            :class="'absolute pt-1 z-10 text-hasen-dark ' + (size === 'small' ? 'inset-0 left-1 text-xl' : 'top-1 left-2 text-2xl')">
             {{ char }}
         </span>
         <img
-        class="absolute inset-0 h-9 w-6"
+        :class="'absolute inset-0 ' + (size === 'small' ? 'h-9 w-6' : 'h-11 w-8')"
         :src="TrickSymbol"
         alt="trick symbol"
         />

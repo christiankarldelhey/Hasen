@@ -6,9 +6,17 @@ import LeaveSymbol from '@/assets/symbols/leave.png'
 const props = withDefaults(defineProps<{
   suit: string
   avoid?: boolean
+  size?: 'small' | 'medium' | 'large'
 }>(), {
-  avoid: false
+  avoid: false,
+  size: 'large'
 })
+
+const sizeClasses = {
+  small: 'h-5 w-5',
+  medium: 'h-8 w-8',
+  large: 'h-8 w-8'
+}
 
 function getSymbol(collect: string) {
     switch (collect) {
@@ -26,9 +34,9 @@ function getSymbol(collect: string) {
 
 <template>
     <!-- Version with avoid (crossed out) -->
-    <div v-if="props.avoid" class="relative h-8 w-8 flex-shrink-0">
+    <div v-if="props.avoid" :class="['relative flex-shrink-0', sizeClasses[props.size]]">
         <img
-            class="h-8 w-8 object-contain"
+            :class="['object-contain', sizeClasses[props.size]]"
             :src="getSymbol(props.suit)"
             alt="symbol avoid"
         />
@@ -43,6 +51,6 @@ function getSymbol(collect: string) {
         v-else
         :src="getSymbol(props.suit)"
         alt="symbol collect"
-        class="h-8 w-8 object-contain"
+        :class="['object-contain', sizeClasses[props.size]]"
     />
 </template>
