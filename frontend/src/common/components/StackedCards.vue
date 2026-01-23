@@ -29,7 +29,7 @@ const stackedCardsWidth = computed(() => {
 
 <template>
   <div 
-    class="relative flex h-[120px]"
+    class="relative flex h-[150px]"
     :style="{ width: `${stackedCardsWidth}px` }"
   >
     <div v-if="publicCard" class="flex justify-center z-10">
@@ -39,7 +39,7 @@ const stackedCardsWidth = computed(() => {
     <div 
       v-for="(_, index) in stackedCards" 
       :key="index"
-      class="absolute rounded-lg w-[70px] h-[120px]"
+      class="absolute rounded-lg w-[90px] h-[150px]"
       :style="{
         backgroundImage: `url(${cardBack})`,
         backgroundSize: 'cover',

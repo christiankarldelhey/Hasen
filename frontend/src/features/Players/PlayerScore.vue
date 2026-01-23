@@ -7,6 +7,7 @@ import SuitSymbol from '@/common/components/SuitSymbol.vue'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
 import PlayerBidScore from '@/features/Bids/PlayerBidScore.vue'
+import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
@@ -118,72 +119,146 @@ const pointsBidScore = computed(() => {
     onLose: pointsBid.value.entry.onLose
   }
 })
+
+const rowsWithBids = computed(() => {
+  const rows = [
+    {
+      id: 'tricks',
+      hasBid: trickBidScore.value.score !== null,
+      order: 1
+    },
+    {
+      id: 'points',
+      hasBid: pointsBidScore.value.score !== null,
+      order: 2
+    },
+    {
+      id: 'setCollection',
+      hasBid: setCollectionBidScore.value.score !== null,
+      order: 3
+    }
+  ]
+  
+  return rows.sort((a, b) => {
+    if (a.hasBid && !b.hasBid) return -1
+    if (!a.hasBid && b.hasBid) return 1
+    return a.order - b.order
+  })
+})
+
+const playerColor = computed(() => {
+  const currentPlayerId = hasenStore.currentPlayerId
+  const player = AVAILABLE_PLAYERS.find(p => p.id === currentPlayerId)
+  return player?.color || '#B89B5E'
+})
+
+const getRowClasses = (hasBid: boolean, position: 'first' | 'middle' | 'last') => {
+  if (!hasBid) return ''
+  
+  const baseClasses = 'bg-amber-50/20 border-l-4 border-b'
+  
+  if (position === 'first') {
+    return `${baseClasses} rounded-tl-xl`
+  } else if (position === 'last') {
+    return `${baseClasses} rounded-bl-xl`
+  }
+  
+  return baseClasses
+}
+
+const getRowStyle = (hasBid: boolean) => {
+  if (!hasBid) return {}
+  
+  return {
+    borderLeftColor: playerColor.value,
+    borderBottomColor: playerColor.value
+  }
+}
 </script>
 
 <template>
-  <div class="rounded-xl px-4 py-2 shadow-lg w-full bg-hasen-base flex flex-col">
+  <div class="rounded-xl shadow-lg w-full bg-hasen-base flex flex-col">
 
-    <!-- Row: Tricks Won -->
-    <div class="flex-1 flex flex-row items-center gap-1 border-b border-hasen-dark min-h-12 py-2 px-1">
-      <div v-if="isBidLost" class="text-hasen-red text-lg font-semibold">
-        You lose this bid
-      </div>
-      <div v-else class="flex flex-row items-center gap-1">
-        <TrickSymbol
-          v-for="trick in trickDisplays"
-          size="large"
-          :key="trick.trickNumber"
-          :state="trick.state"
-          :char="trick.trickNumber"
-          :style="{ opacity: trick.opacity }"
+    <template v-for="(row, index) in rowsWithBids" :key="row.id">
+      
+      <!-- Row: Tricks Won -->
+      <div 
+        v-if="row.id === 'tricks'"
+        class="flex flex-row items-center gap-1 px-4 border-b border-hasen-dark h-16 py-2 px-1 transition-colors"
+        :class="getRowClasses(row.hasBid, index === 0 ? 'first' : index === rowsWithBids.length - 1 ? 'last' : 'middle')"
+        :style="getRowStyle(row.hasBid)"
+      >
+        <div v-if="isBidLost" class="text-hasen-red text-lg font-semibold">
+          You lose this bid
+        </div>
+        <div v-else class="flex flex-row items-center gap-1">
+          <TrickSymbol
+            v-for="trick in trickDisplays"
+            size="large"
+            :key="trick.trickNumber"
+            :state="trick.state"
+            :char="trick.trickNumber"
+            :style="{ opacity: trick.opacity }"
+          />
+        </div>
+        <PlayerBidScore 
+          :score="trickBidScore.score" 
+          :onLose="trickBidScore.onLose"
+          :showLose="true"
         />
       </div>
-      <PlayerBidScore 
-        :score="trickBidScore.score" 
-        :onLose="trickBidScore.onLose"
-        :showLose="true"
-      />
-    </div>
 
-    <!-- Row: Points -->
-    <div class="flex-1 flex flex-row items-center justify-between py-2 px-0 border-b border-hasen-dark">
-      <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.minPoints : 0" :class="pointsDisplay ? '' : 'opacity-30'" />
-      <span class="text-hasen-dark text-2xl">
-        {{ points }}
-      </span>
-      <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
-      <PlayerBidScore 
-        :score="pointsBidScore.score" 
-        :onLose="pointsBidScore.onLose"
-        :showLose="true"
-      />
-    </div>
-
-    <!-- Row: Set Collection -->
-    <div class="flex-1 flex flex-row items-center justify-between py-3">
-      <div v-for="suitDisplay in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
-        <SuitSymbol 
-          :suit="suitDisplay.suit" 
-          :avoid="suitDisplay.isAvoid"
-          :class="!suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''"
-        />
-        <span 
-          class="text-lg font-semibold"
-          :class="[
-            suitDisplay.isAvoid ? 'text-hasen-red' : 'text-hasen-dark',
-            !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
-          ]"
-        >
-          {{ suitDisplay.score !== null ? suitDisplay.score : suitDisplay.count }}
+      <!-- Row: Points -->
+      <div 
+        v-if="row.id === 'points'"
+        class="flex flex-row items-center justify-between py-2 px-4 border-b border-hasen-dark h-16 transition-colors"
+        :class="getRowClasses(row.hasBid, index === 0 ? 'first' : index === rowsWithBids.length - 1 ? 'last' : 'middle')"
+        :style="getRowStyle(row.hasBid)"
+      >
+        <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.minPoints : 0" :class="pointsDisplay ? '' : 'opacity-30'" />
+        <span class="text-hasen-dark text-2xl">
+          {{ points }}
         </span>
+        <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
+        <PlayerBidScore 
+          :score="pointsBidScore.score" 
+          :onLose="pointsBidScore.onLose"
+          :showLose="true"
+        />
       </div>
-      <PlayerBidScore 
-        :score="setCollectionBidScore.score" 
-        :onLose="setCollectionBidScore.onLose"
-        :showLose="true"
-        :winSuit="setCollectionDisplay?.winSuit ?? null"
-        :avoidSuit="setCollectionDisplay?.avoidSuit ?? null"
-      />
-    </div>
+
+      <!-- Row: Set Collection -->
+      <div 
+        v-if="row.id === 'setCollection'"
+        class="flex flex-row items-center justify-between py-2 px-4 h-16 transition-colors"
+        :class="getRowClasses(row.hasBid, index === 0 ? 'first' : index === rowsWithBids.length - 1 ? 'last' : 'middle')"
+        :style="getRowStyle(row.hasBid)"
+      >
+        <div v-for="suitDisplay in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
+          <SuitSymbol 
+            :suit="suitDisplay.suit" 
+            :avoid="suitDisplay.isAvoid"
+            :class="!suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''"
+          />
+          <span 
+            class="text-lg font-semibold"
+            :class="[
+              suitDisplay.isAvoid ? 'text-hasen-red' : 'text-hasen-dark',
+              !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+            ]"
+          >
+            {{ suitDisplay.score !== null ? suitDisplay.score : suitDisplay.count }}
+          </span>
+        </div>
+        <PlayerBidScore 
+          :score="setCollectionBidScore.score" 
+          :onLose="setCollectionBidScore.onLose"
+          :showLose="true"
+          :winSuit="setCollectionDisplay?.winSuit ?? null"
+          :avoidSuit="setCollectionDisplay?.avoidSuit ?? null"
+        />
+      </div>
+      
+    </template>
   </div>
 </template>

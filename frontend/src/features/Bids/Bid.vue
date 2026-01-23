@@ -2,11 +2,13 @@
 import { computed } from 'vue'
 import type { Bid, BidType } from '@domain/interfaces/Bid'
 import type { PlayerId } from '@domain/interfaces/Player'
+import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
 import WinCondition from './WinCondition.vue'
 import BidScore from './BidScore.vue'
 import Hare from '@/common/components/Hare.vue'
 import { useSocketGame } from '@/common/composables/useSocketGame'
 import { useGameStore } from '@/stores/gameStore'
+import { useHasenStore } from '@/stores/hasenStore'
 
 const props = defineProps<{
   bid: Bid | null
@@ -16,6 +18,7 @@ const props = defineProps<{
 
 const socketGame = useSocketGame()
 const gameStore = useGameStore()
+const hasenStore = useHasenStore()
 
 const bidders = computed<PlayerId[]>(() => {
   if (!props.bid) return []
@@ -32,6 +35,31 @@ const bidders = computed<PlayerId[]>(() => {
   })
   
   return Array.from(biddersSet)
+})
+
+const currentPlayerBidColor = computed(() => {
+  const currentPlayerId = hasenStore.currentPlayerId
+  if (!currentPlayerId || !bidders.value.includes(currentPlayerId)) return null
+  
+  const player = AVAILABLE_PLAYERS.find(p => p.id === currentPlayerId)
+  return player?.color || null
+})
+
+const bidCardClasses = computed(() => {
+  const baseClasses = 'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-64 transition-all duration-150 relative'
+  const stateClasses = props.disabled 
+    ? 'bg-hasen-base cursor-not-allowed bg-color-hasen' 
+    : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
+  
+  return `${baseClasses} ${stateClasses}`
+})
+
+const bidCardStyle = computed(() => {
+  if (!currentPlayerBidColor.value) return {}
+  
+  return {
+    borderLeft: `4px solid ${currentPlayerBidColor.value}`
+  }
 })
 
 const handleBidClick = () => {
@@ -55,13 +83,11 @@ const handleBidClick = () => {
 <template>
   <div v-if="bid" class="flex flex-row items-center gap-2">    
     <!-- Bid card -->
-    <div :class="[
-      'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-64 transition-all duration-150 relative',
-      disabled 
-        ? 'bg-hasen-base cursor-not-allowed bg-color-hasen' 
-        : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
-    ]" 
-     @click="handleBidClick">
+    <div 
+      :class="bidCardClasses"
+      :style="bidCardStyle"
+      @click="handleBidClick"
+    >
       <div class="flex flex-row items-stretch">
         <BidScore :score="bid.bid_score" :bidders="bidders" />
         <div class="w-[60%] flex flex-row items-center justify-center gap-2 min-w-0">
