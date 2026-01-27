@@ -2,7 +2,7 @@
 import { computed, watch } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
-import { useBidValidation } from '@/common/composables/useBidValidation'
+import { useBidValidation } from '@/features/Bids/composables/useBidValidation'
 import Bid from './Bid.vue'
 
 const gameStore = useGameStore()

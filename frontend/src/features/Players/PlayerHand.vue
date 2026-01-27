@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
-import PlayerScore from './PlayerScore.vue';
+import PlayerBidScore from '../Bids/PlayerBidScore.vue';
 import PlayerCards from './PlayerCards.vue';
 import PlayerGameInfo from './PlayerGameInfo.vue';
 import ActionButton from '@/common/components/ActionButton.vue';
@@ -76,7 +76,7 @@ const handleFinishTurn = () => {
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
       <div class="pointer-events-auto">
-        <PlayerScore />
+        <PlayerBidScore />
       </div>
       
       <div class="flex flex-col gap-3 pointer-events-auto">

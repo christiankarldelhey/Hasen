@@ -21,6 +21,14 @@ export interface PointsDisplay {
   maxPoints: number
 }
 
+export interface SuitDisplay {
+  suit: Suit
+  count: number
+  isWin: boolean
+  isAvoid: boolean
+  score: number | null
+}
+
 export function usePlayerScore(
   playerBids: ComputedRef<PlayerBidEntry[]>,
   tricksWon: ComputedRef<TrickNumber[]>,
@@ -194,6 +202,50 @@ export function usePlayerScore(
     })
   })
 
+  const suitDisplays = computed((): SuitDisplay[] => {
+    if (!setCollection) return []
+    
+    const suitOrder: Suit[] = ['acorns', 'leaves', 'berries']
+    
+    const displays = suitOrder.map(suit => {
+      const count = setCollection.value[suit] || 0
+      
+      if (!setCollectionDisplay.value) {
+        return {
+          suit,
+          count,
+          isWin: false,
+          isAvoid: false,
+          score: null
+        }
+      }
+      
+      const isWin = setCollectionDisplay.value.winSuit === suit
+      const isAvoid = setCollectionDisplay.value.avoidSuit === suit
+      
+      return {
+        suit,
+        count,
+        isWin,
+        isAvoid,
+        score: isWin ? setCollectionDisplay.value.winScore : (isAvoid ? setCollectionDisplay.value.avoidScore : null)
+      }
+    })
+    
+    // When setCollectionDisplay is active, reorder: winSuit first, avoidSuit second, hide the third
+    if (setCollectionDisplay.value) {
+      return displays
+        .filter(d => d.isWin || d.isAvoid)
+        .sort((a, b) => {
+          if (a.isWin) return -1
+          if (b.isWin) return 1
+          return 0
+        })
+    }
+    
+    return displays
+  })
+
   return {
     trickBid,
     isBidLost,
@@ -201,6 +253,7 @@ export function usePlayerScore(
     setCollectionBid,
     setCollectionDisplay,
     pointsBid,
-    pointsDisplay
+    pointsDisplay,
+    suitDisplays
   }
 }
