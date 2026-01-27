@@ -26,13 +26,19 @@ export interface Game {
   playerTurnOrder: PlayerId[]
   tricksHistory: Trick[]
   bidsHistory: Bid[];
-  playerScores: PlayerRoundScore[];
+  playerScores: PlayerScore[];
   gameSettings: {
     minPlayers: number
     maxPlayers: number
     pointsToWin: number
   }
 }
+
+export interface PlayerScore {
+  playerId: PlayerId;
+  score: number;
+}
+
 export interface LobbyGame {
   gameId: string;
   gameName: string;

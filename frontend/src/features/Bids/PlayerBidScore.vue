@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-1 min-w-[60px]">
+  <div class="flex flex-col items-center gap-1 min-w-[60px] py-1 px-3">
     <!-- Win Crown -->
     <div v-if="score !== null" class="flex flex-row items-center justify-center gap-0.5 w-full">
       <div v-if="!avoidSuit" class="relative h-6 w-6 flex-shrink-0">

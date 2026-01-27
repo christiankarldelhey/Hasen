@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PlayingCard } from '@domain/interfaces'
 import { computed } from 'vue'
-import deckSprite from '@/assets/sprites/deck-sprite.jpg'
+import deckSprite from '@/assets/sprites/deck-sprite_v2.jpg'
 
 interface Props {
   card: PlayingCard

@@ -12,7 +12,7 @@ const props = defineProps<{
 const cardPositions = computed(() => {
   const totalCards = props.cards.length;
   const cardWidth = 180;
-  const cardSpacing = 120; // More spacing between cards
+  const cardSpacing = 150; // Spacing to keep top-right corner visible
   
   // Random rotations for each card (fixed values for consistency)
   const randomRotations = [-4, 2, -1, 3];

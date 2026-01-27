@@ -14,7 +14,7 @@ const deckLayers = 5
         backgroundImage: `url(${cardBack})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        transform: `translate(${(index - 1) * 2}px, ${(index - 1) * -1}px)`,
+        transform: `translate(${(index - 1) * -1}px, ${(index - 1) * 2}px)`,
         zIndex: deckLayers - index
       }"
     />

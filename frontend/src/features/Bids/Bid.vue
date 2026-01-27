@@ -113,32 +113,3 @@ const handleBidClick = () => {
   </div>
 </template>
 
-<style scoped>
-@keyframes shimmer {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  60% {
-    opacity: 1;
-  }
-}
-
-.bid-clickable::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 0.75rem;
-  padding: 2px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.7)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: shimmer 4s ease-in-out infinite;
-  pointer-events: none;
-}
-</style>
