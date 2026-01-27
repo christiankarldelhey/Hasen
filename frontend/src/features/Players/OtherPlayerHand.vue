@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
-import OtherPlayerInfo from '@/common/components/OtherPlayerInfo.vue'
+import PlayerInfo from '@/common/components/PlayerInfo.vue'
 import StackedCards from '@/common/components/StackedCards.vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 
@@ -51,7 +51,7 @@ const positionClasses = computed(() => {
     <template v-if="position === 'top'">
       <div class="flex flex-row gap-2 items-center">
         <div class="flex flex-row gap-2">
-          <OtherPlayerInfo :player-id="playerId" />
+          <PlayerInfo :player-id="playerId" />
           <StackedCards 
             :count="privateHandsCount" 
             :public-card="publicCard || undefined" 
@@ -66,7 +66,7 @@ const positionClasses = computed(() => {
       <div class="flex flex-col gap-2">
 
         <template v-if="position === 'right'">
-          <OtherPlayerInfo :player-id="playerId" />
+          <PlayerInfo :player-id="playerId" />
           <StackedCards 
             :public-card="publicCard || undefined"
             :count="privateHandsCount" 
@@ -75,7 +75,7 @@ const positionClasses = computed(() => {
         </template>
 
         <template v-if="position === 'left'">
-          <OtherPlayerInfo :player-id="playerId" />
+          <PlayerInfo :player-id="playerId" />
           <StackedCards 
             :public-card="publicCard || undefined"
             :count="privateHandsCount" 

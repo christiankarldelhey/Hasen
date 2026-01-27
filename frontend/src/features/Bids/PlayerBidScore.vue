@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { PlayerId } from '@domain/interfaces/Player'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayerScore } from '@/features/Bids/composables/useBidPlayerScore'
 import SuitSymbol from '@/common/components/SuitSymbol.vue'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
-import PlayerLoseWinBidScore from '@/features/Bids/PlayerBidLoseWinScore.vue'
-import PlayerBidHeader from '@/features/Bids/PlayerBidHeader.vue'
+import PlayerBidScoreRow from '@/features/Bids/PlayerBidScoreRow.vue'
 import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
 
+interface Props {
+  playerId?: PlayerId
+}
+
+const props = defineProps<Props>()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
 
+const targetPlayerId = computed(() => props.playerId ?? hasenStore.currentPlayerId)
+
 const playerRoundScore = computed(() => {
   const roundScore = gameStore.publicGameState?.round.roundScore || []
-  const currentPlayerId = hasenStore.currentPlayerId
-  return roundScore.find((score) => score.playerId === currentPlayerId)
+  return roundScore.find((score) => score.playerId === targetPlayerId.value)
 })
 
 const points = computed(() => playerRoundScore.value?.points ?? 0)
@@ -31,11 +37,10 @@ const setCollection = computed(() => playerRoundScore.value?.setCollection ?? {
 const tricksWon = computed(() => playerRoundScore.value?.tricksWon ?? [])
 
 const playerBids = computed(() => {
-  const currentPlayerId = hasenStore.currentPlayerId
-  if (!currentPlayerId || !gameStore.publicGameState?.round.roundBids.playerBids) {
+  if (!targetPlayerId.value || !gameStore.publicGameState?.round.roundBids.playerBids) {
     return []
   }
-  return gameStore.publicGameState.round.roundBids.playerBids[currentPlayerId] || []
+  return gameStore.publicGameState.round.roundBids.playerBids[targetPlayerId.value] || []
 })
 
 const currentTrick = computed(() => 
@@ -80,8 +85,7 @@ const pointsBidScore = computed(() => {
 })
 
 const playerColor = computed(() => {
-  const currentPlayerId = hasenStore.currentPlayerId
-  const player = AVAILABLE_PLAYERS.find(p => p.id === currentPlayerId)
+  const player = AVAILABLE_PLAYERS.find(p => p.id === targetPlayerId.value)
   return player?.color || '#B89B5E'
 })
 </script>
@@ -90,63 +94,57 @@ const playerColor = computed(() => {
   <div class="rounded-xl shadow-lg w-full bg-hasen-base flex flex-col">
 
     <!-- Row: Tricks Won -->
-    <div class="flex flex-row items-center border-b border-hasen-dark h-16">
-      <PlayerBidHeader 
-        type="tricks" 
-        :isActive="trickBidScore.score !== null" 
-        :playerColor="playerColor"
-      />
-      <div class="flex flex-row items-center gap-1 px-4 py-2 flex-1">
-        <div v-if="isBidLost" class="text-hasen-red text-lg font-semibold">
-          You lose this bid
-        </div>
-        <div v-else class="flex flex-row items-center gap-1">
-          <TrickSymbol
-            v-for="trick in trickDisplays"
-            size="large"
-            :key="trick.trickNumber"
-            :state="trick.state"
-            :char="trick.trickNumber"
-            :style="{ opacity: trick.opacity }"
-          />
-        </div>
+    <PlayerBidScoreRow
+      type="tricks"
+      :isActive="trickBidScore.score !== null"
+      :playerColor="playerColor"
+      :score="trickBidScore.score"
+      :onLose="trickBidScore.onLose"
+    >
+      <div v-if="isBidLost" class="text-hasen-red text-lg font-semibold">
+        You lose this bid
       </div>
-      <PlayerLoseWinBidScore 
-        :score="trickBidScore.score" 
-        :onLose="trickBidScore.onLose"
-        :showLose="true"
-      />
-    </div>
+      <div v-else class="flex flex-row items-center gap-1">
+        <TrickSymbol
+          v-for="trick in trickDisplays"
+          size="large"
+          :key="trick.trickNumber"
+          :state="trick.state"
+          :char="trick.trickNumber"
+          :style="{ opacity: trick.opacity }"
+        />
+      </div>
+    </PlayerBidScoreRow>
 
     <!-- Row: Points -->
-    <div class="flex flex-row items-center border-b border-hasen-dark h-16">
-      <PlayerBidHeader 
-        type="points" 
-        :isActive="pointsBidScore.score !== null" 
-        :playerColor="playerColor"
-      />
-      <div class="flex flex-row items-center justify-between py-2 px-4 flex-1">
+    <PlayerBidScoreRow
+      type="points"
+      :isActive="pointsBidScore.score !== null"
+      :playerColor="playerColor"
+      :score="pointsBidScore.score"
+      :onLose="pointsBidScore.onLose"
+    >
+      <div class="flex flex-row items-center justify-between w-full">
         <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.minPoints : 0" :class="pointsDisplay ? '' : 'opacity-30'" />
         <span class="text-hasen-dark text-2xl">
           {{ points }}
         </span>
         <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
       </div>
-      <PlayerLoseWinBidScore 
-        :score="pointsBidScore.score" 
-        :onLose="pointsBidScore.onLose"
-        :showLose="true"
-      />
-    </div>
+    </PlayerBidScoreRow>
 
     <!-- Row: Set Collection -->
-    <div class="flex flex-row items-center h-16">
-      <PlayerBidHeader 
-        type="setCollection" 
-        :isActive="setCollectionBidScore.score !== null" 
-        :playerColor="playerColor"
-      />
-      <div class="flex flex-row items-center justify-between py-2 px-4 flex-1">
+    <PlayerBidScoreRow
+      type="setCollection"
+      :isActive="setCollectionBidScore.score !== null"
+      :playerColor="playerColor"
+      :score="setCollectionBidScore.score"
+      :onLose="setCollectionBidScore.onLose"
+      :winSuit="setCollectionDisplay?.winSuit ?? null"
+      :avoidSuit="setCollectionDisplay?.avoidSuit ?? null"
+      :isLastRow="true"
+    >
+      <div class="flex flex-row items-center justify-between w-full">
         <div v-for="suitDisplay in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
           <SuitSymbol 
             :suit="suitDisplay.suit" 
@@ -164,14 +162,7 @@ const playerColor = computed(() => {
           </span>
         </div>
       </div>
-      <PlayerLoseWinBidScore 
-        :score="setCollectionBidScore.score" 
-        :onLose="setCollectionBidScore.onLose"
-        :showLose="true"
-        :winSuit="setCollectionDisplay?.winSuit ?? null"
-        :avoidSuit="setCollectionDisplay?.avoidSuit ?? null"
-      />
-    </div>
+    </PlayerBidScoreRow>
 
   </div>
 </template>

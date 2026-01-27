@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
+import { useHasenStore } from '@/stores/hasenStore';
 import PlayerBidScore from '../Bids/PlayerBidScore.vue';
+import PlayerInfo from '@/common/components/PlayerInfo.vue';
 import PlayerCards from './PlayerCards.vue';
 import PlayerGameInfo from './PlayerGameInfo.vue';
 import ActionButton from '@/common/components/ActionButton.vue';
@@ -27,6 +29,7 @@ const emit = defineEmits<{
   finishTrick: []
 }>();
 
+const hasenStore = useHasenStore();
 const selectedCardId = ref<string | null>(null);
 const hasPlayedCard = ref<boolean>(false);
 
@@ -75,7 +78,8 @@ const handleFinishTurn = () => {
     </div>
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
-      <div class="pointer-events-auto">
+      <div class="pointer-events-auto flex flex-col gap-2">
+        <PlayerInfo v-if="hasenStore.currentPlayerId" :player-id="hasenStore.currentPlayerId" layout="row" />
         <PlayerBidScore />
       </div>
       

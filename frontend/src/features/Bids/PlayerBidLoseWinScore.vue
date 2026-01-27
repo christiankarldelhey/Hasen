@@ -17,12 +17,12 @@ const props = withDefaults(defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-1 min-w-[60px] py-1 px-3 border-l border-hasen-dark">
+  <div class="flex flex-col items-center gap-1 w-[60px] h-full py-1 px-3 border-l border-hasen-dark">
     <!-- Win Crown -->
     <div v-if="score !== null" class="flex flex-row items-center justify-center gap-0.5 w-full">
-      <div v-if="!avoidSuit" class="relative h-6 w-6 flex-shrink-0">
+      <div v-if="!avoidSuit" class="relative flex-shrink-0">
         <img
-          class="h-6 w-6 object-contain"
+          class="h-5 w-5 object-contain"
           :src="CrownSymbol"
           alt="crown win"
         />
@@ -38,9 +38,9 @@ const props = withDefaults(defineProps<{
 
     <!-- Lose Crown (crossed out) -->
     <div v-if="onLose !== null && showLose" class="flex flex-row items-center justify-center gap-0.5 w-full">
-      <div v-if="!avoidSuit" class="relative h-6 w-6 flex-shrink-0">
+      <div v-if="!avoidSuit" class="relative flex-shrink-0">
         <img
-          class="h-6 w-6 object-contain"
+          class="h-5 w-5 object-contain"
           :src="CrownSymbol"
           alt="crown lose"
         />
