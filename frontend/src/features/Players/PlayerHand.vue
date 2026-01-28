@@ -78,8 +78,11 @@ const handleFinishTurn = () => {
     </div>
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
-      <div class="pointer-events-auto flex flex-col gap-2">
-        <PlayerInfo v-if="hasenStore.currentPlayerId" :player-id="hasenStore.currentPlayerId" layout="row" />
+      <div class="pointer-events-auto flex flex-col gap-2 items-start">
+        <PlayerInfo 
+          v-if="hasenStore.currentPlayerId" 
+          :player-id="hasenStore.currentPlayerId" 
+          :is-player="true" />
         <PlayerBidScore />
       </div>
       

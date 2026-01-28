@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
+import { usePlayers } from './composables/usePlayers'
+
+const { getPlayerNameById } = usePlayers()
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
@@ -31,7 +34,7 @@ const isMyTurn = computed(() =>
 )
 
 const currentPlayerName = computed(() => {
-  return currentPlayerTurn.value || 'Unknown'
+  return currentPlayerTurn.value ? getPlayerNameById.value(currentPlayerTurn.value) : undefined
 })
 
 const turnMessage = computed(() => {
