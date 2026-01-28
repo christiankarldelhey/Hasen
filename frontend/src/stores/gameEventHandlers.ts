@@ -121,7 +121,13 @@ const handleTrickCompleted: GameEventHandler = (event, _context) => {
 
 const handleRoundEnded: GameEventHandler = (event, _context) => {
   if (event.type !== 'ROUND_ENDED') return
-  console.log('🏁 Round ended:', (event as RoundEndedEvent).payload)
+  
+  const payload = (event as RoundEndedEvent).payload
+  console.log('🏁 Round ended:', payload.round)
+  console.log('📊 Round scores:', payload.scores)
+  
+  // Los playerScores acumulados ya vienen actualizados en el siguiente stateUpdate
+  // Este evento es principalmente informativo para mostrar el scoring del round
 }
 
 const handleBidMade: GameEventHandler = (event, context) => {
@@ -141,7 +147,7 @@ const handleBidMade: GameEventHandler = (event, context) => {
     bidId: payload.bidId,
     trickNumber: payload.trickNumber,
     onLose: payload.onLose,
-    hasPlayerWon: null
+    isPlayerWinning: null
   })
   
   console.log(`🎯 Bid made by ${payload.playerId}: ${payload.bidType} on trick ${payload.trickNumber} (${payload.bidScore} points)`)

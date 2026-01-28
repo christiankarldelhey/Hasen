@@ -3,6 +3,8 @@ import { shuffleDeck } from '@domain/rules/DeckRules.js'
 import { shuffleBidDeck, updateBidsPool } from '@domain/rules/BidDeckRules'
 import { createFirstCardDealtEvent } from '@domain/events/GameEvents.js'
 import { createRoundSetupCompletedEvent } from '@domain/events/GameEvents.js'
+import { createRoundEndedEvent } from '@domain/events/GameEvents.js'
+import { getPlayerScoreFromRound } from '@domain/rules/BidRules.js'
 import type { RoundPhase, Bid, PlayerId, PlayingCard } from '@domain/interfaces'
 
 
@@ -76,7 +78,11 @@ export class RoundService {
     const setupEvent = createRoundSetupCompletedEvent(
       game.round.round,
       game.deck.length,
-      game.round.roundBids
+      {
+        points: game.round.roundBids.bids.find(b => b.bid_type === 'points') || null,
+        set_collection: game.round.roundBids.bids.find(b => b.bid_type === 'set_collection') || null,
+        trick: game.round.roundBids.bids.find(b => b.bid_type === 'trick') || null
+      }
     );
     
     const firstCardsEvent = createFirstCardDealtEvent(
@@ -105,17 +111,41 @@ export class RoundService {
   static async finishRoundAndStartNext(gameId: string) {
     console.log(`🏁 Finishing round and starting next for game ${gameId}`);
     
-    // Simplemente llamar a startNewRound que ya hace todo:
-    // - Incrementa round number
-    // - Resetea roundScore
-    // - Devuelve cartas al deck y hace shuffle
-    // - Reparte 5 cartas a cada jugador
-    // - Cambia fase a 'player_drawing'
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+
+    // 1. CALCULAR SCORES DEL ROUND
+    const roundScores: Partial<Record<PlayerId, number>> = {};
+    
+    for (const playerId of game.activePlayers) {
+      const scoreFromRound = getPlayerScoreFromRound(game, playerId);
+      roundScores[playerId] = scoreFromRound;
+      
+      // Actualizar playerScores acumulados
+      const playerScore = game.playerScores.find(ps => ps.playerId === playerId);
+      if (playerScore) {
+        playerScore.score += scoreFromRound;
+      } else {
+        game.playerScores.push({ playerId, score: scoreFromRound });
+      }
+    }
+
+    await game.save();
+    
+    console.log(`📊 Round ${game.round.round} scores calculated:`, roundScores);
+    
+    // 2. CREAR EVENTO ROUND_ENDED
+    const roundEndedEvent = createRoundEndedEvent(game.round.round, roundScores as Record<PlayerId, number>);
+    
+    // 3. INICIAR NUEVO ROUND
     const result = await RoundService.startNewRound(gameId);
     
     console.log(`✅ Round ${result.game.round.round} started successfully`);
     
-    return result;
+    return { 
+      ...result,
+      roundEndedEvent
+    };
   }
 
 }

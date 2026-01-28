@@ -77,7 +77,7 @@ export interface PublicGameState {
   }[]
   playerTurnOrder: PlayerId[]
   round: PublicRoundState
-  playerScores: PlayerRoundScore[];
+  playerScores: PlayerScore[];
   gameSettings: {
     minPlayers: number
     maxPlayers: number

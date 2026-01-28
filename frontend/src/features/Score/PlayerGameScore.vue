@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
-import { useGameStore } from '@/stores/gameStore'
+import { useGameScore } from '@/features/Score/composables/useGameScore'
 import CarrotIcon from '@/assets/symbols/carrot.svg'
 
 interface Props {
@@ -13,13 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'small'
 })
 
-const gameStore = useGameStore()
-
-const playerScore = computed(() => {
-  const roundScore = gameStore.publicGameState?.round.roundScore || []
-  const found = roundScore.find((score) => score.playerId === props.playerId)
-  return found?.points ?? 0
-})
+const { playerScore } = useGameScore(props.playerId)
 
 const iconSize = computed(() => props.size === 'small' ? 'h-5 w-5' : 'h-7 w-7')
 const textSize = computed(() => props.size === 'small' ? 'text-xxl' : 'text-lg')

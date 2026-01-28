@@ -201,3 +201,171 @@ export function calculateBidOnLose(
   
   return 0
 }
+
+/**
+ * Determina si un bid está siendo ganado actualmente (parcial o final)
+ * @param bid - El bid a evaluar
+ * @param playerRoundScore - El score del jugador en el round actual
+ * @param isRoundComplete - Si el round ya terminó (para evaluación final)
+ * @returns true si está ganando, false si está perdiendo, null si aún no se puede determinar
+ */
+export function isWinningBid(
+  bid: import('../interfaces/Bid').Bid,
+  playerRoundScore: import('../interfaces/Round').PlayerRoundScore,
+  isRoundComplete: boolean = false
+): boolean | null {
+  const bidType = bid.bid_type;
+
+  // TRICK BIDS
+  if (bidType === 'trick') {
+    const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition;
+    const tricksWon = playerRoundScore.tricksWon;
+    const tricksWonCount = tricksWon.length;
+
+    // Verificar lose_trick_position: si ganó un trick que debía perder
+    if (condition.lose_trick_position) {
+      const wonForbiddenTrick = condition.lose_trick_position.some(
+        forbiddenTrick => tricksWon.includes(forbiddenTrick)
+      );
+      if (wonForbiddenTrick) return false;
+    }
+
+    // Verificar win_trick_position: si debía ganar tricks específicos
+    if (condition.win_trick_position) {
+      const requiredTricks = condition.win_trick_position;
+      const wonAllRequired = requiredTricks.every(t => tricksWon.includes(t));
+      
+      if (isRoundComplete) {
+        return wonAllRequired;
+      } else {
+        const lostRequiredTrick = requiredTricks.some(
+          t => !tricksWon.includes(t)
+        );
+        if (lostRequiredTrick && isRoundComplete) return false;
+        if (wonAllRequired) return true;
+        return null;
+      }
+    }
+
+    // Verificar win_min_tricks y win_max_tricks
+    if (condition.win_min_tricks !== undefined || condition.win_max_tricks !== undefined) {
+      const minTricks = condition.win_min_tricks ?? 0;
+      const maxTricks = condition.win_max_tricks ?? 5;
+
+      if (tricksWonCount > maxTricks) return false;
+      
+      if (isRoundComplete) {
+        return tricksWonCount >= minTricks && tricksWonCount <= maxTricks;
+      } else {
+        const tricksRemaining = 5 - tricksWonCount;
+        const maxPossible = tricksWonCount + tricksRemaining;
+        
+        if (maxPossible < minTricks) return false;
+        if (tricksWonCount >= minTricks && tricksWonCount <= maxTricks) return true;
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  // POINTS BIDS
+  if (bidType === 'points') {
+    const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition;
+    const points = playerRoundScore.points;
+
+    if (points > condition.max_points) return false;
+
+    if (isRoundComplete) {
+      return points >= condition.min_points && points <= condition.max_points;
+    } else {
+      if (points > condition.max_points) return false;
+      if (points >= condition.min_points && points <= condition.max_points) return true;
+      return null;
+    }
+  }
+
+  // SET COLLECTION BIDS
+  if (bidType === 'set_collection') {
+    const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
+    const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
+    const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+
+    // Calcular puntos netos: (winSuit * 10) - (avoidSuit * 10)
+    const winPoints = winSuitCount * 10;
+    const avoidPenalty = avoidSuitCount * 10;
+    const netPoints = winPoints - avoidPenalty;
+
+    if (isRoundComplete) {
+      // Gana si los puntos netos son >= 10
+      return netPoints >= 10;
+    } else {
+      // Durante el round, evaluamos parcialmente
+      if (netPoints < 10 && avoidSuitCount > 0) return false;
+      if (netPoints >= 10) return true;
+      return null; // Aún no se puede determinar
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Calcula el score que obtiene un jugador al final del round
+ * basado en sus bids ganados/perdidos y los points del round
+ * @param game - El estado completo del juego
+ * @param playerId - ID del jugador
+ * @returns Score total del round (puede ser negativo)
+ */
+export function getPlayerScoreFromRound(
+  game: Game,
+  playerId: PlayerId
+): number {
+  const playerRoundScore = game.round.roundScore.find(s => s.playerId === playerId);
+  if (!playerRoundScore) return 0;
+
+  const playerBids = game.round.roundBids.playerBids[playerId] || [];
+  let totalScore = playerRoundScore.points;
+
+  for (const bidEntry of playerBids) {
+    const bid = game.round.roundBids.bids.find(b => b.bid_id === bidEntry.bidId);
+    if (!bid) continue;
+
+    const isWinning = isWinningBid(bid, playerRoundScore, true);
+
+    if (isWinning === true) {
+      if (bid.bid_type === 'set_collection') {
+        // Calcular puntos netos: (winSuit * 10) - (avoidSuit * |onLose|)
+        const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
+        const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
+        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+        const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
+        const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
+        totalScore += netPoints;
+      } else {
+        totalScore += bid.bid_score;
+      }
+    } else if (isWinning === false) {
+      if (bid.bid_type === 'set_collection') {
+        // Calcular puntos netos
+        const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
+        const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
+        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+        const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
+        const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
+        
+        // Si está entre -9 y 9: pierde con -10 fijo
+        // Si es <= -10: pierde con ese valor
+        if (netPoints >= -9 && netPoints <= 9) {
+          totalScore += -10;
+        } else {
+          totalScore += netPoints;
+        }
+      } else {
+        totalScore += bidEntry.onLose;
+      }
+    }
+  }
+
+  return totalScore;
+}

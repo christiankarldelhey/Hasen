@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { PublicGameState, PrivateGameState } from '@domain/interfaces/Game'
+import type { PublicGameState, PrivateGameState, PlayerScore } from '@domain/interfaces/Game'
 import { processGameEvent } from './gameEventHandlers'
 
 export const useGameStore = defineStore('game', () => {
@@ -14,6 +14,8 @@ export const useGameStore = defineStore('game', () => {
   const currentPhase = computed(() => publicGameState.value?.round.roundPhase ?? 'round_setup')
 
   const playerHand = computed(() => privateGameState.value?.hand || null)
+  
+  const playerScores = computed(() => publicGameState.value?.playerScores || [])
 
   // Actions
   function setPublicGameState(state: PublicGameState) {
@@ -35,6 +37,12 @@ export const useGameStore = defineStore('game', () => {
     })
   }
 
+  function updatePlayerScores(scores: PlayerScore[]) {
+    if (publicGameState.value) {
+      publicGameState.value.playerScores = scores
+    }
+  }
+
   function reset() {
     publicGameState.value = null
     privateGameState.value = null
@@ -51,11 +59,13 @@ export const useGameStore = defineStore('game', () => {
     currentRound,
     currentPhase,
     playerHand,
+    playerScores,
     
     // Actions
     setPublicGameState,
     setPrivateGameState,
     handleGameEvent,
+    updatePlayerScores,
     reset,
   }
 })

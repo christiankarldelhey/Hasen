@@ -166,8 +166,11 @@ socket.on('round:start', async ({ gameId }) => {
         // Dar un pequeño delay para que los clientes procesen el TRICK_COMPLETED
         setTimeout(async () => {
           try {
-            const { game: newGame, setupEvent, firstCardsEvent, privateCards } = 
+            const { game: newGame, setupEvent, firstCardsEvent, privateCards, roundEndedEvent } = 
               await RoundService.finishRoundAndStartNext(gameId);
+            
+            // Emitir evento ROUND_ENDED primero
+            io.to(gameId).emit('game:event', roundEndedEvent);
             
             // Emitir eventos del nuevo round
             io.to(gameId).emit('game:event', setupEvent);
@@ -302,8 +305,11 @@ socket.on('round:start', async ({ gameId }) => {
         // Dar un pequeño delay para que los clientes procesen el cambio de estado
         setTimeout(async () => {
           try {
-            const { game: newGame, setupEvent, firstCardsEvent, privateCards } = 
+            const { game: newGame, setupEvent, firstCardsEvent, privateCards, roundEndedEvent } = 
               await RoundService.finishRoundAndStartNext(gameId);
+            
+            // Emitir evento ROUND_ENDED primero
+            io.to(gameId).emit('game:event', roundEndedEvent);
             
             // Emitir eventos del nuevo round
             io.to(gameId).emit('game:event', setupEvent);

@@ -26,7 +26,7 @@ export interface PlayerBidEntry {
   bidId: string
   trickNumber: TrickNumber
   onLose: number
-  hasPlayerWon: boolean | null
+  isPlayerWinning: boolean | null
 }
 
 export interface PlayerBidsMap {

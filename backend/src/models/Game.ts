@@ -30,7 +30,7 @@ const PlayerBidEntrySchema = new Schema({
   bidId: { type: String, required: true },
   trickNumber: { type: Number, required: true, enum: [1, 2, 3] },
   onLose: { type: Number, required: true },
-  hasPlayerWon: { type: Boolean, default: null }
+  isPlayerWinning: { type: Boolean, default: null }
 }, { _id: false });
 
 // Schema para Bid
@@ -157,7 +157,10 @@ const GameSchema = new Schema<GameDocument>({
   }],
   tricksHistory: [TrickSchema],
   bidsHistory: [BidSchema],
-  playerScores: [PlayerRoundScoreSchema],
+  playerScores: [{
+    playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+    score: { type: Number, required: true, default: 0 }
+  }],
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
