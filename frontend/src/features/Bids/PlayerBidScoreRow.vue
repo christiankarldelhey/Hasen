@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import PlayerBidHeader from '@/features/Bids/PlayerBidHeader.vue'
-import PlayerLoseWinBidScore from '@/features/Bids/PlayerBidLoseWinScore.vue'
 import type { Suit } from '@domain/interfaces/Card'
 
 interface Props {
@@ -32,16 +31,14 @@ withDefaults(defineProps<Props>(), {
       :type="type" 
       :isActive="isActive" 
       :playerColor="playerColor"
-    />
-    <div class="flex flex-row items-center gap-1 px-4 py-2 flex-1">
-      <slot />
-    </div>
-    <PlayerLoseWinBidScore 
-      :score="score" 
+      :score="score"
       :onLose="onLose"
       :showLose="showLose"
       :winSuit="winSuit"
       :avoidSuit="avoidSuit"
     />
+    <div class="flex flex-row items-center gap-1 px-4 py-2 flex-1">
+      <slot />
+    </div>
   </div>
 </template>

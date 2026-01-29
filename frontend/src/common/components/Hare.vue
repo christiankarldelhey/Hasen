@@ -1,20 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 
 interface Props {
-  playerId: PlayerId
   size?: string
+  color?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: '40px'
+  size: '40px',
+  color: '#e2d2a8'
 })
 
-const playerColor = computed(() => {
-  const player = AVAILABLE_PLAYERS.find(p => p.id === props.playerId)
-  return player?.color || '#000000'
-})
 </script>
 
 <template>
@@ -24,7 +19,7 @@ const playerColor = computed(() => {
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="0 0 385.26 420.69"
     class="block flex-shrink-0"
-    :style="{ fill: playerColor, height: size, width: 'auto' }"
+    :style="{ fill: color, height: size, width: 'auto' }"
   >
     <g id="Capa_1-2" data-name="Capa 1">
       <g id="QTlxMR.tif">
