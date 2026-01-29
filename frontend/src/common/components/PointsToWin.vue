@@ -12,7 +12,7 @@ defineProps<{
     <img
       :src="WinSymbol"
       alt="Win Symbol"
-      :class="size === 'small' ? 'w-8' : 'w-12'"
+      :class="size === 'small' ? 'w-8' : 'w-12 h-9'"
     />
 
     <span

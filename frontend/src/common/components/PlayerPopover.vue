@@ -24,7 +24,7 @@ const showPopover = ref(false)
     <Transition name="fade">
       <div 
         v-if="showPopover"
-        class="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-[400px]"
+        class="absolute z-50 mt-2 left-1/2 -translate-x-1/2"
       >
         <PlayerBidScore :player-id="playerId" />
       </div>

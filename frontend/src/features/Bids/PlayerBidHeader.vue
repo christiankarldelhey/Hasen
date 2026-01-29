@@ -34,7 +34,7 @@ const iconMap = {
       style="filter: brightness(0);"
     />
 
-    <div v-else class="flex flex-col items-center gap-1 w-[60px] h-full py-1 px-3 border-l border-hasen-dark">
+    <div v-else class="flex flex-col items-center gap-1 w-[60px] h-full py-1 px-3">
         <!-- Win Scoring -->
         <div v-if="score !== null" class="flex flex-row items-center justify-center gap-0.5 w-full">
           <div v-if="type === 'tricks'" class="relative flex-shrink-0">

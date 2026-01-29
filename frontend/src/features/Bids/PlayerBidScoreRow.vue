@@ -24,8 +24,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div 
-    class="flex flex-row items-center h-16"
-    :class="{ 'border-b border-hasen-dark': !isLastRow }"
+    :class="['flex flex-row items-center h-16 rounded-xl shadow-lg w-auto bg-hasen-base', { [`border-2 border-[${playerColor}]`]: isActive }]"
   >
     <PlayerBidHeader 
       :type="type" 

@@ -91,7 +91,7 @@ const playerColor = computed(() => {
 </script>
 
 <template>
-  <div class="rounded-xl shadow-lg w-auto bg-hasen-base flex flex-col">
+  <div class="rounded-xl bg-black/60 p-4 flex flex-col gap-2">
 
     <!-- Row: Tricks Won -->
     <PlayerBidScoreRow

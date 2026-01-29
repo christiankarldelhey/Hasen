@@ -5,10 +5,10 @@ import type { PlayerId } from '@domain/interfaces/Player'
 import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
 import WinCondition from './BidWinCondition.vue'
 import BidScore from './BidScore.vue'
-import Hare from '@/common/components/Hare.vue'
 import { useSocketGame } from '@/common/composables/useSocketGame'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 
 const props = defineProps<{
   bid: Bid | null
@@ -19,6 +19,7 @@ const props = defineProps<{
 const socketGame = useSocketGame()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
+const { isPlayerTurn } = usePlayers()
 
 const bidders = computed<PlayerId[]>(() => {
   if (!props.bid) return []
@@ -45,8 +46,13 @@ const currentPlayerBidColor = computed(() => {
   return player?.color || null
 })
 
+const isCurrentPlayerTurn = computed(() => {
+  const currentPlayerId = hasenStore.currentPlayerId
+  return currentPlayerId ? isPlayerTurn.value(currentPlayerId) : false
+})
+
 const bidCardClasses = computed(() => {
-  const baseClasses = 'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-64 transition-all duration-150 relative'
+  const baseClasses = 'rounded-xl px-1 py-1 shadow-lg max-h-16 min-w-55 transition-all duration-150 relative'
   const stateClasses = props.disabled 
     ? 'bg-hasen-base cursor-not-allowed bg-color-hasen' 
     : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
@@ -58,7 +64,8 @@ const bidCardStyle = computed(() => {
   if (!currentPlayerBidColor.value) return {}
   
   return {
-    borderLeft: `4px solid ${currentPlayerBidColor.value}`
+    border: `4px solid ${currentPlayerBidColor.value}`,
+    animation: isCurrentPlayerTurn.value ? 'subtleGlow 3s ease-in-out infinite' : 'none'
   }
 })
 
@@ -90,26 +97,26 @@ const handleBidClick = () => {
     >
       <div class="flex flex-row items-stretch">
         <BidScore :score="bid.bid_score" :bidders="bidders" />
-        <div class="w-[60%] flex flex-row items-center justify-center gap-2 min-w-0">
+        <div class="w-[80%] flex flex-row items-center justify-center gap-2 min-w-0">
           <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
-        </div>
-        <div class="border-l border-hasen-dark w-[20%] min-w-0 flex items-center justify-center">
-          <div class="relative w-12 h-12 flex justify-center items-center">
-            <Hare 
-              v-if="bidders.length >= 1 && bidders[0]" 
-              :class="'hare-1 absolute z-0 ' + (bidders.length === 2 ? 'top-1 left-4' : 'top-1 left-3')" 
-              :player-id="bidders[0]" 
-              size="32px" />
-            <Hare 
-              v-if="bidders.length >= 2 && bidders[1]" 
-              class="hare-2 absolute top-1 left-2 z-10" 
-              :player-id="bidders[1]" 
-              size="32" />
-
-          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes subtleGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.8;
+    filter: brightness(1.3);
+  }
+}
+</style>
 
