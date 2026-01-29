@@ -5,8 +5,8 @@ import { useHasenStore } from '@/stores/hasenStore';
 import PlayerBidScore from '../Bids/PlayerBidScore.vue';
 import PlayerInfo from '@/common/components/PlayerInfo.vue';
 import PlayerCards from './PlayerCards.vue';
-import PlayerGameInfo from './PlayerGameInfo.vue';
-import ActionButton from '@/common/components/ActionButton.vue';
+import PlayerNotifications from './PlayerNotifications.vue';
+import PlayerControls from './PlayerControls.vue';
 
 interface Props {
   cards: Card[];
@@ -78,42 +78,25 @@ const handleFinishTurn = () => {
     </div>
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
-      <div class="pointer-events-auto flex flex-col gap-2 items-start">
+      <PlayerBidScore />
+      
+      <div class="flex flex-col gap-3 pointer-events-auto">
         <PlayerInfo 
           v-if="hasenStore.currentPlayerId" 
           :player-id="hasenStore.currentPlayerId" 
           :is-player="true" />
-        <PlayerBidScore />
-      </div>
-      
-      <div class="flex flex-col gap-3 pointer-events-auto">
-      <PlayerGameInfo />
-      
-      <template v-if="mode === 'card_replacement'">
-        <ActionButton 
-          label="Confirm" 
-          :disabled="!selectedCardId"
-          @click="handleConfirm"
+        <PlayerNotifications />
+        <PlayerControls 
+          :mode="mode"
+          :is-my-turn="isMyTurn"
+          :is-trick-in-resolve="isTrickInResolve"
+          :selected-card-id="selectedCardId"
+          :has-played-card="hasPlayedCard"
+          @skip-replacement="$emit('skipReplacement')"
+          @confirm="handleConfirm"
+          @finish-turn="handleFinishTurn"
+          @finish-trick="$emit('finishTrick')"
         />
-        <ActionButton 
-          label="Skip" 
-          variant="secondary"
-          @click="$emit('skipReplacement')"
-        />
-      </template>
-
-      <ActionButton 
-        v-else-if="mode === 'normal' && isMyTurn && !isTrickInResolve"
-        label="Finish Turn"
-        :disabled="!hasPlayedCard"
-        @click="handleFinishTurn"
-      />
-
-      <ActionButton 
-        v-else-if="isTrickInResolve"
-        label="Finish Trick"
-        @click="$emit('finishTrick')"
-      />
       </div>
     </div>
   </div>

@@ -2,17 +2,22 @@
 import { computed } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 
 interface Props {
   playerId: PlayerId
   isPlayer?: boolean
-  isCurrentTurn?: boolean
+  position?: 'top' | 'bottom' | 'left' | 'right'
 }
 
+const { isPlayerTurn } = usePlayers()
+
 const props = withDefaults(defineProps<Props>(), {
-  isCurrentTurn: false,
-  isPlayer: false
+  isPlayer: false,
+  position: 'bottom'
 })
+
+const isCurrentTurn = computed(() => isPlayerTurn.value(props.playerId))
 
 const { playerScore } = useGameScore(props.playerId)
 
@@ -21,36 +26,46 @@ const player = computed(() => {
 })
 
 const playerColor = computed(() => player.value?.color || '#000000')
+
 const playerName = computed(() => player.value?.name || 'Player')
+
+const positionClasses = computed(() => {
+  switch (props.position) {
+    case 'bottom':
+      return 'flex-col'
+    case 'left':
+    case 'right':
+      return props.position === 'left' ? 'flex-row' : ''
+    default:
+      return 'flex-col'
+  }
+})
+
+const playerClasses = computed(() => {
+  return [ props.isPlayer ? 'flex-row items-center' : 'flex-col items-center', positionClasses.value]
+})
+
+
 </script>
 
 <template>
-  <div :class="['flex', 'gap-3', props.isPlayer ? 'flex-row items-center' : 'flex-col items-center' ]">
+  <div :class="['flex', 'gap-3', playerClasses ]">
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
-      <!-- Outer glow rings for current turn -->
+      <!-- Outer glow ring for current turn -->
       <div 
         v-if="isCurrentTurn"
-        class="absolute inset-0 rounded-full animate-ping opacity-75"
+        class="absolute inset-0 rounded-full animate-subtle-glow opacity-60"
         :style="{ backgroundColor: playerColor }"
-      ></div>
-      <div 
-        v-if="isCurrentTurn"
-        class="absolute inset-0 rounded-full animate-pulse"
-        :style="{ 
-          backgroundColor: playerColor,
-          boxShadow: `0 0 20px ${playerColor}, 0 0 40px ${playerColor}`
-        }"
       ></div>
       
       <!-- Main circle with gradient -->
       <div 
         class="relative w-18 h-18 rounded-full flex items-center justify-center shadow-lg"
-        :class="{ 'animate-slow-pulse-bg': isCurrentTurn }"
         :style="{ 
           background: `radial-gradient(circle at 30% 30%, ${playerColor}dd, ${playerColor})`,
           border: `2px solid ${playerColor}`,
-          boxShadow: isCurrentTurn ? `0 0 25px ${playerColor}` : '0 3px 5px rgba(0,0,0,0.3)',
+          boxShadow: isCurrentTurn ? `0 0 25px ${playerColor}80` : '0 3px 5px rgba(0,0,0,0.3)',
           '--pulse-color-light': `${playerColor}dd`,
           '--pulse-color-dark': playerColor
         }"
@@ -78,7 +93,7 @@ const playerName = computed(() => player.value?.name || 'Player')
     
     <!-- Player name label -->
     <div 
-      :class="['bg-hasen-dark text-hasen-base px-3 py-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '']"
+      :class="['bg-hasen-dark text-hasen-base px-3 py-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
       :style="{ borderColor: playerColor }"
     >
       {{ playerName }} {{ isPlayer ? '(You)' : '' }}
@@ -87,10 +102,16 @@ const playerName = computed(() => player.value?.name || 'Player')
 </template>
 
 <style scoped>
-@keyframes ping {
-  75%, 100% {
-    transform: scale(1.2);
-    opacity: 0;
+@keyframes subtleGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.3;
+    filter: brightness(1.3);
   }
 }
 
@@ -103,24 +124,11 @@ const playerName = computed(() => player.value?.name || 'Player')
   }
 }
 
-.animate-ping {
-  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+.animate-subtle-glow {
+  animation: subtleGlow 3s ease-in-out infinite;
 }
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes slowPulseBg {
-  0%, 100% {
-    filter: brightness(0.85);
-  }
-  50% {
-    filter: brightness(1.4);
-  }
-}
-
-.animate-slow-pulse-bg {
-  animation: slowPulseBg 2s ease-in-out infinite;
 }
 </style>

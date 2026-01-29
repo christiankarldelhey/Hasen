@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
-import PlayerInfo from '@/common/components/PlayerInfo.vue'
-import PlayerBidScore from '@/features/Bids/PlayerBidScore.vue'
+import PlayerPopover from '@/common/components/PlayerPopover.vue'
 import StackedCards from '@/common/components/StackedCards.vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 
@@ -15,7 +14,6 @@ interface Props {
 
 const props = defineProps<Props>()
 const gameStore = useGameStore()
-const showPopover = ref(false)
 
 const publicCard = computed(() => {
   if (!props.publicCardId) return null
@@ -49,107 +47,13 @@ const positionClasses = computed(() => {
   <div 
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
-    <!-- Layout for top position: cards only -->
-    <template v-if="position === 'top'">
-      <div class="flex flex-row gap-2 items-center">
-        <div class="flex flex-row gap-2">
-          <div 
-            class="relative"
-            @mouseenter="showPopover = true"
-            @mouseleave="showPopover = false"
-          >
-            <PlayerInfo 
-              :player-id="playerId" />
-            
-            <Transition name="fade">
-              <div 
-                v-if="showPopover"
-                class="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-[400px]"
-              >
-                <PlayerBidScore 
-                  :player-id="playerId" />
-              </div>
-            </Transition>
-          </div>
-          
-          <StackedCards 
-            :count="privateHandsCount" 
-            :public-card="publicCard || undefined" 
-            :player-id="playerId" 
-          />
-        </div>
-      </div>
-    </template>
-
-    <!-- Layout for left/right positions: cards only -->
-    <template v-else>
-      <div class="flex flex-col gap-2">
-
-        <template v-if="position === 'right'">
-          <div 
-            class="relative"
-            @mouseenter="showPopover = true"
-            @mouseleave="showPopover = false"
-          >
-            <PlayerInfo :player-id="playerId" />
-            
-            <Transition name="fade">
-              <div 
-                v-if="showPopover"
-                class="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-[400px]"
-              >
-                <PlayerBidScore :player-id="playerId" />
-              </div>
-            </Transition>
-          </div>
-          
-          <StackedCards 
-            :public-card="publicCard || undefined"
-            :count="privateHandsCount" 
-            :player-id="playerId" 
-          />
-        </template>
-
-        <template v-if="position === 'left'">
-          <div 
-            class="relative"
-            @mouseenter="showPopover = true"
-            @mouseleave="showPopover = false"
-          >
-            <PlayerInfo :player-id="playerId" />
-            
-            <Transition name="fade">
-              <div 
-                v-if="showPopover"
-                class="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-[400px]"
-              >
-                <PlayerBidScore :player-id="playerId" />
-              </div>
-            </Transition>
-          </div>
-          
-          <StackedCards 
-            :public-card="publicCard || undefined"
-            :count="privateHandsCount" 
-            :player-id="playerId" 
-          />
-        </template>
-        
-        
-      </div>
-    </template>
-
+    <div :class="position === 'top' ? 'flex flex-row gap-2 items-center' : 'flex flex-col gap-2'">
+      <PlayerPopover :player-id="playerId" :position="position" />
+      <StackedCards 
+        :count="privateHandsCount" 
+        :public-card="publicCard || undefined" 
+        :player-id="playerId" 
+      />
+    </div>
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
