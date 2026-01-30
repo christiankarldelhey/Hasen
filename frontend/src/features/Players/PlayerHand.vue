@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import { useHasenStore } from '@/stores/hasenStore';
+import { useGameStore } from '@/stores/gameStore';
 import PlayerBids from '../Bids/PlayerBids.vue';
 import PlayerInfo from '@/common/components/PlayerInfo.vue';
 import PlayerCards from './PlayerCards.vue';
@@ -30,13 +31,20 @@ const emit = defineEmits<{
 }>();
 
 const hasenStore = useHasenStore();
+const gameStore = useGameStore();
 const selectedCardId = ref<string | null>(null);
 const hasPlayedCard = ref<boolean>(false);
 
+// Reset hasPlayedCard when it becomes my turn
 watch(() => props.isMyTurn, (newVal) => {
   if (newVal) {
     hasPlayedCard.value = false;
   }
+});
+
+// Also reset hasPlayedCard when trick number changes (new trick started)
+watch(() => gameStore.publicGameState?.round.currentTrick?.trick_number, () => {
+  hasPlayedCard.value = false;
 });
 
 const isCardSelectable = (card: Card) => {

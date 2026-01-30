@@ -7,7 +7,6 @@ export const useGameStore = defineStore('game', () => {
   // State - Game Playing
   const publicGameState = ref<PublicGameState | null>(null)
   const privateGameState = ref<PrivateGameState | null>(null)
-  const lastEvent = ref<any>(null)
   
   // Computed - Game state
   const currentRound = computed(() => publicGameState.value?.round.round ?? 0)
@@ -27,7 +26,6 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function handleGameEvent(event: any) {
-    lastEvent.value = event
     const hasenStore = useHasenStore()
     
     processGameEvent(event, {
@@ -46,14 +44,12 @@ export const useGameStore = defineStore('game', () => {
   function reset() {
     publicGameState.value = null
     privateGameState.value = null
-    lastEvent.value = null
   }
 
   return {
     // State
     publicGameState,
     privateGameState,
-    lastEvent,
     
     // Computed
     currentRound,

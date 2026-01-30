@@ -208,8 +208,10 @@ export class TrickService {
       trickCompletedEvent = createTrickCompletedEvent(
         currentTrick.trick_number,
         trickWinner,
+        currentTrick.winning_card || '',
         trickScore.trick_points,
-        trickCards
+        trickCards,
+        trickScore.trick_collections
       );
       
       // NO cambiar el estado de las cartas todavía - se mantendrán en 'in_trick'
@@ -221,9 +223,11 @@ export class TrickService {
       // No hay próximo jugador inmediato porque el trick terminó
       nextPlayer = null;
     } else {
-      // NO avanzar el turno automáticamente
-      // El jugador debe hacer click en "Finish Turn" para avanzar
-      nextPlayer = null;
+      // Calcular el siguiente jugador para el evento, pero NO actualizar playerTurn
+      // El jugador debe hacer click en "Finish Turn" para avanzar (puede hacer bids primero)
+      const currentPlayerIndex = game.playerTurnOrder.indexOf(playerId);
+      const nextPlayerIndex = (currentPlayerIndex + 1) % game.playerTurnOrder.length;
+      nextPlayer = game.playerTurnOrder[nextPlayerIndex];
     }
 
     await game.save();

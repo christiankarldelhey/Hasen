@@ -13,6 +13,12 @@ export function usePlayers() {
     }
   })
 
+  // const isCurrentPlayer = computed(() => {
+  //   return (id: PlayerId): boolean => {
+  //     return id === gameStore.publicGameState?.playerTurn
+  //   }
+  // })
+
   const isPlayerTurn = computed(() => {
     return (id: PlayerId): boolean => {
       return id === gameStore.publicGameState?.round?.playerTurn

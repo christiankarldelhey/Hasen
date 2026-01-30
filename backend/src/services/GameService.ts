@@ -2,15 +2,15 @@ import { GameModel } from '../models/Game.js'
 import { createDeck } from '@domain/rules/DeckRules.js'
 import { createBidDeck } from '@domain/rules/BidDeckRules.js'
 import { shuffleDeck } from '@domain/rules/DeckRules.js'
-import { createDeckShuffledEvent } from '@domain/events/GameEvents.js'
-import { v4 as uuidv4 } from 'uuid'
-import type { PlayerId, Game, PlayingCard } from '@domain/interfaces'
-import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
 import { 
+  createDeckShuffledEvent,
   createCardReplacementSkippedEvent, 
   createCardReplacementCompletedEvent,
   createCardReplacedPrivateEvent 
-} from '@domain/events/PlayerEvents.js'
+} from '@domain/events/GameEvents.js'
+import { v4 as uuidv4 } from 'uuid'
+import type { PlayerId, Game, PlayingCard } from '@domain/interfaces'
+import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
 import { TrickService } from './TrickService.js'
 
 export class GameService {

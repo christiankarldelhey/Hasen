@@ -1,4 +1,4 @@
-import type { Bid, PlayingCard, PlayerId } from "../interfaces";
+import type { Bid, PlayingCard, PlayerId, PlayerBidsMap } from "../interfaces";
 // DECK SHUFFLED EVENT
 /**
  * Event emitted when the deck is shuffled
@@ -25,25 +25,29 @@ export interface RoundSetupCompletedEvent {
   payload: {
     round: number
     deckSize: number
+    roundPhase: 'player_drawing'
+    playerTurn: PlayerId
+    currentTrick: null
     roundBids: {
-      points: Bid | null
-      set_collection: Bid | null
-      trick: Bid | null
+      bids: Bid[]
+      playerBids: PlayerBidsMap
     }
   }
 }
 export function createRoundSetupCompletedEvent(
   round: number,
   deckSize: number,
+  roundPhase: 'player_drawing',
+  playerTurn: PlayerId,
+  currentTrick: null,
   roundBids: {
-    points: Bid | null
-    set_collection: Bid | null
-    trick: Bid | null
+    bids: Bid[]
+    playerBids: PlayerBidsMap
   }
 ): RoundSetupCompletedEvent {
   return {
     type: 'ROUND_SETUP_COMPLETED',
-    payload: { round, deckSize, roundBids }
+    payload: { round, deckSize, roundPhase, playerTurn, currentTrick, roundBids }
   }
 }
 
@@ -188,19 +192,28 @@ export interface TrickCompletedEvent {
   payload: {
     trickNumber: 1 | 2 | 3 | 4 | 5
     winner: PlayerId
+    winningCard: string
     points: number
     cards: PlayingCard[]
+    collections: {
+      acorns: number
+      leaves: number
+      berries: number
+      flowers: number
+    } | null
   }
 }
 export function createTrickCompletedEvent(
   trickNumber: 1 | 2 | 3 | 4 | 5,
   winner: PlayerId,
+  winningCard: string,
   points: number,
-  cards: PlayingCard[]
+  cards: PlayingCard[],
+  collections: { acorns: number; leaves: number; berries: number; flowers: number } | null
 ): TrickCompletedEvent {
   return {
     type: 'TRICK_COMPLETED',
-    payload: { trickNumber, winner, points, cards }
+    payload: { trickNumber, winner, winningCard, points, cards, collections }
   }
 }
 // ROUND ENDED EVENT
@@ -212,15 +225,20 @@ export interface RoundEndedEvent {
   payload: {
     round: number
     scores: Record<PlayerId, number>
+    playerScores?: Array<{
+      playerId: PlayerId
+      score: number
+    }>
   }
 }
 export function createRoundEndedEvent(
   round: number,
-  scores: Record<PlayerId, number>
+  scores: Record<PlayerId, number>,
+  playerScores?: Array<{ playerId: PlayerId; score: number }>
 ): RoundEndedEvent {
   return {
     type: 'ROUND_ENDED',
-    payload: { round, scores }
+    payload: { round, scores, playerScores }
   }
 }
 // BID MADE EVENT
@@ -251,16 +269,161 @@ export function createBidMadeEvent(
     payload: { playerId, bidId, bidType, trickNumber, bidScore, onLose }
   }
 }
+
+// TURN FINISHED EVENT
+/**
+ * Event emitted when a player finishes their turn
+ */
+export interface TurnFinishedEvent {
+  type: 'TURN_FINISHED'
+  payload: {
+    playerId: PlayerId
+    nextPlayer: PlayerId
+    trickNumber: 1 | 2 | 3 | 4 | 5
+  }
+}
+export function createTurnFinishedEvent(
+  playerId: PlayerId,
+  nextPlayer: PlayerId,
+  trickNumber: 1 | 2 | 3 | 4 | 5
+): TurnFinishedEvent {
+  return {
+    type: 'TURN_FINISHED',
+    payload: { playerId, nextPlayer, trickNumber }
+  }
+}
+
+// TRICK FINISHED EVENT
+/**
+ * Event emitted when a trick is finished and moved to history
+ */
+export interface TrickFinishedEvent {
+  type: 'TRICK_FINISHED'
+  payload: {
+    trickNumber: 1 | 2 | 3 | 4 | 5
+    nextTrickNumber: 1 | 2 | 3 | 4 | 5 | null
+  }
+}
+export function createTrickFinishedEvent(
+  trickNumber: 1 | 2 | 3 | 4 | 5,
+  nextTrickNumber: 1 | 2 | 3 | 4 | 5 | null
+): TrickFinishedEvent {
+  return {
+    type: 'TRICK_FINISHED',
+    payload: { trickNumber, nextTrickNumber }
+  }
+}
+
+// CARD REPLACED PRIVATE EVENT
+/**
+ * Event emitted to the player who replaced a card (private info)
+ */
+export interface CardReplacedPrivateEvent {
+  type: 'CARD_REPLACED_PRIVATE'
+  payload: {
+    playerId: PlayerId
+    cardToReplace: PlayingCard
+    replacementCard: PlayingCard
+  }
+}
+export function createCardReplacedPrivateEvent(
+  playerId: PlayerId,
+  cardToReplace: PlayingCard,
+  replacementCard: PlayingCard
+): CardReplacedPrivateEvent {
+  return {
+    type: 'CARD_REPLACED_PRIVATE',
+    payload: { playerId, cardToReplace, replacementCard }
+  }
+}
+
+// BID PLACED EVENT
+/**
+ * Event emitted when a player places a bid
+ */
+export interface BidPlacedEvent {
+  type: 'BID_PLACED'
+  payload: {
+    playerId: PlayerId
+    bidId: number
+    bidType: 'points' | 'set_collection' | 'trick'
+    trickNumber: 1 | 2 | 3
+  }
+}
+export function createBidPlacedEvent(
+  playerId: PlayerId,
+  bidId: number,
+  bidType: 'points' | 'set_collection' | 'trick',
+  trickNumber: 1 | 2 | 3
+): BidPlacedEvent {
+  return {
+    type: 'BID_PLACED',
+    payload: { playerId, bidId, bidType, trickNumber }
+  }
+}
+
+// CARD REPLACEMENT SKIPPED EVENT
+/**
+ * Event emitted when a player skips card replacement
+ */
+export interface CardReplacementSkippedEvent {
+  type: 'CARD_REPLACEMENT_SKIPPED'
+  payload: {
+    playerId: PlayerId
+    round: number
+    nextPlayerId: PlayerId
+  }
+}
+export function createCardReplacementSkippedEvent(
+  playerId: PlayerId,
+  round: number,
+  nextPlayerId: PlayerId
+): CardReplacementSkippedEvent {
+  return {
+    type: 'CARD_REPLACEMENT_SKIPPED',
+    payload: { playerId, round, nextPlayerId }
+  }
+}
+
+// CARD REPLACEMENT COMPLETED EVENT
+/**
+ * Event emitted when a player completes card replacement
+ */
+export interface CardReplacementCompletedEvent {
+  type: 'CARD_REPLACEMENT_COMPLETED'
+  payload: {
+    playerId: PlayerId
+    round: number
+    nextPlayerId: PlayerId
+  }
+}
+export function createCardReplacementCompletedEvent(
+  playerId: PlayerId,
+  round: number,
+  nextPlayerId: PlayerId
+): CardReplacementCompletedEvent {
+  return {
+    type: 'CARD_REPLACEMENT_COMPLETED',
+    payload: { playerId, round, nextPlayerId }
+  }
+}
+
 // UNION TYPE
 export type GameEvent = 
   | DeckShuffledEvent
+  | RoundSetupCompletedEvent
   | FirstCardDealtEvent
   | RemainingCardsDealtEvent
   | CardReplacedPublicEvent
+  | CardReplacedPrivateEvent
   | FirstCardHiddenEvent
   | TrickStartedEvent
   | CardPlayedEvent
   | TrickCompletedEvent
   | RoundEndedEvent
-  | RoundSetupCompletedEvent
   | BidMadeEvent
+  | BidPlacedEvent
+  | TurnFinishedEvent
+  | TrickFinishedEvent
+  | CardReplacementSkippedEvent
+  | CardReplacementCompletedEvent

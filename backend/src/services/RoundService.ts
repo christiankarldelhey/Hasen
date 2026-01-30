@@ -78,11 +78,10 @@ export class RoundService {
     const setupEvent = createRoundSetupCompletedEvent(
       game.round.round,
       game.deck.length,
-      {
-        points: game.round.roundBids.bids.find(b => b.bid_type === 'points') || null,
-        set_collection: game.round.roundBids.bids.find(b => b.bid_type === 'set_collection') || null,
-        trick: game.round.roundBids.bids.find(b => b.bid_type === 'trick') || null
-      }
+      'player_drawing',
+      game.activePlayers[0],
+      null,
+      game.round.roundBids
     );
     
     const firstCardsEvent = createFirstCardDealtEvent(

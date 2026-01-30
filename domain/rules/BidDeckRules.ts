@@ -87,6 +87,11 @@ export function updateBidsPool(
   
   return {
     bids: [...setCollectionBids, ...pointsBids, ...trickBids],
-    playerBids: {}
+    playerBids: {
+      player_1: [],
+      player_2: [],
+      player_3: [],
+      player_4: []
+    }
   }
 }
