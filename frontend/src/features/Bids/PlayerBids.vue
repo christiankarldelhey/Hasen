@@ -92,6 +92,10 @@ const playerColor = computed(() => {
 
 <template>
   <div class="rounded-xl bg-black/60 p-4 flex flex-col gap-2">
+    <div class="flex flex-row gap-2"> 
+      <span class="text-hasen-base text-md">Your bids</span>
+    </div>
+      
 
     <!-- Row: Tricks Won -->
     <PlayerBidScoreRow

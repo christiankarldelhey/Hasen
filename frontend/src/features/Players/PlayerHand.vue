@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import { useHasenStore } from '@/stores/hasenStore';
-import PlayerBidScore from '../Bids/PlayerBidScore.vue';
+import PlayerBids from '../Bids/PlayerBids.vue';
 import PlayerInfo from '@/common/components/PlayerInfo.vue';
 import PlayerCards from './PlayerCards.vue';
 import PlayerNotifications from './PlayerNotifications.vue';
@@ -78,7 +78,7 @@ const handleFinishTurn = () => {
     </div>
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
-      <PlayerBidScore />
+      <PlayerBids />
       
       <div class="flex flex-col gap-3 pointer-events-auto">
         <PlayerInfo 

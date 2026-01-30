@@ -31,7 +31,9 @@ watch(roundBids, (newVal) => {
 <template>
   <div class="fixed top-0 right-0 rounded-xl bg-black/60 p-4 z-10 m-4">
     <div v-if="roundBids" class="flex flex-col gap-2">
-
+      <div class="flex flex-row">
+        <span class="text-hasen-base text-sm">Available bids</span>
+      </div>
       <!-- Fila de Tricks / tricks (2 bids) -->
       <div class="flex flex-row gap-2">
         <Bid 

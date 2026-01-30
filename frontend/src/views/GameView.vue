@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { useGameControls } from '../common/composables/useGameControls';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
-import BidsPanel from '@/features/Bids/BidsPanel.vue';
+import AvailableBids from '@/features/Bids/AvailableBids.vue';
 import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
@@ -52,7 +52,7 @@ onMounted(() => {
     <div v-else class="relative w-full h-screen">
       <GameInfo />
       
-      <BidsPanel />
+      <AvailableBids />
       <!-- Oponentes en diferentes posiciones -->
       <OtherPlayerHand
         v-for="opponent in opponentPositions"
