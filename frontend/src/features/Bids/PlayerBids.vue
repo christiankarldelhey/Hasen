@@ -158,7 +158,10 @@ const playerColor = computed(() => {
           <SuitSymbol 
             :suit="suitDisplay.suit" 
             :avoid="suitDisplay.isAvoid"
-            :class="!suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''"
+            :class="[
+              !setCollectionDisplay ? 'opacity-30' : '',
+              !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+            ]"
           />
           <span 
             class="text-lg font-semibold"

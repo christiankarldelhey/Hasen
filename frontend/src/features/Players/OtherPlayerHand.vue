@@ -8,7 +8,6 @@ import type { PlayerId } from '@domain/interfaces/Player'
 interface Props {
   playerId: PlayerId
   publicCardId: string | null
-  handCardsCount: number
   position: 'top' | 'left' | 'right'
 }
 
@@ -25,9 +24,38 @@ const publicCard = computed(() => {
   return null
 })
 
+const calculateCardCount = computed(() => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick
+  const trickNumber = currentTrick?.trick_number ?? 0
+  const roundPhase = gameStore.publicGameState?.round.roundPhase
+  
+  // Durante card replacement (trick 0)
+  if (roundPhase === 'player_drawing') {
+    // Si tiene public card visible: 4 cartas privadas + 1 pública
+    return publicCard.value ? 4 : 5
+  }
+  
+  // Durante los tricks (1-5)
+  // Empezamos con 5 cartas, restamos el número de tricks completados
+  let totalCards = 5 - (trickNumber - 1)
+  
+  // Verificar si el jugador ya jugó en el trick actual
+  const hasPlayedInCurrentTrick = currentTrick?.cards.some(cardId => {
+    const card = gameStore.publicGameState?.publicCards[cardId]
+    return card?.owner === props.playerId
+  })
+  
+  // Si ya jugó en el trick actual, restar 1 más
+  if (hasPlayedInCurrentTrick) {
+    totalCards -= 1
+  }
+  
+  return totalCards
+})
+
 const privateHandsCount = computed(() => {
-  // Solo restar 1 si realmente hay una carta visible
-  return publicCard.value ? props.handCardsCount - 1 : props.handCardsCount
+  // Si tiene public card visible, restar 1 del total calculado
+  return publicCard.value ? calculateCardCount.value - 1 : calculateCardCount.value
 })
 
 const positionClasses = computed(() => {

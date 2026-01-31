@@ -51,21 +51,45 @@ export function useGameSession(gameId: string) {
     if (totalOpponents === 0) return []
     
     if (totalOpponents === 1 && opponents[0]) {
-      return [{ ...opponents[0], position: 'top' as const }]
+      return [{ 
+        playerId: opponents[0].playerId,
+        publicCardId: opponents[0].publicCardId,
+        position: 'top' as const 
+      }]
     }
     
     if (totalOpponents === 2 && opponents[0] && opponents[1]) {
       return [
-        { ...opponents[0], position: 'top' as const },
-        { ...opponents[1], position: 'left' as const }
+        { 
+          playerId: opponents[0].playerId,
+          publicCardId: opponents[0].publicCardId,
+          position: 'top' as const 
+        },
+        { 
+          playerId: opponents[1].playerId,
+          publicCardId: opponents[1].publicCardId,
+          position: 'left' as const 
+        }
       ]
     }
     
     if (totalOpponents === 3 && opponents[0] && opponents[1] && opponents[2]) {
       return [
-        { ...opponents[0], position: 'top' as const },
-        { ...opponents[1], position: 'left' as const },
-        { ...opponents[2], position: 'right' as const }
+        { 
+          playerId: opponents[0].playerId,
+          publicCardId: opponents[0].publicCardId,
+          position: 'top' as const 
+        },
+        { 
+          playerId: opponents[1].playerId,
+          publicCardId: opponents[1].publicCardId,
+          position: 'left' as const 
+        },
+        { 
+          playerId: opponents[2].playerId,
+          publicCardId: opponents[2].publicCardId,
+          position: 'right' as const 
+        }
       ]
     }
     

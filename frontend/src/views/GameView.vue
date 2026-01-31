@@ -59,7 +59,6 @@ onMounted(() => {
         :key="opponent.playerId"
         :player-id="opponent.playerId"
         :public-card-id="opponent.publicCardId"
-        :hand-cards-count="opponent.handCardsCount"
         :position="opponent.position"
       />
       
