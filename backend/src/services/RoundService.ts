@@ -134,7 +134,11 @@ export class RoundService {
     console.log(`📊 Round ${game.round.round} scores calculated:`, roundScores);
     
     // 2. CREAR EVENTO ROUND_ENDED
-    const roundEndedEvent = createRoundEndedEvent(game.round.round, roundScores as Record<PlayerId, number>);
+    const roundEndedEvent = createRoundEndedEvent(
+      game.round.round, 
+      roundScores as Record<PlayerId, number>,
+      game.playerScores
+    );
     
     // 3. INICIAR NUEVO ROUND
     const result = await RoundService.startNewRound(gameId);

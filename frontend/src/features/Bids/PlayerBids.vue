@@ -130,7 +130,12 @@ const playerColor = computed(() => {
     >
       <div class="flex flex-row items-center justify-between w-full">
         <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.minPoints : 0" :class="pointsDisplay ? '' : 'opacity-30'" />
-        <span class="text-hasen-dark text-2xl">
+        <span 
+          class="text-2xl"
+          :class="pointsBidScore.score !== null && pointsDisplay 
+            ? (points >= pointsDisplay.minPoints && points <= pointsDisplay.maxPoints ? 'text-hasen-green' : 'text-hasen-red')
+            : 'text-hasen-dark'"
+        >
           {{ points }}
         </span>
         <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
@@ -149,7 +154,7 @@ const playerColor = computed(() => {
       :isLastRow="true"
     >
       <div class="flex flex-row items-center justify-between w-full">
-        <div v-for="suitDisplay in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
+        <div v-for="(suitDisplay, index) in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
           <SuitSymbol 
             :suit="suitDisplay.suit" 
             :avoid="suitDisplay.isAvoid"
@@ -163,6 +168,14 @@ const playerColor = computed(() => {
             ]"
           >
             {{ suitDisplay.score !== null ? suitDisplay.score : suitDisplay.count }}
+          </span>
+          
+          <span 
+            v-if="index === 0 && setCollectionDisplay"
+            class="text-2xl font-semibold mx-2"
+            :class="(setCollectionDisplay.winScore + setCollectionDisplay.avoidScore) < 10 ? 'text-hasen-red' : 'text-hasen-green'"
+          >
+            {{ setCollectionDisplay.winScore + setCollectionDisplay.avoidScore }}
           </span>
         </div>
       </div>
