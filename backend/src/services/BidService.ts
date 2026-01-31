@@ -51,7 +51,7 @@ export class BidService {
       bidId: currentBid.bid_id,
       trickNumber,
       onLose,
-      hasPlayerWon: null
+      isPlayerWinning: null
     })
 
     game.markModified('round.roundBids.playerBids')

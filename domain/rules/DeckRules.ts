@@ -71,7 +71,7 @@ export function dealCards(
     // Update card ownership and state
     playerCards.forEach(card => {
       card.owner = playerId
-      card.state = 'in_hand'
+      card.state = 'in_hand_hidden'
     })
     
     hands.set(playerId, playerCards)
