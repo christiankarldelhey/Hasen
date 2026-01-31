@@ -1,0 +1,30 @@
+services:
+  # Backend Service
+  - type: web
+    name: hasen-backend
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: MONGODB_URI
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+  # Frontend Service
+  - type: web
+    name: hasen-frontend
+    env: static
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
