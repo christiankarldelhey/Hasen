@@ -69,7 +69,7 @@ const sortedTricks = computed(() => {
             :char="trick.position" 
         />
         <!-- Ganar determinado truco -->
-        <template v-if="trickCondition.win_min_tricks && trickCondition.win_min_tricks < trickCondition.win_max_tricks">
+        <template v-if="trickCondition.win_min_tricks && trickCondition.win_max_tricks && trickCondition.win_min_tricks < trickCondition.win_max_tricks">
             <TrickSymbol state="win" v-for="_num in trickCondition.win_min_tricks" />
         </template>
         <template v-if="trickCondition?.win_max_tricks && trickCondition?.win_min_tricks === trickCondition?.win_max_tricks">

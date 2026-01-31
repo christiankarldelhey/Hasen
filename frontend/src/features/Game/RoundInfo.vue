@@ -22,16 +22,6 @@ const leadSuitIcon = computed(() => {
   if (!leadSuit.value) return null
   return suitIcons[leadSuit.value]
 })
-
-const _bidStatus = computed(() => {
-  if (!trickNumber.value) return ''
-  if (trickNumber.value >= 1 && trickNumber.value <= 3) {
-    return '(can make bids)'
-  } else if (trickNumber.value >= 4 && trickNumber.value <= 5) {
-    return '(cant make bids)'
-  }
-  return ''
-})
 </script>
 
 <template>
