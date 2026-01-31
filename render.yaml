@@ -19,7 +19,7 @@ services:
 
   # Frontend Service
   - type: web
-    name: hasen-frontend
+    name: hasen-game
     env: static
     region: frankfurt
     plan: free
