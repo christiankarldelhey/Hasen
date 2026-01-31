@@ -57,7 +57,7 @@ export function canReplaceCard(
 
 export function canAdvanceFromPlayerDrawing(
   currentPlayerIndex: number,
-  totalPlayers: number
+  _totalPlayers: number
 ): boolean {
   return currentPlayerIndex === 0
 }

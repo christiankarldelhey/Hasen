@@ -1,4 +1,4 @@
-import { BidType, BidScore, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from "../interfaces";
+import type { BidType, BidScore, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from "../interfaces";
 
 interface BidDefinition {
   type: BidType

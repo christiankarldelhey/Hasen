@@ -15,7 +15,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   showHare: true,
-  publicCard: null as DomainPlayingCard | null,
+  publicCard: undefined,
 })
 
 const stackedCards = computed(() => {

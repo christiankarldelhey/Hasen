@@ -2,7 +2,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 import { userIdService } from './userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
-import type { PublicGameState } from '@domain/interfaces/Game';
 
 export interface JoinGameResponse {
   gameId: string;

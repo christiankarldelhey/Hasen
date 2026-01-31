@@ -82,7 +82,7 @@ export function useSocketLobby() {
 
     // Navegación integrada
     startGameAndNavigate: (gameId: string) => {
-      socket.on('game:started', (payload: GameStartedPayload) => {
+      socket.on('game:started', (_payload: GameStartedPayload) => {
         router.push(`/game/${gameId}`);
       });
     },

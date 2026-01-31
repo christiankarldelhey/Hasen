@@ -59,7 +59,7 @@ const cardPositions = computed(() => {
   <div class="relative h-[260px]" style="transform: translateY(40%);">
     <TransitionGroup name="card">
       <div
-        v-for="(pos, index) in cardPositions"
+        v-for="(pos, _index) in cardPositions"
         :key="pos.card.id"
         class="absolute pointer-events-auto transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
         :style="{

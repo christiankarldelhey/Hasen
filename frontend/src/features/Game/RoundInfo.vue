@@ -23,7 +23,7 @@ const leadSuitIcon = computed(() => {
   return suitIcons[leadSuit.value]
 })
 
-const bidStatus = computed(() => {
+const _bidStatus = computed(() => {
   if (!trickNumber.value) return ''
   if (trickNumber.value >= 1 && trickNumber.value <= 3) {
     return '(can make bids)'

@@ -10,11 +10,15 @@ const props = defineProps<{
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }>()
 
+const pointsCondition = computed(() => props.win_condition as PointsBidCondition)
+const setCondition = computed(() => props.win_condition as SetCollectionBidCondition)
+const trickCondition = computed(() => props.win_condition as TrickBidCondition)
+
 const sortedTricks = computed(() => {
   if (props.type !== 'trick') return []
   
   const tricks: Array<{ position: number, state: 'win' | 'lose' | 'neutral' }> = []
-  const condition = props.win_condition as TrickBidCondition
+  const condition = trickCondition.value
   
   condition.lose_trick_position?.forEach(pos => {
     tricks.push({ position: pos, state: 'lose' })
@@ -35,9 +39,9 @@ const sortedTricks = computed(() => {
 <template>
     <!-- POINTS -->
     <div v-if="props.type === 'points'" class="flex flex-row px-1">
-        <PointsToWin :points="props.win_condition.min_points" />
+        <PointsToWin :points="pointsCondition.min_points" />
         <span class="text-hasen-dark text-2xl font-semibold pt-1">  -  </span>  
-        <PointsToWin :points="props.win_condition.max_points" />
+        <PointsToWin :points="pointsCondition.max_points" />
     </div>
 
     <!-- SET COLLECTION -->
@@ -45,12 +49,12 @@ const sortedTricks = computed(() => {
         class="px-1">
             <div class="flex flex-row justify-center">
                 <div class="flex flex-row pr-2">
-                    <SuitSymbol :suit="props.win_condition.win_suit" />
+                    <SuitSymbol :suit="setCondition.win_suit" />
                     <span class="text-hasen-green text-md pt-1">10</span>
                 </div>
 
                 <div class="flex flex-row">
-                    <SuitSymbol :suit="props.win_condition.avoid_suit" :avoid="true" />
+                    <SuitSymbol :suit="setCondition.avoid_suit" :avoid="true" />
                     <span class="text-hasen-red text-md pt-1">-10</span>
                 </div>
             </div> 
@@ -65,12 +69,12 @@ const sortedTricks = computed(() => {
             :char="trick.position" 
         />
         <!-- Ganar determinado truco -->
-        <template v-if="props.win_condition.win_min_tricks && props.win_condition.win_min_tricks < props.win_condition.win_max_tricks">
-            <TrickSymbol state="win" v-for="num in props.win_condition.win_min_tricks" />
+        <template v-if="trickCondition.win_min_tricks && trickCondition.win_min_tricks < trickCondition.win_max_tricks">
+            <TrickSymbol state="win" v-for="_num in trickCondition.win_min_tricks" />
         </template>
-        <template v-if="props.win_condition?.win_max_tricks && props.win_condition?.win_min_tricks === props.win_condition?.win_max_tricks">
-            <TrickSymbol v-for="(_, i) in props.win_condition.win_max_tricks" state="win" :key="i" />
-            <TrickSymbol v-for="(_, i) in (5 - props.win_condition.win_max_tricks)" state="lose" :key="i" />
+        <template v-if="trickCondition?.win_max_tricks && trickCondition?.win_min_tricks === trickCondition?.win_max_tricks">
+            <TrickSymbol v-for="(_, i) in trickCondition.win_max_tricks" state="win" :key="i" />
+            <TrickSymbol v-for="(_, i) in (5 - trickCondition.win_max_tricks)" state="lose" :key="i" />
         </template>
     </div>
 </template>

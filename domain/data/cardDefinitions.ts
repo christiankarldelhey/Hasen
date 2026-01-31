@@ -1,4 +1,4 @@
-import { Character, Suit, CardPoints, NormalRank, LeadRank } from "../interfaces";
+import type { Character, Suit, CardPoints, NormalRank, LeadRank } from "../interfaces";
 
 interface CardDefinition {
   char: Character

@@ -27,7 +27,7 @@ export type GameEventHandler = (
   context: GameEventContext
 ) => void
 
-const handleDeckShuffled: GameEventHandler = (event, context) => {
+const handleDeckShuffled: GameEventHandler = (event, _context) => {
   if (event.type !== 'DECK_SHUFFLED') return
   
   const payload = (event as DeckShuffledEvent).payload
