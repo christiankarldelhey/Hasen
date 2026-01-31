@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-export function useMinimumLoadingTime(minimumMs: number = 3500) {
+export function useLoadingTime(minimumMs: number = 3500) {
   const isLoading = ref(false);
   const startTime = ref<number | null>(null);
 

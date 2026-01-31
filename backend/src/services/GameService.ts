@@ -125,15 +125,12 @@ export class GameService {
   
   if (userId && game.playerSessions) {
     playerId = game.playerSessions.get(userId) || null;
-    console.log(`🔍 [getPlayerGameState] userId: ${userId}, mapped playerId: ${playerId}`);
-    console.log(`🔍 [getPlayerGameState] playerSessions:`, Array.from(game.playerSessions.entries()));
     
     if (playerId && game.activePlayers.includes(playerId)) {
       playerHand = game.deck.filter(
         (card: any) => card.owner === playerId && 
         (card.state === 'in_hand_visible' || card.state === 'in_hand_hidden')
       );
-      console.log(`🔍 [getPlayerGameState] Found ${playerHand.length} cards for ${playerId}`);
     }
   }
 

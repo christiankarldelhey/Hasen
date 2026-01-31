@@ -47,12 +47,26 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
   }
 })
 
-socket.on('game:deleted-by-host', ({ gameId }: { gameId: string }) => {
-  console.log(`🗑️ Host deleted game ${gameId}`);
-  // Notificar a todos en el room
-  io.to(gameId).emit('game:deleted', { 
-    gameId, 
-    message: 'Host deleted the game' 
+  // Handler: Registrar jugador en juego activo (después del refresh)
+  socket.on('game:register-player', ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
+    socket.join(gameId)
+    socketToPlayer.set(socket.id, { gameId, playerId, userId })
+    console.log(`🎮 Socket ${socket.id} registered in active game: ${gameId} as ${playerId} (userId: ${userId})`)
+  })
+
+  // Handler: Desregistrar jugador del juego activo
+  socket.on('game:unregister-player', ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
+    console.log(`🚪 Player ${playerId} (userId: ${userId}) unregistering from game ${gameId}`)
+    socket.leave(gameId)
+    socketToPlayer.delete(socket.id)
+  })
+
+  socket.on('game:deleted-by-host', ({ gameId }: { gameId: string }) => {
+    console.log(`🗑️ Host deleted game ${gameId}`);
+    // Notificar a todos en el room
+    io.to(gameId).emit('game:deleted', { 
+      gameId, 
+      message: 'Host deleted the game' 
+    });
   });
-});
 }

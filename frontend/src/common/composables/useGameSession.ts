@@ -1,13 +1,16 @@
 import { computed, onUnmounted } from 'vue'
 import { useGameAPI } from './useGameAPI'
 import { useSocketGame } from './useSocketGame'
-import { useGameStore } from '@/stores/gameStore'
-import { useHasenStore } from '@/stores/hasenStore'
-import { useLobbyStore } from '@/stores/lobbyStore'
+import { useSocketLobby } from './useSocketLobby'
+import { useGameStore } from '../../stores/gameStore'
+import { useHasenStore } from '../../stores/hasenStore'
+import { useLobbyStore } from '../../stores/lobbyStore'
+import { userIdService } from '../../services/userIdService'
 
-export function useGameControls(gameId: string) {
+export function useGameSession(gameId: string) {
   const gameAPI = useGameAPI()
   const socketGame = useSocketGame()
+  const socketLobby = useSocketLobby()
   const gameStore = useGameStore()
   const hasenStore = useHasenStore()
   const lobbyStore = useLobbyStore()
@@ -18,9 +21,11 @@ export function useGameControls(gameId: string) {
     gameStore.publicGameState?.round.roundPhase === 'player_drawing'
   )
 
-  const isMyTurn = computed(() => 
-    gameStore.publicGameState?.round.playerTurn === hasenStore.currentPlayerId
-  )
+  const isMyTurn = computed(() => {
+    const playerTurn = gameStore.publicGameState?.round.playerTurn
+    const currentPlayerId = hasenStore.currentPlayerId
+    return playerTurn === currentPlayerId
+  })
 
   const handMode = computed(() => {
     return isPlayerDrawingPhase.value && isMyTurn.value ? 'card_replacement' : 'normal'
@@ -115,7 +120,13 @@ export function useGameControls(gameId: string) {
   const initialize = async () => {
     try {
       await gameAPI.fetchPlayerGameState(gameId)
-      console.log('mounted game view')
+      
+      // Registrar el socket en el backend después del refresh
+      const userId = userIdService.getUserId()
+      const playerId = hasenStore.currentPlayerId
+      if (playerId && userId) {
+        socketLobby.registerPlayer({ gameId, playerId, userId })
+      }
       
       socketGame.onGameStateUpdate((data) => {
         if (data.publicGameState) {
@@ -144,6 +155,13 @@ export function useGameControls(gameId: string) {
   const cleanup = () => {
     socketGame.offGameStateUpdate()
     socketGame.offPrivateStateUpdate()
+    
+    // Desregistrar el socket cuando se desmonta el componente
+    const userId = userIdService.getUserId()
+    const playerId = hasenStore.currentPlayerId
+    if (playerId && userId) {
+      socketLobby.unregisterPlayer({ gameId, playerId, userId })
+    }
   }
 
   onUnmounted(() => {

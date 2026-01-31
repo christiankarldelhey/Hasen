@@ -47,7 +47,7 @@ const turnMessage = computed(() => {
     } else {
       return {
         title: 'Your turn!',
-        subtitle: 'Play a card'
+        subtitle: 'Play a card and optionally make a Bid'
       }
     }
   } else {

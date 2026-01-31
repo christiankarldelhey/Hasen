@@ -3,13 +3,13 @@ import { useLobbyStore } from '../../stores/lobbyStore'
 import { useHasenStore } from '../../stores/hasenStore'
 import { useGameStore } from '../../stores/gameStore'
 import type { PlayerId } from '@domain/interfaces/Player'
-import { useMinimumLoadingTime } from './useMinimumLoadingTime'
+import { useLoadingTime } from './useLoadingTime'
 
 export function useGameAPI() {
   const lobbyStore = useLobbyStore()
   const hasenStore = useHasenStore()
   const gameStore = useGameStore()
-  const { startLoading, stopLoading } = useMinimumLoadingTime(1000)
+  const { startLoading, stopLoading } = useLoadingTime(1000)
 
   async function fetchGames() {
     startLoading()

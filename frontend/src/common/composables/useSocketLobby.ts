@@ -48,6 +48,15 @@ export function useSocketLobby() {
       socket.emit('lobby:leave', payload);
     },
 
+    // Game session management (for active game)
+    registerPlayer: (payload: LobbyJoinPayload) => {
+      socket.emit('game:register-player', payload);
+    },
+
+    unregisterPlayer: (payload: LobbyLeavePayload) => {
+      socket.emit('game:unregister-player', payload);
+    },
+
     // Game lifecycle
     onGameStarted: (callback: (payload: GameStartedPayload) => void) => {
       socket.on('game:started', (payload: GameStartedPayload) => {

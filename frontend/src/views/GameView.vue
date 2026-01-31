@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameControls } from '../common/composables/useGameControls';
+import { useGameSession } from '../common/composables/useGameSession';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
 import AvailableBids from '@/features/Bids/AvailableBids.vue';
@@ -30,7 +30,7 @@ const {
   handleFinishTurn,
   handleFinishTrick,
   initialize
-} = useGameControls(gameId);
+} = useGameSession(gameId);
 
 onMounted(() => {
   initialize();
