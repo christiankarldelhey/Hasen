@@ -4,7 +4,9 @@ import { shuffleBidDeck, updateBidsPool } from '@domain/rules/BidDeckRules'
 import { createFirstCardDealtEvent } from '@domain/events/GameEvents.js'
 import { createRoundSetupCompletedEvent } from '@domain/events/GameEvents.js'
 import { createRoundEndedEvent } from '@domain/events/GameEvents.js'
+import { createGameEndedEvent } from '@domain/events/GameEvents.js'
 import { getPlayerScoreFromRound } from '@domain/rules/BidRules.js'
+import { hasGameEnded, getWinnerName } from '@domain/rules/GameEndRules.js'
 import type { RoundPhase, Bid, PlayerId, PlayingCard } from '@domain/interfaces'
 
 
@@ -140,7 +142,31 @@ export class RoundService {
       game.playerScores
     );
     
-    // 3. INICIAR NUEVO ROUND
+    // 3. CHEQUEAR SI EL JUEGO HA TERMINADO
+    const gameEndCheck = hasGameEnded(game);
+    
+    if (gameEndCheck.hasEnded && gameEndCheck.winner) {
+      console.log(`🏆 Game ended! Winner: ${gameEndCheck.winner}`);
+      
+      game.gamePhase = 'ended';
+      game.winner = gameEndCheck.winner;
+      await game.save();
+      
+      const winnerName = getWinnerName(gameEndCheck.winner);
+      const gameEndedEvent = createGameEndedEvent(
+        gameEndCheck.winner,
+        winnerName,
+        game.playerScores
+      );
+      
+      return {
+        game,
+        roundEndedEvent,
+        gameEndedEvent
+      };
+    }
+    
+    // 4. INICIAR NUEVO ROUND
     const result = await RoundService.startNewRound(gameId);
     
     console.log(`✅ Round ${result.game.round.round} started successfully`);

@@ -408,6 +408,32 @@ export function createCardReplacementCompletedEvent(
   }
 }
 
+// GAME ENDED EVENT
+/**
+ * Event emitted when the game ends and a winner is determined
+ */
+export interface GameEndedEvent {
+  type: 'GAME_ENDED'
+  payload: {
+    winnerId: PlayerId
+    winnerName: string
+    finalScores: Array<{
+      playerId: PlayerId
+      score: number
+    }>
+  }
+}
+export function createGameEndedEvent(
+  winnerId: PlayerId,
+  winnerName: string,
+  finalScores: Array<{ playerId: PlayerId; score: number }>
+): GameEndedEvent {
+  return {
+    type: 'GAME_ENDED',
+    payload: { winnerId, winnerName, finalScores }
+  }
+}
+
 // UNION TYPE
 export type GameEvent = 
   | DeckShuffledEvent
@@ -427,3 +453,4 @@ export type GameEvent =
   | TrickFinishedEvent
   | CardReplacementSkippedEvent
   | CardReplacementCompletedEvent
+  | GameEndedEvent

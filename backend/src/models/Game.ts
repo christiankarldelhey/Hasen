@@ -161,10 +161,16 @@ const GameSchema = new Schema<GameDocument>({
     playerId: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
     score: { type: Number, required: true, default: 0 }
   }],
+  winner: {
+    type: String,
+    enum: ['player_1', 'player_2', 'player_3', 'player_4', null],
+    default: null,
+    required: false
+  },
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
-    pointsToWin: { type: Number, required: true, default: 300 }
+    pointsToWin: { type: Number, required: true, default: 20 }
   }
 }, {
   timestamps: true,

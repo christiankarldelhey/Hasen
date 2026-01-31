@@ -92,7 +92,8 @@ export class GameService {
       tricksBidDeck: game.bidDecks.tricksBidDeck
     },
     gameSettings: game.gameSettings,
-    playerScores: game.playerScores
+    playerScores: game.playerScores,
+    winner: game.winner || null
   };
 
   // Agregar las cartas públicas visibles al mapa

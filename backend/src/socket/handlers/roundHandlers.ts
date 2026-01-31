@@ -136,14 +136,20 @@ socket.on('round:start', async ({ gameId }) => {
         
         setTimeout(async () => {
           try {
-            const { game: newGame, setupEvent, firstCardsEvent, privateCards, roundEndedEvent } = 
-              await RoundService.finishRoundAndStartNext(gameId);
+            const result = await RoundService.finishRoundAndStartNext(gameId);
             
-            io.to(gameId).emit('game:event', roundEndedEvent);
-            io.to(gameId).emit('game:event', setupEvent);
-            io.to(gameId).emit('game:event', firstCardsEvent);
+            io.to(gameId).emit('game:event', result.roundEndedEvent);
             
-            for (const [playerId, cards] of privateCards) {
+            if (result.gameEndedEvent) {
+              io.to(gameId).emit('game:event', result.gameEndedEvent);
+              console.log(`🏆 Game ended! Winner: ${result.gameEndedEvent.payload.winnerName}`);
+              return;
+            }
+            
+            io.to(gameId).emit('game:event', result.setupEvent);
+            io.to(gameId).emit('game:event', result.firstCardsEvent);
+            
+            for (const [playerId, cards] of result.privateCards) {
               const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
               const playerSocketId = Array.from(socketToPlayer.entries())
                 .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
@@ -153,7 +159,7 @@ socket.on('round:start', async ({ gameId }) => {
               }
             }
             
-            console.log(`✅ Round ${newGame.round.round} started automatically`);
+            console.log(`✅ Round ${result.game.round.round} started automatically`);
           } catch (error: any) {
             console.error('Error starting next round:', error);
           }
@@ -258,14 +264,20 @@ socket.on('round:start', async ({ gameId }) => {
         
         setTimeout(async () => {
           try {
-            const { game: newGame, setupEvent, firstCardsEvent, privateCards, roundEndedEvent } = 
-              await RoundService.finishRoundAndStartNext(gameId);
+            const result = await RoundService.finishRoundAndStartNext(gameId);
             
-            io.to(gameId).emit('game:event', roundEndedEvent);
-            io.to(gameId).emit('game:event', setupEvent);
-            io.to(gameId).emit('game:event', firstCardsEvent);
+            io.to(gameId).emit('game:event', result.roundEndedEvent);
             
-            for (const [playerId, cards] of privateCards) {
+            if (result.gameEndedEvent) {
+              io.to(gameId).emit('game:event', result.gameEndedEvent);
+              console.log(`🏆 Game ended! Winner: ${result.gameEndedEvent.payload.winnerName}`);
+              return;
+            }
+            
+            io.to(gameId).emit('game:event', result.setupEvent);
+            io.to(gameId).emit('game:event', result.firstCardsEvent);
+            
+            for (const [playerId, cards] of result.privateCards) {
               const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
               const playerSocketId = Array.from(socketToPlayer.entries())
                 .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
@@ -275,7 +287,7 @@ socket.on('round:start', async ({ gameId }) => {
               }
             }
             
-            console.log(`✅ Round ${newGame.round.round} started automatically`);
+            console.log(`✅ Round ${result.game.round.round} started automatically`);
           } catch (error: any) {
             console.error('Error starting next round:', error);
           }

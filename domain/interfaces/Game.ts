@@ -27,6 +27,7 @@ export interface Game {
   tricksHistory: Trick[]
   bidsHistory: Bid[];
   playerScores: PlayerScore[];
+  winner: PlayerId | null;
   gameSettings: {
     minPlayers: number
     maxPlayers: number
@@ -78,6 +79,7 @@ export interface PublicGameState {
   playerTurnOrder: PlayerId[]
   round: PublicRoundState
   playerScores: PlayerScore[];
+  winner: PlayerId | null;
   gameSettings: {
     minPlayers: number
     maxPlayers: number

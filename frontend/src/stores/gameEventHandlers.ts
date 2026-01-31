@@ -12,7 +12,8 @@ import type {
   RoundEndedEvent,
   BidMadeEvent,
   CardReplacementSkippedEvent,
-  CardReplacementCompletedEvent
+  CardReplacementCompletedEvent,
+  GameEndedEvent
 } from '@domain/events/GameEvents'
 
 export interface GameEventContext {
@@ -297,6 +298,24 @@ const handleCardReplacementCompleted: GameEventHandler = (event, context) => {
   console.log(`🔄 ${payload.playerId} replaced card, next turn: ${payload.nextPlayerId}`)
 }
 
+const handleGameEnded: GameEventHandler = (event, context) => {
+  if (event.type !== 'GAME_ENDED') return
+  if (!context.publicGameState) return
+  
+  const payload = (event as GameEndedEvent).payload
+  
+  context.publicGameState.gamePhase = 'ended'
+  context.publicGameState.winner = payload.winnerId
+  
+  console.log(`🏆 Game ended! Winner: ${payload.winnerName}`)
+  
+  setTimeout(() => {
+    alert(`🎉 ¡${payload.winnerName} ha ganado el juego!\n\nPuntuación final:\n${payload.finalScores.map(s => `${s.playerId}: ${s.score} puntos`).join('\n')}`)
+    
+    window.location.href = '/'
+  }, 1000)
+}
+
 export const gameEventHandlers: Record<string, GameEventHandler> = {
   'DECK_SHUFFLED': handleDeckShuffled,
   'ROUND_SETUP_COMPLETED': handleRoundSetupCompleted,
@@ -312,6 +331,7 @@ export const gameEventHandlers: Record<string, GameEventHandler> = {
   'TRICK_FINISHED': handleTrickFinished,
   'CARD_REPLACEMENT_SKIPPED': handleCardReplacementSkipped,
   'CARD_REPLACEMENT_COMPLETED': handleCardReplacementCompleted,
+  'GAME_ENDED': handleGameEnded,
 }
 
 export function processGameEvent(
