@@ -115,7 +115,7 @@ export function getHighestPrioritySpecialCard(deck: PlayingCard[], trick: Trick)
  * Valida si un jugador puede seleccionar el próximo lead
  */
 export function canSelectNextLead(
-  playerId: PlayerId,
+  _playerId: PlayerId,
   selectedLeadPlayer: PlayerId,
   activePlayers: PlayerId[]
 ): { valid: boolean; reason?: string } {
@@ -130,7 +130,7 @@ export function canSelectNextLead(
  * Valida si un jugador puede robar una carta del trick
  */
 export function canStealCard(
-  playerId: PlayerId,
+  _playerId: PlayerId,
   cardId: string,
   trickCards: string[]
 ): { valid: boolean; reason?: string } {

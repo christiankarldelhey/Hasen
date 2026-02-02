@@ -54,7 +54,7 @@ export function canPlayCard(
 export function getEffectiveRank(
   card: PlayingCard,
   leadSuit: LeadSuit | null,
-  trickNumber: TrickNumber
+  _trickNumber: TrickNumber
 ): number {
   // SPECIAL: Acorns U (rank 40) has high rank when it leads ANY trick
   // In all other cases, it uses its base rank (1)
