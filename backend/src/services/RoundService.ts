@@ -67,10 +67,22 @@ export class RoundService {
     
     
     
-    // 6. Actualizar fase a player_drawing
+    // 6. Actualizar fase a player_drawing y determinar lead player rotativo
     game.round.roundPhase = 'player_drawing';
     game.round.currentTrick = null;
-    game.round.playerTurn = game.activePlayers[0];
+    
+    // Rotar el lead player basado en el número de round
+    // Round 1 -> activePlayers[0], Round 2 -> activePlayers[1], etc.
+    const leadPlayerIndex = (game.round.round - 1) % game.activePlayers.length;
+    game.round.playerTurn = game.activePlayers[leadPlayerIndex];
+    
+    // Actualizar playerTurnOrder para que comience desde el lead player
+    // Esto asegura que el orden de turnos dentro del round refleje la rotación
+    const rotatedTurnOrder: PlayerId[] = [
+      ...game.activePlayers.slice(leadPlayerIndex),
+      ...game.activePlayers.slice(0, leadPlayerIndex)
+    ];
+    game.playerTurnOrder = rotatedTurnOrder;
     
     await game.save();
     
@@ -81,7 +93,7 @@ export class RoundService {
       game.round.round,
       game.deck.length,
       'player_drawing',
-      game.activePlayers[0],
+      game.round.playerTurn,
       null,
       game.round.roundBids
     );

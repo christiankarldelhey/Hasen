@@ -52,7 +52,9 @@ export class TrickService {
       throw new Error('Cannot start trick: maximum 5 tricks per round');
     }
     
-    const determinedLeadPlayer = leadPlayer || game.playerTurnOrder[0];
+    // Usar el playerTurn actual del round como lead player por defecto
+    // Esto respeta la rotación del lead player entre rounds
+    const determinedLeadPlayer = leadPlayer || game.round.playerTurn || game.playerTurnOrder[0];
     
     const newTrick: Trick = {
       trick_id: randomUUID(),

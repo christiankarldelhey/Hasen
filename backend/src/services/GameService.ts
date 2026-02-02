@@ -199,7 +199,7 @@ export class GameService {
 
     game.gamePhase = 'playing';
     game.playerTurnOrder = [...game.activePlayers];
-    game.round.round = 1;
+    game.round.round = 0;
     game.round.roundPhase = 'round_setup';
     game.deck = shuffleDeck(game.deck);
     
