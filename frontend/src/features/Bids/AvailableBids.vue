@@ -11,7 +11,7 @@ const hasenStore = useHasenStore()
 const game = computed(() => gameStore.publicGameState)
 const playerId = computed(() => hasenStore.currentPlayerId || null)
 
-const { isBidDisabled } = useBidValidation(game, playerId)
+const { isBidDisabled, getBidDisabledReason } = useBidValidation(game, playerId)
 
 const roundBids = computed(() => {
   const allBids = gameStore.publicGameState?.round.roundBids.bids || []
@@ -42,6 +42,7 @@ watch(roundBids, (newVal) => {
           :bid="bid"
           type="trick"
           :disabled="isBidDisabled('trick', bid)"
+          :disabled-reason="getBidDisabledReason('trick', bid)"
         />
       </div>
 
@@ -53,6 +54,7 @@ watch(roundBids, (newVal) => {
           :bid="bid"
           type="points"
           :disabled="isBidDisabled('points', bid)"
+          :disabled-reason="getBidDisabledReason('points', bid)"
         />
       </div>
 
@@ -64,6 +66,7 @@ watch(roundBids, (newVal) => {
           :bid="bid"
           type="set_collection"
           :disabled="isBidDisabled('set_collection', bid)"
+          :disabled-reason="getBidDisabledReason('set_collection', bid)"
         />
       </div>
 
