@@ -9,6 +9,7 @@ import { useSocketGame } from '@/common/composables/useSocketGame'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
+import { useBidTooltips } from '@/common/composables/useBidTooltips'
 
 const props = defineProps<{
   bid: Bid | null
@@ -16,6 +17,8 @@ const props = defineProps<{
   disabled?: boolean
   disabledReason?: string
 }>()
+
+const { getTooltip } = useBidTooltips()
 
 const socketGame = useSocketGame()
 const gameStore = useGameStore()
@@ -70,6 +73,41 @@ const bidCardStyle = computed(() => {
   }
 })
 
+const isCurrentPlayerBid = computed(() => {
+  const currentPlayerId = hasenStore.currentPlayerId
+  return currentPlayerId ? bidders.value.includes(currentPlayerId) : false
+})
+
+const tooltip = computed(() => {
+  if (!props.bid) return null
+  
+  // Si el jugador ya seleccionó este bid, siempre mostrar tooltip informativo verde
+  if (isCurrentPlayerBid.value) {
+    return getTooltip(props.bid, false, undefined)
+  }
+  
+  // Si no, usar la lógica normal (error si está disabled, info si no)
+  return getTooltip(props.bid, props.disabled || false, props.disabledReason)
+})
+
+const tooltipClasses = computed(() => {
+  if (!tooltip.value) return ''
+  
+  const baseClasses = 'absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50'
+  const colorClass = tooltip.value.type === 'error' ? 'bg-hasen-red' : 'bg-hasen-green'
+  
+  return `${baseClasses} ${colorClass}`
+})
+
+const tooltipArrowClasses = computed(() => {
+  if (!tooltip.value) return ''
+  
+  const baseClasses = 'absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent'
+  const colorClass = tooltip.value.type === 'error' ? 'border-t-hasen-red' : 'border-t-hasen-green'
+  
+  return `${baseClasses} ${colorClass}`
+})
+
 const handleBidClick = () => {
   if (!props.bid || props.disabled) return
   
@@ -104,13 +142,13 @@ const handleBidClick = () => {
       </div>
     </div>
     
-    <!-- Tooltip para mostrar la razón cuando está deshabilitado -->
+    <!-- Tooltip informativo o de error -->
     <div 
-      v-if="disabled && disabledReason"
-      class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
+      v-if="tooltip"
+      :class="tooltipClasses"
     >
-      {{ disabledReason }}
-      <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+      {{ tooltip.text }}
+      <div :class="tooltipArrowClasses"></div>
     </div>
   </div>
 </template>
