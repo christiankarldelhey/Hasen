@@ -57,6 +57,16 @@ export function useSocketGame() {
       socket.emit('player:finishTrick', { gameId });
     },
 
+    // Select next lead player (e.g., when special card is played)
+    selectNextLeadPlayer: (gameId: string, selectedLeadPlayer: string) => {
+      socket.emit('player:selectNextLeadPlayer', { gameId, selectedLeadPlayer });
+    },
+
+    // Select card to steal (e.g., when Leaves U is played)
+    selectCardToSteal: (gameId: string, selectedCardId: string) => {
+      socket.emit('player:selectCardToSteal', { gameId, selectedCardId });
+    },
+
     onGameStateUpdate: (callback: (data: any) => void) => {
       socket.on('game:stateUpdate', callback);
     },

@@ -33,6 +33,16 @@ export function canPlayCard(
     if (playerTurn !== playerId) {
       return { valid: false, reason: 'Not your turn to play a card' }
     }
+    // 6. SPECIAL RULE: Acorns U cannot be played as first card of first trick if you are lead player
+    const isAcornsU = card.suit === 'acorns' && card.char === 'U';
+    const isFirstCardOfTrick = currentTrick.cards.length === 0;
+    const isFirstTrick = currentTrick.trick_number === 1;
+    const isLeadPlayer = currentTrick.lead_player === playerId;
+    
+    if (isAcornsU && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
+      return { valid: false, reason: 'Acorns U cannot be played as first card of the first trick' }
+    }
+    
     return { valid: true }
   }
 
@@ -46,9 +56,14 @@ export function getEffectiveRank(
   leadSuit: LeadSuit | null,
   trickNumber: TrickNumber
 ): number {
-  // If Unter of berries is not lead its rank is base (lowest priority)
-  if (card.rank.onSuit === 40 && trickNumber !== 1) {
-    return card.rank.base;
+  // SPECIAL: Acorns U (rank 40) has high rank when it leads ANY trick
+  // In all other cases, it uses its base rank (1)
+  if (card.rank.onSuit === 40) {
+    // Use high rank whenever acorns-U is the lead card (any trick)
+    if (leadSuit === 'acorns') {
+      return card.rank.onSuit; // 40
+    }
+    return card.rank.base; // 1
   }
   // If it's trump (flowers), always use base rank
   if (card.suit === 'flowers') {
@@ -74,11 +89,12 @@ export function compareCards(
     const currentCardRank = getEffectiveRank(current_card, leadSuit, trick_number);
     const winningCardRank = getEffectiveRank(winning_card, leadSuit, trick_number);
 
-    // EXCEPTION: If current card is the special 31 (Unter of flowers) and winning card is the 40 (Unter of flowers), current card wins
+    // EXCEPTION: Flowers U (rank 31) beats Acorns U (rank 40) when Acorns U leads
     if (currentCardRank === 31 && winningCardRank === 40) {
       return current_card as PlayingCard;
     }
-    // Normal cases
+    
+    // Normal cases: higher rank wins
     const newWinningCard = winningCardRank >= currentCardRank ? winning_card : current_card;
 
     return newWinningCard as PlayingCard;

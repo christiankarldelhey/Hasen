@@ -13,7 +13,13 @@ import type {
   BidMadeEvent,
   CardReplacementSkippedEvent,
   CardReplacementCompletedEvent,
-  GameEndedEvent
+  GameEndedEvent,
+  PickNextLeadEvent,
+  NextLeadPlayerSelectedEvent,
+  PickCardFromTrickEvent,
+  CardStolenFromTrickEvent,
+  TurnFinishedEvent,
+  TrickFinishedEvent
 } from '@domain/events/GameEvents'
 
 export interface GameEventContext {
@@ -174,23 +180,20 @@ const handleTrickCompleted: GameEventHandler = (event, context) => {
   if (!context.publicGameState || !context.publicGameState.round.currentTrick) return
   
   const payload = (event as TrickCompletedEvent).payload
+  const currentTrick = context.publicGameState.round.currentTrick
   
-  // Update trick state to 'resolve'
-  context.publicGameState.round.currentTrick.trick_state = 'resolve'
-  context.publicGameState.round.currentTrick.winning_card = payload.winningCard
-  context.publicGameState.round.currentTrick.score = {
-    trick_winner: payload.winner,
-    trick_points: payload.points,
-    trick_collections: payload.collections
-  }
+  // Actualizar el trick con el ganador y score
+  currentTrick.score.trick_winner = payload.winner
+  currentTrick.score.trick_points = payload.points
+  currentTrick.score.trick_collections = payload.collections
+  currentTrick.trick_state = 'resolve'
   
-  // Update roundScore
-  if (!context.publicGameState.round.roundScore) {
-    context.publicGameState.round.roundScore = []
-  }
+  // Actualizar cards del trick (sin carta robada si aplica)
+  currentTrick.cards = payload.cards.map(c => c.id)
   
+  // Actualizar roundScore del ganador
   let playerScore = context.publicGameState.round.roundScore.find(
-    score => score.playerId === payload.winner
+    s => s.playerId === payload.winner
   )
   
   if (!playerScore) {
@@ -210,6 +213,33 @@ const handleTrickCompleted: GameEventHandler = (event, context) => {
     playerScore.setCollection.leaves += payload.collections.leaves || 0
     playerScore.setCollection.berries += payload.collections.berries || 0
     playerScore.setCollection.flowers += payload.collections.flowers || 0
+  }
+  
+  // Actualizar roundScore del ladrón si existe
+  if (payload.stolenCardInfo) {
+    let thiefScore = context.publicGameState.round.roundScore.find(
+      s => s.playerId === payload.stolenCardInfo!.thiefId
+    )
+    
+    if (!thiefScore) {
+      thiefScore = {
+        playerId: payload.stolenCardInfo.thiefId,
+        points: 0,
+        tricksWon: [],
+        setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+      }
+      context.publicGameState.round.roundScore.push(thiefScore)
+    }
+    
+    thiefScore.points += payload.stolenCardInfo.points
+    // NO agregar a tricksWon (el ladrón no gana el trick)
+    if (payload.stolenCardInfo.collections) {
+      thiefScore.setCollection.acorns += payload.stolenCardInfo.collections.acorns || 0
+      thiefScore.setCollection.leaves += payload.stolenCardInfo.collections.leaves || 0
+      thiefScore.setCollection.berries += payload.stolenCardInfo.collections.berries || 0
+      thiefScore.setCollection.flowers += payload.stolenCardInfo.collections.flowers || 0
+    }
+    console.log(`🍃 Thief ${payload.stolenCardInfo.thiefId} scored ${payload.stolenCardInfo.points} points`)
   }
   
   console.log(`🏆 Trick ${payload.trickNumber} completed! Winner: ${payload.winner} (${payload.points} points)`)
@@ -260,7 +290,7 @@ const handleTurnFinished: GameEventHandler = (event, context) => {
   if (event.type !== 'TURN_FINISHED') return
   if (!context.publicGameState) return
   
-  const payload = (event as any).payload
+  const payload = (event as TurnFinishedEvent).payload
   context.publicGameState.round.playerTurn = payload.nextPlayer
   
   console.log(`🔄 Turn finished: ${payload.playerId} → ${payload.nextPlayer}`)
@@ -270,7 +300,7 @@ const handleTrickFinished: GameEventHandler = (event, context) => {
   if (event.type !== 'TRICK_FINISHED') return
   if (!context.publicGameState) return
   
-  const payload = (event as any).payload
+  const payload = (event as TrickFinishedEvent).payload
   
   // Clear current trick (moved to history)
   context.publicGameState.round.currentTrick = null
@@ -296,6 +326,78 @@ const handleCardReplacementCompleted: GameEventHandler = (event, context) => {
   context.publicGameState.round.playerTurn = payload.nextPlayerId
   
   console.log(`🔄 ${payload.playerId} replaced card, next turn: ${payload.nextPlayerId}`)
+}
+
+const handlePickNextLead: GameEventHandler = (event, context) => {
+  if (event.type !== 'PICK_NEXT_LEAD') return
+  if (!context.publicGameState || !context.publicGameState.round.currentTrick) return
+  
+  const payload = (event as PickNextLeadEvent).payload
+  
+  // Actualizar el trick state a awaiting_special_action
+  context.publicGameState.round.currentTrick.trick_state = 'awaiting_special_action'
+  context.publicGameState.round.currentTrick.pendingSpecialAction = {
+    type: 'PICK_NEXT_LEAD',
+    playerId: payload.playerId
+  }
+  
+  // Mantener el turno en el jugador que debe seleccionar
+  context.publicGameState.round.playerTurn = payload.playerId
+  
+  console.log(`🫐 Pick next lead activated for ${payload.playerId}`)
+}
+
+const handleNextLeadPlayerSelected: GameEventHandler = (event, context) => {
+  if (event.type !== 'NEXT_LEAD_PLAYER_SELECTED') return
+  if (!context.publicGameState || !context.publicGameState.round.currentTrick) return
+  
+  const payload = (event as NextLeadPlayerSelectedEvent).payload
+  
+  // Actualizar la acción especial pendiente
+  if (context.publicGameState.round.currentTrick.pendingSpecialAction) {
+    context.publicGameState.round.currentTrick.pendingSpecialAction.selectedNextLead = payload.selectedLeadPlayer
+  }
+  
+  // Cambiar el trick state a resolve
+  context.publicGameState.round.currentTrick.trick_state = 'resolve'
+  
+  console.log(`🫐 Next lead player selected: ${payload.selectedLeadPlayer}`)
+}
+
+const handlePickCardFromTrick: GameEventHandler = (event, context) => {
+  if (event.type !== 'PICK_CARD_FROM_TRICK') return
+  if (!context.publicGameState || !context.publicGameState.round.currentTrick) return
+  
+  const payload = (event as PickCardFromTrickEvent).payload
+  
+  // Actualizar el trick state a awaiting_special_action
+  context.publicGameState.round.currentTrick.trick_state = 'awaiting_special_action'
+  context.publicGameState.round.currentTrick.pendingSpecialAction = {
+    type: 'STEAL_CARD',
+    playerId: payload.playerId
+  }
+  
+  // Mantener el turno en el jugador que debe seleccionar
+  context.publicGameState.round.playerTurn = payload.playerId
+  
+  console.log(`🍃 Pick card from trick activated for ${payload.playerId}`)
+}
+
+const handleCardStolenFromTrick: GameEventHandler = (event, context) => {
+  if (event.type !== 'CARD_STOLEN_FROM_TRICK') return
+  if (!context.publicGameState || !context.publicGameState.round.currentTrick) return
+  
+  const payload = (event as CardStolenFromTrickEvent).payload
+  
+  // Actualizar la acción especial pendiente
+  if (context.publicGameState.round.currentTrick.pendingSpecialAction) {
+    context.publicGameState.round.currentTrick.pendingSpecialAction.selectedCardToSteal = payload.stolenCardId
+  }
+  
+  // Cambiar el trick state a resolve
+  context.publicGameState.round.currentTrick.trick_state = 'resolve'
+  
+  console.log(`🍃 Card stolen from trick: ${payload.stolenCardId}`)
 }
 
 const handleGameEnded: GameEventHandler = (event, context) => {
@@ -331,6 +433,10 @@ export const gameEventHandlers: Record<string, GameEventHandler> = {
   'TRICK_FINISHED': handleTrickFinished,
   'CARD_REPLACEMENT_SKIPPED': handleCardReplacementSkipped,
   'CARD_REPLACEMENT_COMPLETED': handleCardReplacementCompleted,
+  'PICK_NEXT_LEAD': handlePickNextLead,
+  'NEXT_LEAD_PLAYER_SELECTED': handleNextLeadPlayerSelected,
+  'PICK_CARD_FROM_TRICK': handlePickCardFromTrick,
+  'CARD_STOLEN_FROM_TRICK': handleCardStolenFromTrick,
   'GAME_ENDED': handleGameEnded,
 }
 

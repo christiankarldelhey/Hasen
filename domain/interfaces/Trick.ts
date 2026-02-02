@@ -2,7 +2,7 @@ import type { PlayerId } from './Player'
 import type { PlayingCardId, Suit } from './Card'
 
 export type TrickNumber = 1 | 2 | 3 | 4 | 5
-export type TrickState = 'in_progress' | 'resolve' | 'ended'
+export type TrickState = 'in_progress' | 'awaiting_special_action' | 'resolve' | 'ended'
 export type LeadSuit = 'acorns' | 'leaves' | 'berries'
 export type TrickScore = {
   trick_winner: PlayerId | null;
@@ -18,5 +18,12 @@ export interface Trick {
   winning_card: PlayingCardId | null
   lead_suit: LeadSuit | null
   cards: PlayingCardId[]
+  stolenCards?: PlayingCardId[]
+  pendingSpecialAction?: {
+    type: 'PICK_NEXT_LEAD' | 'STEAL_CARD'
+    playerId: PlayerId
+    selectedNextLead?: PlayerId
+    selectedCardToSteal?: PlayingCardId
+  }
   score: TrickScore
 }

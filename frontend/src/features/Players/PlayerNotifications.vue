@@ -21,8 +21,20 @@ const isPlayingPhase = computed(() =>
   currentPhase.value === 'playing'
 )
 
+const currentTrick = computed(() => 
+  gameStore.publicGameState?.round.currentTrick
+)
+
+const pendingSpecialAction = computed(() => 
+  currentTrick.value?.pendingSpecialAction
+)
+
+const isAwaitingSpecialAction = computed(() => 
+  currentTrick.value?.trick_state === 'awaiting_special_action'
+)
+
 const shouldShowTurnInfo = computed(() => 
-  isPlayerDrawingPhase.value || isPlayingPhase.value
+  isPlayerDrawingPhase.value || isPlayingPhase.value || isAwaitingSpecialAction.value
 )
 
 const currentPlayerTurn = computed(() => 
@@ -38,6 +50,25 @@ const currentPlayerName = computed(() => {
 })
 
 const turnMessage = computed(() => {
+  // Prioridad a acciones especiales
+  if (isAwaitingSpecialAction.value && pendingSpecialAction.value) {
+    const actionPlayerId = pendingSpecialAction.value.playerId
+    const actionPlayerName = getPlayerNameById.value(actionPlayerId)
+    const isMyAction = actionPlayerId === hasenStore.currentPlayerId
+    
+    if (pendingSpecialAction.value.type === 'PICK_NEXT_LEAD') {
+      return {
+        title: isMyAction ? '🫐 Select Next Lead Player!' : `⏳ Waiting for ${actionPlayerName}`,
+        subtitle: isMyAction ? 'Choose who will lead the next trick' : 'Selecting the next lead player...'
+      }
+    } else if (pendingSpecialAction.value.type === 'STEAL_CARD') {
+      return {
+        title: isMyAction ? '🍃 Select Card to Steal!' : `⏳ Waiting for ${actionPlayerName}`,
+        subtitle: isMyAction ? 'Choose a card from the trick to steal' : 'Selecting a card to steal...'
+      }
+    }
+  }
+  
   if (isMyTurn.value) {
     if (isPlayerDrawingPhase.value) {
       return {

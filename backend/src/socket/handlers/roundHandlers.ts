@@ -5,7 +5,15 @@ import { BidService } from '@/services/BidService';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
-import { createRemainingCardsDealtEvent, createTurnFinishedEvent, createTrickFinishedEvent, createTrickStartedEvent } from '@domain/events/GameEvents.js'
+import type { PlayerId } from '@domain/interfaces'
+import { 
+  createRemainingCardsDealtEvent, 
+  createTurnFinishedEvent, 
+  createTrickFinishedEvent, 
+  createTrickStartedEvent,
+  createNextLeadPlayerSelectedEvent,
+  createCardStolenFromTrickEvent
+} from '@domain/events/GameEvents.js'
 
 export function setupRoundHandlers(io: Server, socket: Socket) {
 
@@ -130,6 +138,17 @@ socket.on('round:start', async ({ gameId }) => {
         io.to(gameId).emit('game:event', trickCompletedEvent);
       }
 
+      // Verificar si se activó una acción especial y emitir evento correspondiente
+      const currentTrick = game.round.currentTrick;
+      if (currentTrick) {
+        const specialCardEvent = TrickService.getSpecialCardEvents(game, currentTrick);
+        if (specialCardEvent) {
+          io.to(gameId).emit('game:event', specialCardEvent);
+          const emoji = specialCardEvent.type === 'PICK_CARD_FROM_TRICK' ? '🍃' : '🫐';
+          console.log(`${emoji} Emitted ${specialCardEvent.type} event for ${specialCardEvent.payload.playerId}`);
+        }
+      }
+
       // Verificar si el round pasó a fase 'scoring' (todos los tricks completados)
       if (game.round.roundPhase === 'scoring') {
         console.log(`🏁 Round ${game.round.round} completed! Starting next round...`);
@@ -235,7 +254,13 @@ socket.on('round:start', async ({ gameId }) => {
 
   socket.on('player:finishTrick', async ({ gameId }: { gameId: string }) => {
     try {
-      const { game } = await TrickService.finishTrick(gameId);
+      const result = await TrickService.finishTrick(gameId);
+      const game = result.game;
+
+      // Emitir TRICK_COMPLETED si existe (con score correcto después del robo)
+      if (result.trickCompletedEvent) {
+        io.to(gameId).emit('game:event', result.trickCompletedEvent);
+      }
 
       const currentTrickNumber = game.round.currentTrick?.trick_number || null;
       const previousTrickNumber = currentTrickNumber ? (currentTrickNumber - 1) as 1 | 2 | 3 | 4 | 5 : 5;
@@ -298,6 +323,76 @@ socket.on('round:start', async ({ gameId }) => {
       
     } catch (error: any) {
       console.error('Error in finishTrick:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
+  socket.on('player:selectNextLeadPlayer', async ({ gameId, selectedLeadPlayer }: { gameId: string; selectedLeadPlayer: string }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, trickCompletedEvent } = await TrickService.saveSpecialCardSelection(
+        gameId,
+        playerData.playerId,
+        { nextLead: selectedLeadPlayer as PlayerId }
+      );
+
+      // Emitir evento de selección completada
+      const nextLeadSelectedEvent = createNextLeadPlayerSelectedEvent(
+        playerData.playerId,
+        selectedLeadPlayer as PlayerId,
+        0 as any // El trick number no importa aquí, se procesa en finishTrick
+      );
+      io.to(gameId).emit('game:event', nextLeadSelectedEvent);
+
+      // Emitir evento TRICK_COMPLETED si existe
+      if (trickCompletedEvent) {
+        io.to(gameId).emit('game:event', trickCompletedEvent);
+      }
+
+      console.log(`✅ Player ${playerData.playerId} selected ${selectedLeadPlayer} as next lead`);
+      
+    } catch (error: any) {
+      console.error('Error in selectNextLeadPlayer:', error);
+      socket.emit('error', { message: error.message });
+    }
+  });
+
+  socket.on('player:selectCardToSteal', async ({ gameId, selectedCardId }: { gameId: string; selectedCardId: string }) => {
+    try {
+      const playerData = socketToPlayer.get(socket.id);
+      if (!playerData) {
+        socket.emit('error', { message: 'Player not found in session' });
+        return;
+      }
+
+      const { game, trickCompletedEvent } = await TrickService.saveSpecialCardSelection(
+        gameId,
+        playerData.playerId,
+        { cardToSteal: selectedCardId }
+      );
+
+      // Emitir evento de carta seleccionada para robar
+      const cardStolenEvent = createCardStolenFromTrickEvent(
+        playerData.playerId,
+        selectedCardId,
+        0 as any // El trick number no importa aquí, se procesa en finishTrick
+      );
+      io.to(gameId).emit('game:event', cardStolenEvent);
+
+      // Emitir evento TRICK_COMPLETED si existe
+      if (trickCompletedEvent) {
+        io.to(gameId).emit('game:event', trickCompletedEvent);
+      }
+
+      console.log(`✅ Player ${playerData.playerId} selected card ${selectedCardId} to steal`);
+      
+    } catch (error: any) {
+      console.error('Error in selectCardToSteal:', error);
       socket.emit('error', { message: error.message });
     }
   });

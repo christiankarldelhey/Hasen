@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
@@ -38,10 +38,32 @@ const playerClasses = computed(() => {
   return [ props.isPlayer ? 'flex-row items-center' : 'flex-col items-center', positionClasses.value]
 })
 
+// Inyectar métodos de special cards
+const specialCards = inject<any>('specialCards', null)
+
+const isSelectable = computed(() => 
+  specialCards?.isPlayerSelectable(props.playerId) ?? false
+)
+
+const handleClick = () => {
+  if (isSelectable.value && specialCards) {
+    specialCards.handlePlayerClick(props.playerId)
+  }
+}
+
+const circleClasses = computed(() => ({
+  'cursor-pointer': isSelectable.value,
+  'hover:scale-110': isSelectable.value,
+  'transition-all duration-300': true,
+  'selectable-glow': isSelectable.value
+}))
+
 </script>
 
 <template>
-  <div :class="['flex', 'gap-3', playerClasses ]">
+  <div 
+    :class="['flex', 'gap-3', playerClasses]"
+  >
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
       <!-- Outer glow ring for current turn -->
@@ -53,7 +75,7 @@ const playerClasses = computed(() => {
       
       <!-- Main circle with gradient -->
       <div 
-        class="relative w-18 h-18 rounded-full flex items-center justify-center shadow-lg"
+        :class="['relative w-18 h-18 rounded-full flex items-center justify-center shadow-lg', circleClasses]"
         :style="{ 
           background: `radial-gradient(circle at 30% 30%, ${playerColor}dd, ${playerColor})`,
           border: `2px solid ${playerColor}`,
@@ -61,6 +83,7 @@ const playerClasses = computed(() => {
           '--pulse-color-light': `${playerColor}dd`,
           '--pulse-color-dark': playerColor
         }"
+        @click="handleClick"
       >
         <Hare :size="'40px'" :color="isCurrentTurn ? 'white' : '#e2d2a8'" />
       </div>
@@ -109,11 +132,25 @@ const playerClasses = computed(() => {
   }
 }
 
+@keyframes selectableGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.6);
+  }
+}
+
 .animate-subtle-glow {
   animation: subtleGlow 3s ease-in-out infinite;
 }
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.selectable-glow {
+  animation: selectableGlow 2s ease-in-out infinite;
+  filter: brightness(1.2);
 }
 </style>

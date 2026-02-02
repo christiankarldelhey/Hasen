@@ -201,6 +201,18 @@ export interface TrickCompletedEvent {
       berries: number
       flowers: number
     } | null
+    stolenCardInfo?: {
+      thiefId: PlayerId
+      stolenCardId: string
+      stolenCard: PlayingCard
+      points: number
+      collections: {
+        acorns: number
+        leaves: number
+        berries: number
+        flowers: number
+      }
+    }
   }
 }
 export function createTrickCompletedEvent(
@@ -209,11 +221,23 @@ export function createTrickCompletedEvent(
   winningCard: string,
   points: number,
   cards: PlayingCard[],
-  collections: { acorns: number; leaves: number; berries: number; flowers: number } | null
+  collections: { acorns: number; leaves: number; berries: number; flowers: number } | null,
+  stolenCardInfo?: {
+    thiefId: PlayerId
+    stolenCardId: string
+    stolenCard: PlayingCard
+    points: number
+    collections: {
+      acorns: number
+      leaves: number
+      berries: number
+      flowers: number
+    }
+  }
 ): TrickCompletedEvent {
   return {
     type: 'TRICK_COMPLETED',
-    payload: { trickNumber, winner, winningCard, points, cards, collections }
+    payload: { trickNumber, winner, winningCard, points, cards, collections, stolenCardInfo }
   }
 }
 // ROUND ENDED EVENT
@@ -434,6 +458,98 @@ export function createGameEndedEvent(
   }
 }
 
+// PICK NEXT LEAD PLAYER EVENT
+/**
+ * Event emitted when a player needs to select who will be the next lead player
+ */
+export interface PickNextLeadEvent {
+  type: 'PICK_NEXT_LEAD'
+  payload: {
+    playerId: PlayerId
+    trickNumber: 1 | 2 | 3 | 4 | 5
+    availablePlayers: PlayerId[]
+  }
+}
+export function createPickNextLeadEvent(
+  playerId: PlayerId,
+  trickNumber: 1 | 2 | 3 | 4 | 5,
+  availablePlayers: PlayerId[]
+): PickNextLeadEvent {
+  return {
+    type: 'PICK_NEXT_LEAD',
+    payload: { playerId, trickNumber, availablePlayers }
+  }
+}
+
+// NEXT LEAD PLAYER SELECTED EVENT
+/**
+ * Event emitted when a player selects who will be the next lead player
+ */
+export interface NextLeadPlayerSelectedEvent {
+  type: 'NEXT_LEAD_PLAYER_SELECTED'
+  payload: {
+    playerId: PlayerId
+    selectedLeadPlayer: PlayerId
+    trickNumber: 1 | 2 | 3 | 4 | 5
+  }
+}
+export function createNextLeadPlayerSelectedEvent(
+  playerId: PlayerId,
+  selectedLeadPlayer: PlayerId,
+  trickNumber: 1 | 2 | 3 | 4 | 5
+): NextLeadPlayerSelectedEvent {
+  return {
+    type: 'NEXT_LEAD_PLAYER_SELECTED',
+    payload: { playerId, selectedLeadPlayer, trickNumber }
+  }
+}
+
+// PICK CARD FROM TRICK EVENT
+/**
+ * Event emitted when a player needs to select a card from a completed trick to steal
+ */
+export interface PickCardFromTrickEvent {
+  type: 'PICK_CARD_FROM_TRICK'
+  payload: {
+    playerId: PlayerId
+    trickNumber: 1 | 2 | 3 | 4 | 5
+    availableCards: string[]
+  }
+}
+export function createPickCardFromTrickEvent(
+  playerId: PlayerId,
+  trickNumber: 1 | 2 | 3 | 4 | 5,
+  availableCards: string[]
+): PickCardFromTrickEvent {
+  return {
+    type: 'PICK_CARD_FROM_TRICK',
+    payload: { playerId, trickNumber, availableCards }
+  }
+}
+
+// CARD STOLEN FROM TRICK EVENT
+/**
+ * Event emitted when a player steals a card from a completed trick
+ */
+export interface CardStolenFromTrickEvent {
+  type: 'CARD_STOLEN_FROM_TRICK'
+  payload: {
+    playerId: PlayerId
+    stolenCardId: string
+    trickNumber: 1 | 2 | 3 | 4 | 5
+  }
+}
+export function createCardStolenFromTrickEvent(
+  playerId: PlayerId,
+  stolenCardId: string,
+  trickNumber: 1 | 2 | 3 | 4 | 5
+): CardStolenFromTrickEvent {
+  return {
+    type: 'CARD_STOLEN_FROM_TRICK',
+    payload: { playerId, stolenCardId, trickNumber }
+  }
+}
+
 // UNION TYPE
 export type GameEvent = 
   | DeckShuffledEvent
@@ -454,3 +570,7 @@ export type GameEvent =
   | CardReplacementSkippedEvent
   | CardReplacementCompletedEvent
   | GameEndedEvent
+  | PickNextLeadEvent
+  | NextLeadPlayerSelectedEvent
+  | PickCardFromTrickEvent
+  | CardStolenFromTrickEvent

@@ -51,12 +51,14 @@ const TrickScoreSchema = new Schema({
 // Schema para Trick
 const TrickSchema = new Schema({
   trick_id: { type: String, required: true },
-  trick_state: { type: String, enum: ['in_progress', 'resolve', 'ended'], required: true },
+  trick_state: { type: String, enum: ['in_progress', 'awaiting_special_action', 'resolve', 'ended'], required: true },
   trick_number: { type: Number, required: true },
   lead_player: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
   winning_card: { type: String, default: null },
   lead_suit: { type: String, enum: ['acorns', 'leaves', 'berries', null], default: null },
   cards: [{ type: String }],
+  stolenCards: { type: [String], default: [] },
+  pendingSpecialAction: { type: Schema.Types.Mixed, default: null },
   score: { type: TrickScoreSchema, required: true }
 }, { _id: false });
 
@@ -170,7 +172,7 @@ const GameSchema = new Schema<GameDocument>({
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
-    pointsToWin: { type: Number, required: true, default: 20 }
+    pointsToWin: { type: Number, required: true, default: 300 }
   }
 }, {
   timestamps: true,

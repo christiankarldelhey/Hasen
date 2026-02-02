@@ -15,7 +15,7 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'acorns', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'acorns', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'acorns', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'acorns', points: 0, baseRank: 1, leadRank: null },  // Especial
+  { char: 'U', suit: 'acorns', points: 0, baseRank: 1, leadRank: 40 },  // Especial - gana casi todo cuando se juega primero
   { char: 'O', suit: 'acorns', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'acorns', points: 4, baseRank: 3, leadRank: 21 },
 
@@ -25,7 +25,7 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'leaves', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'leaves', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'leaves', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'leaves', points: 0, baseRank: 2, leadRank: null},  // Especial
+  { char: 'U', suit: 'leaves', points: 0, baseRank: 0, leadRank: null},  // Especial - pierde siempre, roba carta
   { char: 'O', suit: 'leaves', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'leaves', points: 4, baseRank: 3, leadRank: 21 },
 
@@ -35,7 +35,7 @@ export const CARD_DEFINITIONS: CardDefinition[] = [
   { char: '8', suit: 'berries', points: 0, baseRank: 3, leadRank: 8 },
   { char: '9', suit: 'berries', points: 0, baseRank: 3, leadRank: 9 },
   { char: '10', suit: 'berries', points: 10, baseRank: 3, leadRank: 10 },
-  { char: 'U', suit: 'berries', points: 0, baseRank: 0, leadRank: 40 },  // MUY especial
+  { char: 'U', suit: 'berries', points: 0, baseRank: 0, leadRank: null },  // MUY especial - pierde siempre, solo elige próximo lead
   { char: 'O', suit: 'berries', points: 3, baseRank: 3, leadRank: 20 },
   { char: 'K', suit: 'berries', points: 4, baseRank: 3, leadRank: 21 },
 

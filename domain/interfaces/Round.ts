@@ -20,6 +20,15 @@ export interface Round {
   roundPhase: RoundPhase
   currentTrick: Trick | null
   roundScore: PlayerRoundScore[]
+  pendingNextLeadSelection?: {
+    playerId: PlayerId
+    nextTrickNumber: TrickNumber
+  }
+  pendingCardSteal?: {
+    playerId: PlayerId
+    trickNumber: TrickNumber
+    availableCards: string[]
+  }
 }
 
 export interface PlayerRoundScore {

@@ -6,6 +6,8 @@ import { useGameStore } from '../../stores/gameStore'
 import { useHasenStore } from '../../stores/hasenStore'
 import { useLobbyStore } from '../../stores/lobbyStore'
 import { userIdService } from '../../services/userIdService'
+import { useSpecialCards } from './useSpecialCards'
+import type { PlayerId } from '@domain/interfaces'
 
 export function useGameSession(gameId: string) {
   const gameAPI = useGameAPI()
@@ -14,6 +16,9 @@ export function useGameSession(gameId: string) {
   const gameStore = useGameStore()
   const hasenStore = useHasenStore()
   const lobbyStore = useLobbyStore()
+  
+  // Inicializar composable de cartas especiales
+  const specialCards = useSpecialCards(gameId)
 
   const playerHand = computed(() => gameStore.privateGameState?.hand || [])
 
@@ -29,6 +34,19 @@ export function useGameSession(gameId: string) {
 
   const handMode = computed(() => {
     return isPlayerDrawingPhase.value && isMyTurn.value ? 'card_replacement' : 'normal'
+  })
+
+  const canFinishTrick = computed(() => {
+    const currentTrick = gameStore.publicGameState?.round.currentTrick
+    if (!currentTrick) return false
+    
+    // Si el trick está esperando acción especial, NO se puede finalizar
+    if (currentTrick.trick_state === 'awaiting_special_action') {
+      return false
+    }
+    
+    // Solo se puede finalizar si está en estado 'resolve'
+    return currentTrick.trick_state === 'resolve'
   })
 
   const loading = computed(() => lobbyStore.loading)
@@ -141,6 +159,14 @@ export function useGameSession(gameId: string) {
     socketGame.finishTrick(gameId)
   }
 
+  const handleSelectNextLeadPlayer = (selectedPlayerId: PlayerId) => {
+    socketGame.selectNextLeadPlayer(gameId, selectedPlayerId)
+  }
+
+  const handleSelectCardToSteal = (selectedCardId: string) => {
+    socketGame.selectCardToSteal(gameId, selectedCardId)
+  }
+
   const initialize = async () => {
     try {
       await gameAPI.fetchPlayerGameState(gameId)
@@ -161,6 +187,9 @@ export function useGameSession(gameId: string) {
         }
         if (data.event) {
           gameStore.handleGameEvent(data.event)
+          
+          // Manejar eventos de cartas especiales
+          specialCards.handleSpecialCardEvent(data.event)
         }
       })
       
@@ -200,16 +229,26 @@ export function useGameSession(gameId: string) {
     winningCardId,
     trickState,
     isTrickInResolve,
+    canFinishTrick,
     loading,
     error,
     isPlayerDrawingPhase,
     isMyTurn,
     handMode,
+    nextLeadSelection: specialCards.nextLeadSelection,
+    cardStealSelection: specialCards.cardStealSelection,
+    selectionType: specialCards.selectionType,
+    isPlayerSelectable: specialCards.isPlayerSelectable,
+    isCardSelectable: specialCards.isCardSelectable,
+    handlePlayerClick: specialCards.handlePlayerClick,
+    handleCardClick: specialCards.handleCardClick,
     handleSkipReplacement,
     handleConfirmReplacement,
     handlePlayCard,
     handleFinishTurn,
     handleFinishTrick,
+    handleSelectNextLeadPlayer,
+    handleSelectCardToSteal,
     initialize,
     cleanup
   }

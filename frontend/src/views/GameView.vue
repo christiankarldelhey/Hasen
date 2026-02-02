@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
@@ -20,10 +20,15 @@ const {
   winningCardId,
   trickState,
   isTrickInResolve,
+  canFinishTrick,
   loading,
   error,
   handMode,
   isMyTurn,
+  isPlayerSelectable,
+  isCardSelectable,
+  handlePlayerClick,
+  handleCardClick,
   handleSkipReplacement,
   handleConfirmReplacement,
   handlePlayCard,
@@ -31,6 +36,14 @@ const {
   handleFinishTrick,
   initialize
 } = useGameSession(gameId);
+
+// Proveer métodos de special cards a componentes hijos
+provide('specialCards', {
+  isPlayerSelectable,
+  isCardSelectable,
+  handlePlayerClick,
+  handleCardClick
+});
 
 onMounted(() => {
   initialize();
@@ -71,6 +84,7 @@ onMounted(() => {
         :mode="handMode"
         :is-my-turn="isMyTurn"
         :is-trick-in-resolve="isTrickInResolve"
+        :can-finish-trick="canFinishTrick"
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"
         @play-card="handlePlayCard"

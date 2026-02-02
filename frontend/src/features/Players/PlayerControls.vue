@@ -5,6 +5,7 @@ interface Props {
   mode?: 'normal' | 'card_replacement';
   isMyTurn?: boolean;
   isTrickInResolve?: boolean;
+  canFinishTrick?: boolean;
   selectedCardId?: string | null;
   hasPlayedCard?: boolean;
 }
@@ -13,6 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
   mode: 'normal',
   isMyTurn: false,
   isTrickInResolve: false,
+  canFinishTrick: true,
   selectedCardId: null,
   hasPlayedCard: false
 });
@@ -58,6 +60,7 @@ const handleFinishTurn = () => {
     <ActionButton 
       v-else-if="isTrickInResolve"
       label="Finish Trick"
+      :disabled="!canFinishTrick"
       @click="$emit('finishTrick')"
     />
   </div>
