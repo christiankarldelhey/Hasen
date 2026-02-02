@@ -265,6 +265,27 @@ export function createRoundEndedEvent(
     payload: { round, scores, playerScores }
   }
 }
+
+// PLAYER CONFIRMED ROUND END EVENT
+/**
+ * Event emitted when a player confirms they've seen the round end modal
+ */
+export interface PlayerConfirmedRoundEndEvent {
+  type: 'PLAYER_CONFIRMED_ROUND_END'
+  payload: {
+    playerId: PlayerId
+    round: number
+  }
+}
+export function createPlayerConfirmedRoundEndEvent(
+  playerId: PlayerId,
+  round: number
+): PlayerConfirmedRoundEndEvent {
+  return {
+    type: 'PLAYER_CONFIRMED_ROUND_END',
+    payload: { playerId, round }
+  }
+}
 // BID MADE EVENT
 /**
  * Event emitted when a player makes a bid
@@ -563,6 +584,7 @@ export type GameEvent =
   | CardPlayedEvent
   | TrickCompletedEvent
   | RoundEndedEvent
+  | PlayerConfirmedRoundEndEvent
   | BidMadeEvent
   | BidPlacedEvent
   | TurnFinishedEvent

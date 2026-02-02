@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { onMounted, provide } from 'vue';
+import { onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
+import { useSocketGame } from '../common/composables/useSocketGame';
+import { useGameStore } from '../stores/gameStore';
+import { useHasenStore } from '../stores/hasenStore';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
 import AvailableBids from '@/features/Bids/AvailableBids.vue';
@@ -9,9 +12,14 @@ import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
 import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
+import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
+import type { GameEvent } from '@domain/events/GameEvents';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
+const socketGame = useSocketGame();
+const gameStore = useGameStore();
+const hasenStore = useHasenStore();
 
 const {
   playerHand,
@@ -45,8 +53,44 @@ provide('specialCards', {
   handleCardClick
 });
 
+// Modal de Round Ended
+const showRoundEndedModal = ref(false);
+
+const handleGameEvent = (event: GameEvent) => {
+  if (event.type === 'ROUND_ENDED') {
+    console.log('🎯 ROUND_ENDED received, showing modal');
+    showRoundEndedModal.value = true;
+  }
+  // Auto-cerrar modal cuando empieza nuevo round
+  if (event.type === 'ROUND_SETUP_COMPLETED') {
+    if (showRoundEndedModal.value) {
+      console.log('🔄 New round started, auto-closing modal');
+      showRoundEndedModal.value = false;
+    }
+  }
+};
+
+const handleCloseRoundModal = () => {
+  showRoundEndedModal.value = false;
+  console.log('✅ Round modal closed manually');
+};
+
+// Auto-cerrar modal si es el turno del jugador
+watch(() => gameStore.publicGameState?.round.playerTurn, (newTurn) => {
+  if (showRoundEndedModal.value && newTurn === hasenStore.currentPlayerId) {
+    console.log('🎯 Your turn! Auto-closing round modal');
+    showRoundEndedModal.value = false;
+  }
+});
+
 onMounted(() => {
   initialize();
+  socketGame.onGameEvent(handleGameEvent);
+  console.log('🎮 GameView mounted with async round modal');
+});
+
+onUnmounted(() => {
+  socketGame.offGameEvent();
 });
 
 </script>
@@ -92,5 +136,12 @@ onMounted(() => {
         @finish-trick="handleFinishTrick"
       />
     </div>
+
+    <!-- Round Ended Modal -->
+    <RoundEndedModal 
+      :isOpen="showRoundEndedModal"
+      :round="gameStore.publicGameState?.round || null"
+      @close="handleCloseRoundModal"
+    />
   </GameLayout>
 </template>

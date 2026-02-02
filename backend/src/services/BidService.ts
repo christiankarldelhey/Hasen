@@ -2,7 +2,7 @@ import { GameModel } from '@/models/Game.js'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { BidType } from '@domain/interfaces/Bid'
 import type { TrickNumber } from '@domain/interfaces/Trick'
-import { canMakeBid, calculateBidOnLose } from '@domain/rules/BidRules'
+import { canMakeSpecificBid, calculateBidOnLose } from '@domain/rules/BidRules'
 import { createBidMadeEvent } from '@domain/events/GameEvents'
 
 export class BidService {
@@ -22,11 +22,6 @@ export class BidService {
       throw new Error('Solo puedes hacer bids en los primeros 3 tricks')
     }
 
-    const validation = canMakeBid(game, playerId, bidType, trickNumber)
-    if (!validation.canMakeBid) {
-      throw new Error(validation.reason || 'Cannot make bid')
-    }
-
     const availableBids = game.round.roundBids.bids.filter((b: any) => b.bid_type === bidType)
     
     if (!availableBids || availableBids.length === 0) {
@@ -39,6 +34,12 @@ export class BidService {
     
     if (!currentBid) {
       throw new Error('Bid not found')
+    }
+
+    // Validar el bid específico que el jugador está intentando hacer
+    const validation = canMakeSpecificBid(game, playerId, currentBid, trickNumber)
+    if (!validation.canMakeBid) {
+      throw new Error(validation.reason || 'Cannot make bid')
     }
 
     const onLose = calculateBidOnLose(bidType, trickNumber)

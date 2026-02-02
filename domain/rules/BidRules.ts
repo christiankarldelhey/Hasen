@@ -8,6 +8,118 @@ export interface CanMakeBidResult {
   reason?: string
 }
 
+/**
+ * Valida si un bid específico puede ser hecho por el jugador
+ * @param game - Estado del juego
+ * @param playerId - ID del jugador
+ * @param bid - El bid específico a validar
+ * @param trickNumber - Número del trick actual
+ * @returns Resultado de la validación con razón específica si no es posible
+ */
+export function canMakeSpecificBid(
+  game: Game,
+  playerId: PlayerId,
+  bid: import('../interfaces/Bid').Bid,
+  trickNumber: TrickNumber
+): CanMakeBidResult {
+  // Primero validar las reglas generales usando canMakeBid
+  const generalValidation = canMakeBid(game, playerId, bid.bid_type, trickNumber)
+  if (!generalValidation.canMakeBid) {
+    return generalValidation
+  }
+
+  // Validaciones específicas del bid individual
+  
+  // Rule: Máximo 2 jugadores por bid específico
+  const biddersCount = Object.values(game.round.roundBids.playerBids)
+    .flat()
+    .filter(pb => pb.bidId === bid.bid_id)
+    .length
+  
+  if (biddersCount >= 2) {
+    return {
+      canMakeBid: false,
+      reason: 'This bid already has the maximum of 2 players'
+    }
+  }
+
+  // Validaciones específicas según el progreso del jugador para este bid en particular
+  const playerRoundScore = game.round.roundScore.find(score => score.playerId === playerId)
+  if (playerRoundScore) {
+    // Para trick bids: verificar si este bid específico es todavía posible
+    if (bid.bid_type === 'trick') {
+      const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
+      const tricksWonSoFar = playerRoundScore.tricksWon.length
+      const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
+      const maxPossibleTricks = tricksWonSoFar + tricksRemaining
+      
+      // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
+      if (condition.win_trick_position) {
+        const lostRequiredTrick = condition.win_trick_position.some(
+          requiredTrick => requiredTrick < trickNumber && !playerRoundScore.tricksWon.includes(requiredTrick)
+        )
+        if (lostRequiredTrick) {
+          return {
+            canMakeBid: false,
+            reason: 'You already lost a trick you needed to win'
+          }
+        }
+      }
+      
+      // Verificar lose_trick_position: si debíamos perder un trick específico y ya lo ganamos
+      if (condition.lose_trick_position) {
+        const wonForbiddenTrick = condition.lose_trick_position.some(
+          forbiddenTrick => playerRoundScore.tricksWon.includes(forbiddenTrick)
+        )
+        if (wonForbiddenTrick) {
+          return {
+            canMakeBid: false,
+            reason: 'You already won a trick you needed to lose'
+          }
+        }
+      }
+      
+      // Verificar win_min_tricks: si ya es imposible alcanzar el mínimo
+      if (condition.win_min_tricks) {
+        if (maxPossibleTricks < condition.win_min_tricks) {
+          return {
+            canMakeBid: false,
+            reason: 'You can no longer reach the minimum required tricks'
+          }
+        }
+      }
+      
+      // Verificar win_max_tricks: si ya superamos el máximo
+      if (condition.win_max_tricks !== undefined) {
+        if (tricksWonSoFar > condition.win_max_tricks) {
+          return {
+            canMakeBid: false,
+            reason: 'You already exceeded the maximum allowed tricks'
+          }
+        }
+      }
+    }
+    
+    // Para points bids: verificar si ya superamos el max_points de este bid específico
+    if (bid.bid_type === 'points') {
+      const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition
+      
+      if (playerRoundScore.points > condition.max_points) {
+        return {
+          canMakeBid: false,
+          reason: 'You already exceeded the maximum allowed points'
+        }
+      }
+    }
+    
+    // Para set_collection: no hay validaciones (siempre hay posibilidad de revertir)
+  }
+
+  return {
+    canMakeBid: true
+  }
+}
+
 export function canMakeBid(
   game: Game,
   playerId: PlayerId,
@@ -17,21 +129,21 @@ export function canMakeBid(
   if (game.round.playerTurn !== playerId) {
     return {
       canMakeBid: false,
-      reason: 'No es tu turno'
+      reason: 'Not your turn'
     }
   }
 
   if (trickNumber > 3) {
     return {
       canMakeBid: false,
-      reason: 'Solo puedes hacer bids en los primeros 3 tricks'
+      reason: 'You can only make bids in the first 3 tricks'
     }
   }
 
   if (!game.round.currentTrick || game.round.currentTrick.trick_state !== 'in_progress') {
     return {
       canMakeBid: false,
-      reason: 'El trick debe estar en progreso para hacer un bid'
+      reason: 'Trick must be in progress to make a bid'
     }
   }
 
@@ -40,7 +152,7 @@ export function canMakeBid(
   if (availableBids.length === 0) {
     return {
       canMakeBid: false,
-      reason: 'No hay bid disponible de este tipo'
+      reason: 'No bids available of this type'
     }
   }
 
@@ -51,7 +163,7 @@ export function canMakeBid(
   if (hasBidInCurrentTrick) {
     return {
       canMakeBid: false,
-      reason: 'Solo puedes hacer un bid por turno'
+      reason: 'You can only make one bid per trick'
     }
   }
 
@@ -64,7 +176,7 @@ export function canMakeBid(
   if (hasBidTypeInRound) {
     return {
       canMakeBid: false,
-      reason: 'Ya tienes un bid de este tipo en esta ronda'
+      reason: 'You already have a bid of this type in this round'
     }
   }
 
@@ -72,7 +184,7 @@ export function canMakeBid(
   if (playerBids.length >= 3) {
     return {
       canMakeBid: false,
-      reason: 'Ya tienes el máximo de 3 bids en esta ronda'
+      reason: 'You already have the maximum of 3 bids in this round'
     }
   }
 
@@ -88,16 +200,21 @@ export function canMakeBid(
   if (allBidsFull) {
     return {
       canMakeBid: false,
-      reason: 'Todos los bids de este tipo ya tienen el máximo de 2 jugadores'
+      reason: 'All bids of this type already have the maximum of 2 players'
     }
   }
 
   // Rule: Verificar si la apuesta ya está perdida de antemano
   const playerRoundScore = game.round.roundScore.find(score => score.playerId === playerId)
   if (playerRoundScore) {
-    // Para trick bids: verificar condiciones de tricks
+    // Para trick bids: verificar si al menos un bid disponible es todavía posible
     if (bidType === 'trick') {
-      for (const bid of availableBids) {
+      const tricksWonSoFar = playerRoundScore.tricksWon.length
+      const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
+      const maxPossibleTricks = tricksWonSoFar + tricksRemaining
+      
+      // Verificar si existe al menos un bid que todavía sea posible
+      const hasAnyPossibleBid = availableBids.some(bid => {
         const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
         
         // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
@@ -105,12 +222,7 @@ export function canMakeBid(
           const lostRequiredTrick = condition.win_trick_position.some(
             requiredTrick => requiredTrick < trickNumber && !playerRoundScore.tricksWon.includes(requiredTrick)
           )
-          if (lostRequiredTrick) {
-            return {
-              canMakeBid: false,
-              reason: 'Ya perdiste un trick que debías ganar'
-            }
-          }
+          if (lostRequiredTrick) return false
         }
         
         // Verificar lose_trick_position: si debíamos perder un trick específico y ya lo ganamos
@@ -118,38 +230,27 @@ export function canMakeBid(
           const wonForbiddenTrick = condition.lose_trick_position.some(
             forbiddenTrick => playerRoundScore.tricksWon.includes(forbiddenTrick)
           )
-          if (wonForbiddenTrick) {
-            return {
-              canMakeBid: false,
-              reason: 'Ya ganaste un trick que debías perder'
-            }
-          }
+          if (wonForbiddenTrick) return false
         }
         
         // Verificar win_min_tricks: si ya es imposible alcanzar el mínimo
         if (condition.win_min_tricks) {
-          const tricksWonSoFar = playerRoundScore.tricksWon.length
-          const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
-          const maxPossibleTricks = tricksWonSoFar + tricksRemaining
-          
-          if (maxPossibleTricks < condition.win_min_tricks) {
-            return {
-              canMakeBid: false,
-              reason: 'Ya no puedes alcanzar el mínimo de tricks requeridos'
-            }
-          }
+          if (maxPossibleTricks < condition.win_min_tricks) return false
         }
         
         // Verificar win_max_tricks: si ya superamos el máximo
         if (condition.win_max_tricks !== undefined) {
-          const tricksWonSoFar = playerRoundScore.tricksWon.length
-          
-          if (tricksWonSoFar > condition.win_max_tricks) {
-            return {
-              canMakeBid: false,
-              reason: 'Ya superaste el máximo de tricks permitidos'
-            }
-          }
+          if (tricksWonSoFar > condition.win_max_tricks) return false
+        }
+        
+        // Este bid todavía es posible
+        return true
+      })
+      
+      if (!hasAnyPossibleBid) {
+        return {
+          canMakeBid: false,
+          reason: 'No trick bids are possible given your current progress'
         }
       }
     }
@@ -162,7 +263,7 @@ export function canMakeBid(
         if (playerRoundScore.points > condition.max_points) {
           return {
             canMakeBid: false,
-            reason: 'Ya superaste el máximo de puntos permitidos'
+            reason: 'You already exceeded the maximum allowed points'
           }
         }
       }

@@ -29,6 +29,7 @@ export interface Round {
     trickNumber: TrickNumber
     availableCards: string[]
   }
+  roundEndConfirmations?: PlayerId[]
 }
 
 export interface PlayerRoundScore {

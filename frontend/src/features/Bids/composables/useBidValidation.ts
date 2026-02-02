@@ -2,7 +2,7 @@ import { computed, type ComputedRef } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { BidType, Bid } from '@domain/interfaces/Bid'
 import type { Round } from '@domain/interfaces/Round'
-import { canMakeBid } from '@domain/rules/BidRules'
+import { canMakeSpecificBid } from '@domain/rules/BidRules'
 
 interface GameState {
   round: Round
@@ -12,7 +12,7 @@ export function useBidValidation(
   game: ComputedRef<GameState | null>,
   playerId: ComputedRef<PlayerId | null>
 ) {
-  const canMakeBidType = (bidType: BidType, _bid: Bid) => {
+  const canMakeBidType = (_bidType: BidType, bid: Bid) => {
     if (!game.value || !playerId.value) {
       return { canMakeBid: false, reason: 'Game or player not found' }
     }
@@ -24,8 +24,8 @@ export function useBidValidation(
 
     const trickNumber = currentTrick.trick_number
     
-    // Cast to Game type for canMakeBid - it only needs the round property
-    return canMakeBid(game.value as any, playerId.value, bidType, trickNumber)
+    // Use canMakeSpecificBid to validate each bid individually
+    return canMakeSpecificBid(game.value as any, playerId.value, bid, trickNumber)
   }
 
   const isBidDisabled = computed(() => {

@@ -65,7 +65,7 @@ const bidCardStyle = computed(() => {
   if (!currentPlayerBidColor.value) return {}
   
   return {
-    border: `4px solid ${currentPlayerBidColor.value}`,
+    boxShadow: `inset 0 0 0 3px ${currentPlayerBidColor.value}`,
     animation: isCurrentPlayerTurn.value ? 'subtleGlow 3s ease-in-out infinite' : 'none'
   }
 })

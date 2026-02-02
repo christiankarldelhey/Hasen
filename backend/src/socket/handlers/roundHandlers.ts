@@ -12,7 +12,8 @@ import {
   createTrickFinishedEvent, 
   createTrickStartedEvent,
   createNextLeadPlayerSelectedEvent,
-  createCardStolenFromTrickEvent
+  createCardStolenFromTrickEvent,
+  createRoundEndedEvent
 } from '@domain/events/GameEvents.js'
 
 export function setupRoundHandlers(io: Server, socket: Socket) {
@@ -285,36 +286,96 @@ socket.on('round:start', async ({ gameId }) => {
 
       // Verificar si el round pasó a fase 'scoring' (todos los tricks completados)
       if (game.round.roundPhase === 'scoring') {
-        console.log(`🏁 Round ${game.round.round} completed! Starting next round...`);
+        console.log(`🏁 Round ${game.round.round} completed! Calculating scores...`);
         
         setTimeout(async () => {
           try {
-            const result = await RoundService.finishRoundAndStartNext(gameId);
+            const updatedGame = await GameModel.findOne({ gameId });
+            if (!updatedGame) throw new Error('Game not found');
+
+            // Calcular scores del round
+            const { getPlayerScoreFromRound } = await import('@domain/rules/BidRules');
+            const roundScores: Partial<Record<PlayerId, number>> = {};
             
-            io.to(gameId).emit('game:event', result.roundEndedEvent);
-            
-            if (result.gameEndedEvent) {
-              io.to(gameId).emit('game:event', result.gameEndedEvent);
-              console.log(`🏆 Game ended! Winner: ${result.gameEndedEvent.payload.winnerName}`);
-              return;
-            }
-            
-            io.to(gameId).emit('game:event', result.setupEvent);
-            io.to(gameId).emit('game:event', result.firstCardsEvent);
-            
-            for (const [playerId, cards] of result.privateCards) {
-              const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
-              const playerSocketId = Array.from(socketToPlayer.entries())
-                .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
+            for (const playerId of updatedGame.activePlayers) {
+              const scoreFromRound = getPlayerScoreFromRound(updatedGame, playerId);
+              roundScores[playerId] = scoreFromRound;
               
-              if (playerSocketId) {
-                io.to(playerSocketId).emit('game:event', privateEvent);
+              const playerScore = updatedGame.playerScores.find(ps => ps.playerId === playerId);
+              if (playerScore) {
+                playerScore.score += scoreFromRound;
+              } else {
+                updatedGame.playerScores.push({ playerId, score: scoreFromRound });
               }
             }
+
+            await updatedGame.save();
             
-            console.log(`✅ Round ${result.game.round.round} started automatically`);
+            console.log(`📊 Round ${updatedGame.round.round} scores calculated:`, roundScores);
+            
+            // Emitir ROUND_ENDED para mostrar modal
+            const roundEndedEvent = createRoundEndedEvent(
+              updatedGame.round.round,
+              roundScores as Record<PlayerId, number>,
+              updatedGame.playerScores
+            );
+            
+            io.to(gameId).emit('game:event', roundEndedEvent);
+            console.log(`📢 ROUND_ENDED event emitted, starting next round in 8 seconds...`);
+            
+            // Esperar 4 segundos para que los jugadores vean el modal, luego iniciar nuevo round
+            setTimeout(async () => {
+              try {
+                const gameForNewRound = await GameModel.findOne({ gameId });
+                if (!gameForNewRound) throw new Error('Game not found');
+
+                // Verificar si el juego terminó
+                const { hasGameEnded, getWinnerName } = await import('@domain/rules/GameEndRules');
+                const gameEndCheck = hasGameEnded(gameForNewRound);
+
+                if (gameEndCheck.hasEnded && gameEndCheck.winner) {
+                  console.log(`🏆 Game ended! Winner: ${gameEndCheck.winner}`);
+                  
+                  gameForNewRound.gamePhase = 'ended';
+                  gameForNewRound.winner = gameEndCheck.winner;
+                  await gameForNewRound.save();
+                  
+                  const { createGameEndedEvent } = await import('@domain/events/GameEvents');
+                  const winnerName = getWinnerName(gameEndCheck.winner);
+                  const gameEndedEvent = createGameEndedEvent(
+                    gameEndCheck.winner,
+                    winnerName,
+                    gameForNewRound.playerScores
+                  );
+                  
+                  io.to(gameId).emit('game:event', gameEndedEvent);
+                  return;
+                }
+
+                // Iniciar nuevo round
+                const result = await RoundService.startNewRound(gameId);
+                
+                io.to(gameId).emit('game:event', result.setupEvent);
+                io.to(gameId).emit('game:event', result.firstCardsEvent);
+                
+                for (const [playerId, cards] of result.privateCards) {
+                  const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
+                  const playerSocketId = Array.from(socketToPlayer.entries())
+                    .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
+                  
+                  if (playerSocketId) {
+                    io.to(playerSocketId).emit('game:event', privateEvent);
+                  }
+                }
+                
+                console.log(`✅ Round ${result.game.round.round} started automatically after delay`);
+              } catch (error: any) {
+                console.error('Error starting next round:', error);
+              }
+            }, 8000);
+            
           } catch (error: any) {
-            console.error('Error starting next round:', error);
+            console.error('Error calculating round scores:', error);
           }
         }, 2000);
       }
@@ -396,5 +457,6 @@ socket.on('round:start', async ({ gameId }) => {
       socket.emit('error', { message: error.message });
     }
   });
+
 
 }

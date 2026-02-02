@@ -24,7 +24,8 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div 
-    :class="['flex flex-row items-center h-16 rounded-xl shadow-lg w-auto bg-hasen-base', { [`bg-hasen-light border-2 border-[${playerColor}]`]: isActive }]"
+    :class="['flex flex-row items-center h-16 rounded-xl shadow-lg w-auto bg-hasen-base', { 'bg-hasen-light': isActive }]"
+    :style="isActive ? { boxShadow: `inset 0 0 0 3px ${playerColor}` } : {}"
   >
     <PlayerBidHeader 
       :type="type" 

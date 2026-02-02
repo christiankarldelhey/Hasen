@@ -3,7 +3,7 @@ import { computed, inject } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
-import Hare from './Hare.vue'
+import PlayerAvatar from './PlayerAvatar.vue'
 
 interface Props {
   playerId: PlayerId
@@ -51,13 +51,6 @@ const handleClick = () => {
   }
 }
 
-const circleClasses = computed(() => ({
-  'cursor-pointer': isSelectable.value,
-  'hover:scale-110': isSelectable.value,
-  'transition-all duration-300': true,
-  'selectable-glow': isSelectable.value
-}))
-
 </script>
 
 <template>
@@ -66,26 +59,14 @@ const circleClasses = computed(() => ({
   >
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
-      <!-- Outer glow ring for current turn -->
-      <div 
-        v-if="isCurrentTurn"
-        class="absolute inset-0 rounded-full animate-subtle-glow opacity-60"
-        :style="{ backgroundColor: playerColor }"
-      ></div>
-      
-      <!-- Main circle with gradient -->
-      <div 
-        :class="['relative w-18 h-18 rounded-full flex items-center justify-center shadow-lg', circleClasses]"
-        :style="{ 
-          background: `radial-gradient(circle at 30% 30%, ${playerColor}dd, ${playerColor})`,
-          border: `2px solid ${playerColor}`,
-          boxShadow: isCurrentTurn ? `0 0 25px ${playerColor}80` : '0 3px 5px rgba(0,0,0,0.3)',
-          '--pulse-color-light': `${playerColor}dd`,
-          '--pulse-color-dark': playerColor
-        }"
-        @click="handleClick"
-      >
-        <Hare :size="'40px'" :color="isCurrentTurn ? 'white' : '#e2d2a8'" />
+      <div :class="{ 'selectable-glow': isSelectable }">
+        <PlayerAvatar 
+          :playerId="playerId"
+          size="medium"
+          :showGlow="isCurrentTurn"
+          :clickable="isSelectable"
+          @click="handleClick"
+        />
       </div>
       
       <!-- Score badge with star -->
