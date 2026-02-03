@@ -94,7 +94,8 @@ const RoundSchema = new Schema({
     }
   },
   currentTrick: { type: TrickSchema, default: null },
-  roundScore: [{ type: PlayerRoundScoreSchema }]
+  roundScore: [{ type: PlayerRoundScoreSchema }],
+  playersReadyForNextRound: { type: [String], default: [] }
 }, { _id: false });
 
 const GameSchema = new Schema<GameDocument>({

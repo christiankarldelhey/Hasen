@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { onMounted, onUnmounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
 import { useGameStore } from '../stores/gameStore';
-import { useHasenStore } from '../stores/hasenStore';
+import type { PlayerId } from '@domain/interfaces/Player';
 import PlayerHand from '@/features/Players/PlayerHand.vue';
 import GameInfo from '@/features/Game/GameInfo.vue';
 import AvailableBids from '@/features/Bids/AvailableBids.vue';
@@ -19,7 +19,6 @@ const route = useRoute();
 const gameId = route.params.gameId as string;
 const socketGame = useSocketGame();
 const gameStore = useGameStore();
-const hasenStore = useHasenStore();
 
 const {
   playerHand,
@@ -55,17 +54,29 @@ provide('specialCards', {
 
 // Modal de Round Ended
 const showRoundEndedModal = ref(false);
+const readyPlayers = ref<PlayerId[]>([]);
+const totalPlayers = ref(0);
 
 const handleGameEvent = (event: GameEvent) => {
   if (event.type === 'ROUND_ENDED') {
     console.log('🎯 ROUND_ENDED received, showing modal');
     showRoundEndedModal.value = true;
+    readyPlayers.value = [];
+    totalPlayers.value = gameStore.publicGameState?.activePlayers.length || 0;
   }
-  // Auto-cerrar modal cuando empieza nuevo round
+  // Actualizar estado de ready players
+  if (event.type === 'PLAYERS_READY_STATUS') {
+    const payload = (event as any).payload;
+    readyPlayers.value = payload.readyPlayers;
+    totalPlayers.value = payload.totalPlayers;
+    console.log(`📊 Ready status: ${payload.readyPlayers.length}/${payload.totalPlayers}`);
+  }
+  // Cerrar modal cuando empieza nuevo round
   if (event.type === 'ROUND_SETUP_COMPLETED') {
     if (showRoundEndedModal.value) {
-      console.log('🔄 New round started, auto-closing modal');
+      console.log('🔄 New round started, closing modal');
       showRoundEndedModal.value = false;
+      readyPlayers.value = [];
     }
   }
 };
@@ -75,13 +86,10 @@ const handleCloseRoundModal = () => {
   console.log('✅ Round modal closed manually');
 };
 
-// Auto-cerrar modal si es el turno del jugador
-watch(() => gameStore.publicGameState?.round.playerTurn, (newTurn) => {
-  if (showRoundEndedModal.value && newTurn === hasenStore.currentPlayerId) {
-    console.log('🎯 Your turn! Auto-closing round modal');
-    showRoundEndedModal.value = false;
-  }
-});
+const handleContinueRound = () => {
+  console.log('✅ Player ready for next round');
+  socketGame.readyForNextRound(gameId);
+};
 
 onMounted(() => {
   initialize();
@@ -141,7 +149,10 @@ onUnmounted(() => {
     <RoundEndedModal 
       :isOpen="showRoundEndedModal"
       :round="gameStore.publicGameState?.round || null"
+      :readyPlayers="readyPlayers"
+      :totalPlayers="totalPlayers"
       @close="handleCloseRoundModal"
+      @continue="handleContinueRound"
     />
   </GameLayout>
 </template>

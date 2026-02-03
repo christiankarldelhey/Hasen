@@ -67,6 +67,11 @@ export function useSocketGame() {
       socket.emit('player:selectCardToSteal', { gameId, selectedCardId });
     },
 
+    // Ready for next round
+    readyForNextRound: (gameId: string) => {
+      socket.emit('player:readyForNextRound', { gameId });
+    },
+
     onGameStateUpdate: (callback: (data: any) => void) => {
       socket.on('game:stateUpdate', callback);
     },

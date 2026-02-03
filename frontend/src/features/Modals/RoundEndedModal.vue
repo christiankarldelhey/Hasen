@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import type { Round } from '@domain/interfaces/Round'
 import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
@@ -11,13 +11,30 @@ import BidWinCondition from '@/features/Bids/BidWinCondition.vue'
 interface Props {
   isOpen: boolean
   round: Round | null
+  readyPlayers?: PlayerId[]
+  totalPlayers?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  readyPlayers: () => [],
+  totalPlayers: 0
+})
 
 const emit = defineEmits<{
   close: []
+  continue: []
 }>()
+
+const isWaiting = ref(false)
+
+const handleContinue = () => {
+  isWaiting.value = true
+  emit('continue')
+}
+
+const isPlayerReady = (playerId: PlayerId) => {
+  return props.readyPlayers.includes(playerId)
+}
 
 interface PlayerBidInfo {
   playerId: PlayerId
@@ -102,8 +119,9 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
 </script>
 
 <template>
-  <BaseModal :isOpen="isOpen" title="Round Ended" maxWidth="2xl" @close="emit('close')">
-    <div class="space-y-4">
+  <BaseModal :isOpen="isOpen" :title="isWaiting ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="emit('close')">
+    <!-- Estado: Mostrando resultados -->
+    <div v-if="!isWaiting" class="space-y-4">
       <!-- Player Results -->
       <div v-for="playerInfo in playerBidsInfo" :key="playerInfo.playerId" class="space-y-2">
         <!-- Player Header -->
@@ -151,14 +169,43 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
       </div>
     </div>
 
+    <!-- Estado: Esperando jugadores -->
+    <div v-else class="space-y-6 py-4">
+      <div class="text-center">
+        <p class="text-lg text-hasen-dark/70 mb-2">Waiting for other players...</p>
+        <p class="text-sm font-bold text-hasen-dark">{{ readyPlayers.length }} / {{ totalPlayers }} players ready</p>
+      </div>
+
+      <!-- Lista de jugadores con estado ready -->
+      <div class="grid grid-cols-2 gap-4">
+        <div 
+          v-for="player in AVAILABLE_PLAYERS.slice(0, totalPlayers)" 
+          :key="player.id"
+          class="flex items-center gap-3 p-3 rounded-lg bg-hasen-dark/5"
+        >
+          <PlayerAvatar :playerId="player.id" size="small" />
+          <div class="flex-1">
+            <p class="font-semibold text-sm">{{ player.name }}</p>
+          </div>
+          <div class="text-2xl">
+            {{ isPlayerReady(player.id) ? '✓' : '⏳' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <template #footer>
       <div class="flex justify-end">
         <button 
-          @click="emit('close')"
-          class="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+          v-if="!isWaiting"
+          @click="handleContinue"
+          class="px-6 py-2 bg-hasen-green text-white rounded-lg font-semibold hover:bg-hasen-green/90 transition-colors"
         >
-          Close
+          Continue
         </button>
+        <div v-else class="text-sm text-hasen-dark/50 italic">
+          Waiting for all players to continue...
+        </div>
       </div>
     </template>
   </BaseModal>

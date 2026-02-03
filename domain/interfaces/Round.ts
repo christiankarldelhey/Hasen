@@ -30,6 +30,7 @@ export interface Round {
     availableCards: string[]
   }
   roundEndConfirmations?: PlayerId[]
+  playersReadyForNextRound?: PlayerId[]
 }
 
 export interface PlayerRoundScore {

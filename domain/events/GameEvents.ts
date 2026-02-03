@@ -571,6 +571,50 @@ export function createCardStolenFromTrickEvent(
   }
 }
 
+// PLAYER READY FOR NEXT ROUND EVENT
+/**
+ * Event emitted when a player confirms they're ready for the next round
+ */
+export interface PlayerReadyForNextRoundEvent {
+  type: 'PLAYER_READY_FOR_NEXT_ROUND'
+  payload: {
+    playerId: PlayerId
+    round: number
+  }
+}
+export function createPlayerReadyForNextRoundEvent(
+  playerId: PlayerId,
+  round: number
+): PlayerReadyForNextRoundEvent {
+  return {
+    type: 'PLAYER_READY_FOR_NEXT_ROUND',
+    payload: { playerId, round }
+  }
+}
+
+// PLAYERS READY STATUS EVENT
+/**
+ * Event emitted to update all players on who is ready for next round
+ */
+export interface PlayersReadyStatusEvent {
+  type: 'PLAYERS_READY_STATUS'
+  payload: {
+    round: number
+    readyPlayers: PlayerId[]
+    totalPlayers: number
+  }
+}
+export function createPlayersReadyStatusEvent(
+  round: number,
+  readyPlayers: PlayerId[],
+  totalPlayers: number
+): PlayersReadyStatusEvent {
+  return {
+    type: 'PLAYERS_READY_STATUS',
+    payload: { round, readyPlayers, totalPlayers }
+  }
+}
+
 // UNION TYPE
 export type GameEvent = 
   | DeckShuffledEvent
@@ -596,3 +640,5 @@ export type GameEvent =
   | NextLeadPlayerSelectedEvent
   | PickCardFromTrickEvent
   | CardStolenFromTrickEvent
+  | PlayerReadyForNextRoundEvent
+  | PlayersReadyStatusEvent
