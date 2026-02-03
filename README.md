@@ -2,7 +2,7 @@
 
 Juego de cartas multijugador en tiempo real construido con Vue 3, TypeScript y Socket.IO.
 
-## 🎮 Características
+## Características
 
 - **Multijugador en tiempo real** con Socket.IO
 - **Sistema de lobby** para crear y unirse a partidas
@@ -10,7 +10,7 @@ Juego de cartas multijugador en tiempo real construido con Vue 3, TypeScript y S
 - **Interfaz** con Vue 3, TypeScript, TailwindCSS y DaisyUI
 - **Arquitectura limpia** con separación de dominio, lógica y presentación
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Frontend
 - Vue 3 + TypeScript
@@ -64,29 +64,7 @@ npm run dev
 http://localhost:5173
 ```
 
-## 📦 Deploy en Producción
-
-Para desplegar el juego en Render (gratis), sigue la guía completa en:
-
-**[📖 DEPLOY.md](./DEPLOY.md)**
-
-La guía incluye:
-- Configuración de MongoDB Atlas
-- Deploy de Backend en Render
-- Deploy de Frontend en Render
-- Configuración de dominio personalizado
-- Troubleshooting
-
-## 🎯 Cómo Jugar
-
-1. Crea o únete a una partida en el lobby
-2. Espera a que se unan suficientes jugadores (mínimo 2)
-3. El host inicia la partida
-4. Juega tus cartas estratégicamente
-5. Haz apuestas en los tricks
-6. ¡Gana puntos y conviértete en el campeón!
-
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 hasen/
@@ -113,21 +91,5 @@ hasen/
 │   ├── interfaces/   # Tipos TypeScript
 │   └── rules/        # Reglas del juego
 └── package.json      # Root package.json
-```
-
-## 🔧 Scripts Disponibles
-
-### Frontend
-```bash
-npm run dev      # Servidor de desarrollo
-npm run build    # Build para producción
-npm run preview  # Preview del build
-```
-
-### Backend
-```bash
-npm run dev      # Servidor de desarrollo con nodemon
-npm run build    # Compilar TypeScript
-npm start        # Ejecutar versión compilada
 ```
 
