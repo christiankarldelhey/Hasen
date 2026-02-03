@@ -6,10 +6,12 @@ import deckSprite from '@/assets/sprites/deck-sprite_v2.jpg'
 interface Props {
   card: PlayingCard
   size?: 'small' | 'medium' | 'large'
+  selectable?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: 'large'
+  size: 'large',
+  selectable: false
 })
 
 const sizeClasses = computed(() => {
@@ -38,7 +40,8 @@ const backgroundPosition = computed(() => {
     :style="{
       backgroundImage: `url(${deckSprite})`,
       backgroundSize: '800% 400%',
-      backgroundPosition: backgroundPosition
+      backgroundPosition: backgroundPosition,
+      border: selectable ? '3px solid #facc15' : 'none'
     }"
   />
 </template>

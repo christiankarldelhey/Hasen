@@ -7,16 +7,19 @@ import type { PlayerId } from '@domain/interfaces/Player'
 interface Props {
   playerId: PlayerId
   position?: 'top' | 'bottom' | 'left' | 'right'
+  disableHover?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  disableHover: false
+})
 const showPopover = ref(false)
 </script>
 
 <template>
   <div 
     class="relative"
-    @mouseenter="showPopover = true"
+    @mouseenter="!disableHover && (showPopover = true)"
     @mouseleave="showPopover = false"
   >
     <PlayerInfo :player-id="playerId" :position="position" />

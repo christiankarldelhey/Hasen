@@ -59,15 +59,16 @@ const handleClick = () => {
   >
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
-      <div :class="{ 'selectable-glow': isSelectable }">
+
         <PlayerAvatar 
           :playerId="playerId"
           size="medium"
           :showGlow="isCurrentTurn"
           :clickable="isSelectable"
+          :disableHover="isSelectable"
           @click="handleClick"
         />
-      </div>
+ 
       
       <!-- Score badge with star -->
       <div 
@@ -113,25 +114,4 @@ const handleClick = () => {
   }
 }
 
-@keyframes selectableGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.6);
-  }
-}
-
-.animate-subtle-glow {
-  animation: subtleGlow 3s ease-in-out infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.selectable-glow {
-  animation: selectableGlow 2s ease-in-out infinite;
-  filter: brightness(1.2);
-}
 </style>

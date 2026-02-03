@@ -34,7 +34,6 @@ const getCardClasses = (cardId: string) => ({
   'cursor-pointer': cardSelectableMap.value[cardId],
   'hover:scale-110': cardSelectableMap.value[cardId],
   'transition-all duration-300': true,
-  'selectable-glow': cardSelectableMap.value[cardId]
 })
 
 const cardPositions = computed(() => {
@@ -87,10 +86,10 @@ const cardPositions = computed(() => {
         >
           <div :class="[
             'relative',
-            pos.isWinning ? 'ring-4 ring-yellow-400 rounded-lg shadow-2xl' : '',
+            pos.isWinning ? 'ring-4 ring-hasen-green rounded-lg shadow-2xl' : '',
             getCardClasses(pos.card.id)
           ]">
-            <PlayingCard :card="pos.card" />
+            <PlayingCard :card="pos.card" :selectable="cardSelectableMap[pos.card.id]" />
           </div>
         </div>
       </template>
@@ -98,18 +97,3 @@ const cardPositions = computed(() => {
   </div>
 </template>
 
-<style scoped>
-@keyframes selectableGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.6);
-  }
-}
-
-.selectable-glow {
-  animation: selectableGlow 2s ease-in-out infinite;
-  filter: brightness(1.2);
-}
-</style>

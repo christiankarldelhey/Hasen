@@ -321,9 +321,9 @@ socket.on('round:start', async ({ gameId }) => {
             );
             
             io.to(gameId).emit('game:event', roundEndedEvent);
-            console.log(`📢 ROUND_ENDED event emitted, starting next round in 8 seconds...`);
+            console.log(`📢 ROUND_ENDED event emitted, starting next round in 12 seconds...`);
             
-            // Esperar 4 segundos para que los jugadores vean el modal, luego iniciar nuevo round
+            // Esperar 12 segundos para que los jugadores vean el modal, luego iniciar nuevo round
             setTimeout(async () => {
               try {
                 const gameForNewRound = await GameModel.findOne({ gameId });
@@ -372,12 +372,12 @@ socket.on('round:start', async ({ gameId }) => {
               } catch (error: any) {
                 console.error('Error starting next round:', error);
               }
-            }, 8000);
+            }, 12000);
             
           } catch (error: any) {
             console.error('Error calculating round scores:', error);
           }
-        }, 2000);
+        }, 500);
       }
 
       console.log(`✅ Trick finished, moved to history and next trick started`);

@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import PlayingCard from '@/common/components/PlayingCard.vue';
+import { useGameStore } from '@/stores/gameStore';
+import { useHasenStore } from '@/stores/hasenStore';
 
 interface Props {
   cards: Card[];
@@ -17,11 +19,40 @@ const emit = defineEmits<{
   selectCard: [card: Card]
 }>();
 
+const gameStore = useGameStore();
+const hasenStore = useHasenStore();
+
 const isCardSelectable = (card: Card) => {
   return props.mode === 'card_replacement' && card.state === 'in_hand_hidden'
 };
 
+const isCardDisabled = (card: Card) => {
+  // Deshabilitar carta pública en modo reemplazo
+  if (props.mode === 'card_replacement' && card.state === 'in_hand_visible') {
+    return true;
+  }
+  
+  // Deshabilitar acorns-U en primer turno del primer trick si el jugador es lead player
+  const currentTrick = gameStore.publicGameState?.round.currentTrick;
+  if (!currentTrick) return false;
+  
+  const isAcornsU = card.suit === 'acorns' && card.char === 'U';
+  const isFirstCardOfTrick = currentTrick.cards.length === 0;
+  const isFirstTrick = currentTrick.trick_number === 1;
+  const isLeadPlayer = currentTrick.lead_player === hasenStore.currentPlayerId;
+  
+  if (isAcornsU && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
+    return true;
+  }
+  
+  return false;
+};
+
 const selectCard = (card: Card) => {
+  // No permitir seleccionar cartas deshabilitadas
+  if (isCardDisabled(card)) {
+    return;
+  }
   emit('selectCard', card);
 };
 
@@ -72,7 +103,7 @@ const cardPositions = computed(() => {
         <div :class="[
           'relative',
           selectedCardId === pos.card.id ? 'ring-4 ring-yellow-400 rounded-lg' : '',
-          pos.card.state === 'in_hand_visible' && mode === 'card_replacement' ? 'opacity-50' : ''
+          isCardDisabled(pos.card) ? 'opacity-50' : ''
         ]">
           <PlayingCard 
             :card="pos.card" 

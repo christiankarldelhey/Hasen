@@ -8,12 +8,14 @@ interface Props {
   size?: 'small' | 'medium' | 'large'
   showGlow?: boolean
   clickable?: boolean
+  disableHover?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'medium',
   showGlow: false,
-  clickable: false
+  clickable: false,
+  disableHover: false
 })
 
 const emit = defineEmits<{
@@ -52,7 +54,7 @@ const hareSize = computed(() => {
 
 const circleClasses = computed(() => ({
   'cursor-pointer': props.clickable,
-  'hover:scale-110': props.clickable,
+  'hover:scale-110': props.clickable && !props.disableHover,
   'transition-all duration-300': true
 }))
 
@@ -77,7 +79,7 @@ const handleClick = () => {
       :class="['relative rounded-full flex items-center justify-center shadow-lg', sizeClasses, circleClasses]"
       :style="{ 
         background: `radial-gradient(circle at 30% 30%, ${playerColor}dd, ${playerColor})`,
-        border: `2px solid ${playerColor}`,
+        border: clickable ? '3px solid #facc15' : `2px solid ${playerColor}`,
         boxShadow: showGlow ? `0 0 25px ${playerColor}80` : '0 3px 5px rgba(0,0,0,0.3)'
       }"
       @click="handleClick"

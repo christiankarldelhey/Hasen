@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import PlayerPopover from '@/common/components/PlayerPopover.vue'
 import StackedCards from '@/common/components/StackedCards.vue'
@@ -13,6 +13,12 @@ interface Props {
 
 const props = defineProps<Props>()
 const gameStore = useGameStore()
+
+const specialCards = inject<any>('specialCards', null)
+
+const isSelectable = computed(() => 
+  specialCards?.isPlayerSelectable(props.playerId) ?? false
+)
 
 const publicCard = computed(() => {
   if (!props.publicCardId) return null
@@ -76,7 +82,7 @@ const positionClasses = computed(() => {
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
     <div :class="position === 'top' ? 'flex flex-row gap-2 items-center' : 'flex flex-col gap-2'">
-      <PlayerPopover :player-id="playerId" :position="position" />
+      <PlayerPopover :player-id="playerId" :position="position" :disableHover="isSelectable" />
       <StackedCards 
         :count="privateHandsCount" 
         :public-card="publicCard || undefined" 
