@@ -116,11 +116,20 @@ const handleStartGame = async () => {
 </script>
 
 <template>
-  <div class="card card-border bg-hasen-base w-full md:w-[40%] h-[75vh] shadow-lg flex flex-col">
-    <div class="card-header">
+  <div class="card card-border bg-hasen-base w-full md:w-[45%] h-[90vh] shadow-lg flex flex-col relative overflow-hidden">
+    <!-- Background image that ignores padding -->
+    <div class="absolute bottom-0 left-0 right-0 pointer-events-none z-0">
+      <img 
+        src="../../assets/backgrounds/lobby-menu-background.png" 
+        alt="Lobby background"
+        class="w-full object-cover object-bottom opacity-95"
+      />
+    </div>
+    
+    <div class="card-header relative z-10">
       <h2 class="text-center text-xxl font-bold text-black my-4">Hasen</h2>
     </div>
-    <div class="card-body flex flex-col gap-4 overflow-y-auto">
+    <div class="card-body flex flex-col gap-4 overflow-y-auto relative z-10">
       <LobbyOptions
         v-if="currentView === 'menu'"
         :games="lobbyStore.rooms"
