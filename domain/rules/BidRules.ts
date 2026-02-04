@@ -107,7 +107,7 @@ export function canMakeSpecificBid(
       if (playerRoundScore.points > condition.max_points) {
         return {
           canMakeBid: false,
-          reason: 'You already exceeded the maximum allowed points'
+          reason: 'You have exceeded the maximum points for this bid'
         }
       }
     }
@@ -255,16 +255,17 @@ export function canMakeBid(
       }
     }
     
-    // Para points bids: verificar si ya superamos el max_points
+    // Para points bids: verificar si existe al menos un bid que todavía sea posible
     if (bidType === 'points') {
-      for (const bid of availableBids) {
+      const hasAnyPossibleBid = availableBids.some(bid => {
         const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition
-        
-        if (playerRoundScore.points > condition.max_points) {
-          return {
-            canMakeBid: false,
-            reason: 'You already exceeded the maximum allowed points'
-          }
+        return playerRoundScore.points <= condition.max_points
+      })
+      
+      if (!hasAnyPossibleBid) {
+        return {
+          canMakeBid: false,
+          reason: 'No points bids are possible given your current points'
         }
       }
     }

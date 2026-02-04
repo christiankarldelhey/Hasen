@@ -32,6 +32,15 @@ const handleContinue = () => {
   emit('continue')
 }
 
+const handleClose = () => {
+  // Si el jugador cierra el modal (click fuera o X), también cuenta como "continue"
+  // para evitar que quede trabado esperando
+  if (!isWaiting.value) {
+    handleContinue()
+  }
+  emit('close')
+}
+
 const isPlayerReady = (playerId: PlayerId) => {
   return props.readyPlayers.includes(playerId)
 }
@@ -123,7 +132,7 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
 </script>
 
 <template>
-  <BaseModal :isOpen="isOpen" :title="isWaiting ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="emit('close')">
+  <BaseModal :isOpen="isOpen" :title="isWaiting ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="handleClose">
     <!-- Estado: Mostrando resultados -->
     <div v-if="!isWaiting" class="space-y-4">
       <!-- Player Results -->
