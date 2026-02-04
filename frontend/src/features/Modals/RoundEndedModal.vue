@@ -103,7 +103,11 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
       }
     }).filter(b => b !== null) as any[]
 
-    const totalScore = playerRoundScore.points + bidsInfo.reduce((sum, b) => sum + b.score, 0)
+    // Si el jugador NO hizo apuestas, usar card points como fallback
+    // Si hizo apuestas, solo sumar bid scores
+    const totalScore = playerBidEntries.length === 0 
+      ? playerRoundScore.points 
+      : bidsInfo.reduce((sum, b) => sum + b.score, 0)
 
     playersInfo.push({
       playerId: player.id,

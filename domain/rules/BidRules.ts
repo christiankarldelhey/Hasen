@@ -426,7 +426,9 @@ export function getPlayerScoreFromRound(
   if (!playerRoundScore) return 0;
 
   const playerBids = game.round.roundBids.playerBids[playerId] || [];
-  let totalScore = playerRoundScore.points;
+  // Si el jugador NO hizo apuestas, usar card points como fallback
+  // Si hizo apuestas, empezar en 0 y solo sumar bid scores
+  let totalScore = playerBids.length === 0 ? playerRoundScore.points : 0;
 
   for (const bidEntry of playerBids) {
     const bid = game.round.roundBids.bids.find(b => b.bid_id === bidEntry.bidId);
