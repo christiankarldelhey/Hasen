@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import { AVAILABLE_PLAYERS, type PlayerId, type TrickNumber } from '@domain/interfaces'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
+import { useGameStore } from '@/stores/gameStore'
 import PlayerAvatar from './PlayerAvatar.vue'
+import { IconStar } from '@tabler/icons-vue'
+import TrickCircle from './TrickCircle.vue'
 
 interface Props {
   playerId: PlayerId
@@ -12,6 +15,7 @@ interface Props {
 }
 
 const { isPlayerTurn } = usePlayers()
+const gameStore = useGameStore()
 
 const props = withDefaults(defineProps<Props>(), {
   isPlayer: false,
@@ -20,7 +24,37 @@ const props = withDefaults(defineProps<Props>(), {
 
 const isCurrentTurn = computed(() => isPlayerTurn.value(props.playerId))
 
-const { playerScore } = useGameScore(props.playerId)
+const { playerScore, playerRoundScore } = useGameScore(props.playerId)
+
+const currentTrickNumber = computed(() => {
+  return gameStore.publicGameState?.round.currentTrick?.trick_number || 1
+})
+
+const tricksWon = computed(() => {
+  return playerRoundScore.value?.tricksWon || []
+})
+
+const points = computed(() => playerRoundScore.value?.points ?? 0)
+
+const trickStates = computed(() => {
+  const states: Array<{ trickNumber: TrickNumber; state: 'win' | 'lose' }> = []
+  
+  for (let i = 1; i < currentTrickNumber.value; i++) {
+    const trickNum = i as TrickNumber
+    const won = tricksWon.value.includes(trickNum)
+    states.push({
+      trickNumber: trickNum,
+      state: won ? 'win' : 'lose'
+    })
+  }
+  
+  return states.reverse()
+})
+
+const currentTrickState = computed(() => {
+  return currentTrickNumber.value <= 5 ? currentTrickNumber.value as TrickNumber : null
+})
+
 
 const player = computed(() => {
   return AVAILABLE_PLAYERS.find(p => p.id === props.playerId)
@@ -51,11 +85,12 @@ const handleClick = () => {
   }
 }
 
+
 </script>
 
 <template>
   <div 
-    :class="['flex', 'gap-3', playerClasses]"
+    :class="['flex', 'gap-5', playerClasses]"
   >
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
@@ -70,23 +105,69 @@ const handleClick = () => {
         />
  
       
-      <!-- Score badge with star -->
-      <div 
-        class="absolute -bottom-1 -right-1 bg-hasen-base rounded-full px-2 py-0.5 flex items-center gap-0.5 shadow-lg border border-hasen-dark"
+      <!-- Score badge with points - BOTTOM CENTERED -->
+      <div
+        class="absolute -bottom-2 left-1/2 -translate-x-1/2
+              bg-hasen-base rounded-full
+              pl-2 pr-4 py-1
+              flex items-center gap-1
+              border border-hasen-dark
+              whitespace-nowrap box-border"
       >
-        <svg class="w-3 h-3 fill-hasen-dark" viewBox="0 0 24 24">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-        <span class="text-hasen-dark font-bold text-xs">{{ playerScore }}</span>
+        <img
+          src="@/assets/symbols/win-points.png"
+          class="w-3 h-3 block"
+          alt="Win points"
+        />
+        <span class="text-hasen-dark font-bold text-xs leading-none">
+          {{ points }}
+        </span>
       </div>
+
+      <!-- Tricks stack con TrickCircle - TOP RIGHT -->
+      <div 
+        class="absolute -top-2 -right-1 bg-transparent px-3 flex"
+      >
+        <div class="relative flex items-center">
+          <!-- Trick actual (con número) - al frente a la izquierda -->
+          <div 
+            v-if="currentTrickState"
+            class="relative flex-shrink-0"
+            :style="{ zIndex: 10 }"
+          >
+            <TrickCircle 
+              :number="currentTrickState"
+              state="current"
+              :size="20"
+            />
+          </div>
+          
+          <!-- Tricks pasados (ganados/perdidos) - stackeados hacia la derecha -->
+          <div 
+            v-for="(trick, index) in trickStates" 
+            :key="trick.trickNumber"
+            class="absolute flex-shrink-0"
+            :style="{ 
+              zIndex: 9 - index,
+              left: `${(index + 1) * 5}px` 
+            }"
+          >
+            <TrickCircle 
+              :state="trick.state"
+              :size="20"
+            />
+          </div>
+        </div>
+      </div>
+
     </div>
     
     <!-- Player name label -->
     <div 
-      :class="['bg-hasen-dark text-hasen-base px-3 py-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
+      :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
       :style="{ borderColor: playerColor }"
     >
-      {{ playerName }} {{ isPlayer ? '(You)' : '' }}
+      {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-bold text-xs', playerScore > 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
     </div>
   </div>
 </template>

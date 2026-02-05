@@ -3,12 +3,14 @@ import { computed } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
+import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayerScore } from '@/features/Bids/composables/useBidPlayerScore'
 import SuitSymbol from '@/common/components/SuitSymbol.vue'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
 import PlayerBidScoreRow from '@/features/Bids/PlayerBidScoreRow.vue'
 import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
+import { IconStar } from '@tabler/icons-vue'
 
 interface Props {
   playerId?: PlayerId
@@ -18,12 +20,10 @@ const props = defineProps<Props>()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
 
+
 const targetPlayerId = computed(() => props.playerId ?? hasenStore.currentPlayerId)
 
-const playerRoundScore = computed(() => {
-  const roundScore = gameStore.publicGameState?.round.roundScore || []
-  return roundScore.find((score) => score.playerId === targetPlayerId.value)
-})
+const { playerScore, playerRoundScore } = useGameScore(targetPlayerId.value)
 
 const points = computed(() => playerRoundScore.value?.points ?? 0)
 
@@ -88,12 +88,25 @@ const playerColor = computed(() => {
   const player = AVAILABLE_PLAYERS.find(p => p.id === targetPlayerId.value)
   return player?.color || '#B89B5E'
 })
+
+const bidsTitle = computed(() => {
+  const isCurrentPlayer = targetPlayerId.value === hasenStore.currentPlayerId
+  if (isCurrentPlayer) {
+    return 'Round score'
+  }
+  const player = AVAILABLE_PLAYERS.find(p => p.id === targetPlayerId.value)
+  return player ? `${player.name}'s round score` : 'Round score'
+})
 </script>
 
 <template>
-  <div class="rounded-xl bg-black/60 p-4 flex flex-col gap-2">
-    <div class="flex flex-row gap-2"> 
-      <span class="text-hasen-base text-md">Your bids</span>
+  <div class="rounded-xl bg-black/60 px-4 pb-4 pt-2 flex flex-col gap-2">
+    <div class="flex flex-row items-center justify-between gap-2"> 
+      <span class="text-hasen-base text-sm">{{ bidsTitle }}</span>
+      <div class="flex flex-row items-center gap-1">
+        <IconStar :size="16" class="text-hasen-base" /> 
+        <span :class="['font-semibold text-lg', playerScore >= 0 ? 'text-hasen-base' : 'text-hasen-red']">{{ playerScore }}</span>
+      </div>
     </div>
       
 
@@ -153,35 +166,35 @@ const playerColor = computed(() => {
       :avoidSuit="setCollectionDisplay?.avoidSuit ?? null"
       :isLastRow="true"
     >
-      <div class="flex flex-row items-center justify-between w-full">
-        <div v-for="(suitDisplay, index) in suitDisplays" :key="suitDisplay.suit" class="flex flex-row items-center gap-1">
+      <div v-if="suitDisplays[0] && suitDisplays[1]" class="flex flex-row items-center justify-between w-full">
           <SuitSymbol 
-            :suit="suitDisplay.suit" 
-            :avoid="suitDisplay.isAvoid"
+            :suit="suitDisplays[0].suit" 
+            :avoid="suitDisplays[0].isAvoid"
+            :value="suitDisplays[0].score !== null ? suitDisplays[0].score : suitDisplays[0].count"
             :class="[
-              !setCollectionDisplay ? 'opacity-30' : '',
-              !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+              !setCollectionDisplay ? 'opacity-80' : '',
+              !suitDisplays[0].isWin && !suitDisplays[0].isAvoid && setCollectionDisplay ? 'opacity-70' : ''
             ]"
           />
-          <span 
-            class="text-lg font-semibold"
-            :class="[
-              suitDisplay.isAvoid ? 'text-hasen-red' : 'text-hasen-dark',
-              !suitDisplay.isWin && !suitDisplay.isAvoid && setCollectionDisplay ? 'opacity-70' : ''
-            ]"
-          >
-            {{ suitDisplay.score !== null ? suitDisplay.score : suitDisplay.count }}
-          </span>
           
           <span 
-            v-if="index === 0 && setCollectionDisplay"
+            v-if="setCollectionDisplay"
             class="text-2xl font-semibold mx-2"
             :class="(setCollectionDisplay.winScore + setCollectionDisplay.avoidScore) < 10 ? 'text-hasen-red' : 'text-hasen-green'"
           >
             {{ setCollectionDisplay.winScore + setCollectionDisplay.avoidScore }}
           </span>
+
+          <SuitSymbol 
+            :suit="suitDisplays[1].suit" 
+            :avoid="suitDisplays[1].isAvoid"
+            :value="suitDisplays[1].score !== null ? suitDisplays[1].score : suitDisplays[1].count"
+            :class="[
+              !setCollectionDisplay ? 'opacity-80' : '',
+              !suitDisplays[1].isWin && !suitDisplays[1].isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+            ]"
+          />
         </div>
-      </div>
     </PlayerBidScoreRow>
 
   </div>

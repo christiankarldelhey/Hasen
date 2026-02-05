@@ -7,9 +7,11 @@ const props = withDefaults(defineProps<{
   suit: string
   avoid?: boolean
   size?: 'small' | 'medium' | 'large'
+  value?: number | string
 }>(), {
   avoid: false,
-  size: 'large'
+  size: 'large',
+  value: undefined
 })
 
 const sizeClasses = {
@@ -34,7 +36,7 @@ function getSymbol(collect: string) {
 
 <template>
     <!-- Version with avoid (crossed out) -->
-    <div v-if="props.avoid" :class="['relative flex-shrink-0', sizeClasses[props.size]]">
+    <div v-if="props.avoid" :class="['relative flex-shrink-0 mx-1', sizeClasses[props.size]]">
         <img
             :class="['object-contain', sizeClasses[props.size]]"
             :src="getSymbol(props.suit)"
@@ -44,13 +46,34 @@ function getSymbol(collect: string) {
             <line x1="0" y1="0" x2="100" y2="100" 
                 stroke="#dc2626" stroke-width="5" />
         </svg>
+        
+        <!-- Value badge for avoid version -->
+        <div 
+            v-if="props.value !== undefined"
+            class="absolute inset-x-0 top-4 flex items-end justify-center pointer-events-none"
+        >
+            <span class="bg-hasen-base rounded-full px-2 py-1 text-hasen-dark font-bold text-xs shadow-md border border-hasen-dark">
+                {{ props.value }}
+            </span>
+        </div>
     </div>
 
-    <!-- Default version -->
-    <img
-        v-else
-        :src="getSymbol(props.suit)"
-        alt="symbol collect"
-        :class="['object-contain', sizeClasses[props.size]]"
-    />
+    <!-- Default version with optional value -->
+    <div v-else :class="['relative flex-shrink-0 mx-1', sizeClasses[props.size]]">
+        <img
+            :src="getSymbol(props.suit)"
+            alt="symbol collect"
+            :class="['object-contain', sizeClasses[props.size]]"
+        />
+        
+        <!-- Value badge -->
+        <div 
+            v-if="props.value !== undefined"
+            class="absolute inset-x-0 top-4 flex items-end justify-center pointer-events-none "
+        >
+            <span class="bg-hasen-base rounded-full px-2 py-1 text-hasen-dark font-bold text-xs shadow-md border border-hasen-dark">
+                {{ props.value }}
+            </span>
+        </div>
+    </div>
 </template>

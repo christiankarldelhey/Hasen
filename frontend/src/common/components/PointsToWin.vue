@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div :class="['relative', 'inline-flex', 'items-center', 'justify-center', size === 'small' ? 'px-0' : 'px-2']">
+  <div :class="['relative', 'inline-flex', 'items-center', 'justify-center']">
     <img
       :src="WinSymbol"
       alt="Win Symbol"

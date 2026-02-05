@@ -29,7 +29,7 @@ watch(roundBids, (newVal) => {
 </script>
 
 <template>
-  <div class="fixed top-0 right-0 rounded-xl bg-black/60 p-4 z-10 m-4">
+  <div class="fixed top-0 right-0 rounded-xl bg-black/60 px-4 pb-4 pt-2 z-10 m-4">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <div class="flex flex-row">
         <span class="text-hasen-base text-sm">Available bids</span>

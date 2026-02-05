@@ -38,7 +38,7 @@ const sortedTricks = computed(() => {
 </script>
 <template>
     <!-- POINTS -->
-    <div v-if="props.type === 'points'" class="flex flex-row px-1">
+    <div v-if="props.type === 'points'" class="flex flex-row gap-3 px-1">
         <PointsToWin :points="pointsCondition.min_points" />
         <span class="text-hasen-dark text-2xl font-semibold pt-1">  -  </span>  
         <PointsToWin :points="pointsCondition.max_points" />

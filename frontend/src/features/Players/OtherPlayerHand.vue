@@ -81,7 +81,7 @@ const positionClasses = computed(() => {
   <div 
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
-    <div :class="position === 'top' ? 'flex flex-row gap-2 items-center' : 'flex flex-col gap-2'">
+    <div :class="position === 'top' ? 'flex flex-row gap-5 items-center' : 'flex flex-col gap-2'">
       <PlayerPopover :player-id="playerId" :position="position" :disableHover="isSelectable" />
       <StackedCards 
         :count="privateHandsCount" 
