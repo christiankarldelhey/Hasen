@@ -194,7 +194,18 @@ const bidsTitle = computed(() => {
               !suitDisplays[1].isWin && !suitDisplays[1].isAvoid && setCollectionDisplay ? 'opacity-70' : ''
             ]"
           />
-        </div>
+
+          <SuitSymbol 
+            v-if="suitDisplays[2]"
+            :suit="suitDisplays[2].suit" 
+            :avoid="suitDisplays[2].isAvoid"
+            :value="suitDisplays[2].score !== null ? suitDisplays[2].score : suitDisplays[2].count"
+            :class="[
+              !setCollectionDisplay ? 'opacity-80' : '',
+              !suitDisplays[1].isWin && !suitDisplays[1].isAvoid && setCollectionDisplay ? 'opacity-70' : ''
+            ]"
+          />
+      </div>
     </PlayerBidScoreRow>
 
   </div>

@@ -27,9 +27,26 @@ const showPopover = ref(false)
     <Transition name="fade">
       <div 
         v-if="showPopover"
-        class="absolute z-50 mt-2 left-1/2 -translate-x-1/2"
+        :class="[
+          'absolute z-50',
+          position === 'top' ? 'top-full mb-2 left-1/2 -translate-x-1/2' : '',
+          position === 'left' ? 'left-full mr-2 top-1/2 -translate-y-1/2' : '',
+          position === 'right' ? 'right-full ml-2 top-1/2 -translate-y-1/2' : ''
+        ]"
       >
-        <PlayerBids :player-id="playerId" />
+        <div class="relative rounded-lg  p-0">
+          <!-- Pointer -->
+          <div 
+            :class="[
+              'absolute w-0 h-0 bg-hasen-dark',
+              position === 'top' ? 'bottom-full left-1/2 -translate-y-1/2 border-l-transparent border-r-transparent border-b-transparent' : '',
+              position === 'bottom' ? 'top-full left-1/2 -translate-y-1/2 border-l-transparent border-r-transparent border-t-transparent' : '',
+              position === 'left' ? 'right-full top-1/2 -translate-x-1/2 border-t-transparent border-b-transparent border-r-transparent' : '',
+              position === 'right' ? 'left-full top-1/2 -translate-x-1/2 border-t-transparent border-b-transparent border-l-transparent' : ''
+            ]"
+          />
+          <PlayerBids :player-id="playerId" />
+        </div>
       </div>
     </Transition>
   </div>

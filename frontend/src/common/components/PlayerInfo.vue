@@ -65,7 +65,7 @@ const playerColor = computed(() => player.value?.color || '#000000')
 const playerName = computed(() => player.value?.name || 'Player')
 
 const positionClasses = computed(() => {
-  return props.position === 'left' || props.position === 'right' ? 'flex-row' : 'flex-col'
+  return props.position === 'left' || props.position === 'right' ? 'flex-row gap-2' : 'flex-col gap-4'
 })
 
 const playerClasses = computed(() => {
@@ -90,7 +90,7 @@ const handleClick = () => {
 
 <template>
   <div 
-    :class="['flex', 'gap-5', playerClasses]"
+    :class="['flex', playerClasses]"
   >
     <!-- Circular avatar with player color and white hare -->
     <div class="relative">
@@ -167,7 +167,7 @@ const handleClick = () => {
       :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
       :style="{ borderColor: playerColor }"
     >
-      {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-bold text-xs', playerScore > 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
+      {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-semibold text-xs', playerScore >= 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
     </div>
   </div>
 </template>
