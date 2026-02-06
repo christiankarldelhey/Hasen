@@ -487,6 +487,17 @@ socket.on('round:start', async ({ gameId }) => {
                 io.to(playerSocketId).emit('game:event', privateEvent);
               }
             }
+
+            // Enviar estado completo a cada jugador para garantizar sincronización
+            for (const [socketId, data] of socketToPlayer.entries()) {
+              if (data.gameId === gameId) {
+                const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
+                io.to(socketId).emit('game:stateUpdate', {
+                  publicGameState: publicState,
+                  privateGameState: privateState
+                });
+              }
+            }
             
             console.log(`✅ Round ${result.game.round.round} started after all players ready`);
           } catch (error: any) {
