@@ -49,7 +49,7 @@ export function canMakeSpecificBid(
     // Para trick bids: verificar si este bid específico es todavía posible
     if (bid.bid_type === 'trick') {
       const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
-      const tricksWonSoFar = playerRoundScore.tricksWon.length
+      const tricksWonSoFar = new Set(playerRoundScore.tricksWon).size
       const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
       const maxPossibleTricks = tricksWonSoFar + tricksRemaining
       
@@ -209,7 +209,7 @@ export function canMakeBid(
   if (playerRoundScore) {
     // Para trick bids: verificar si al menos un bid disponible es todavía posible
     if (bidType === 'trick') {
-      const tricksWonSoFar = playerRoundScore.tricksWon.length
+      const tricksWonSoFar = new Set(playerRoundScore.tricksWon).size
       const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
       const maxPossibleTricks = tricksWonSoFar + tricksRemaining
       
@@ -322,7 +322,7 @@ export function isWinningBid(
   if (bidType === 'trick') {
     const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition;
     const tricksWon = playerRoundScore.tricksWon;
-    const tricksWonCount = tricksWon.length;
+    const tricksWonCount = new Set(tricksWon).size;
 
     // Verificar lose_trick_position: si ganó un trick que debía perder
     if (condition.lose_trick_position) {
@@ -359,7 +359,7 @@ export function isWinningBid(
       if (isRoundComplete) {
         return tricksWonCount >= minTricks && tricksWonCount <= maxTricks;
       } else {
-        const tricksRemaining = 5 - tricksWonCount;
+        const tricksRemaining = 5 - new Set(tricksWon).size;
         const maxPossible = tricksWonCount + tricksRemaining;
         
         if (maxPossible < minTricks) return false;

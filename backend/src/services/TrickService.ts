@@ -298,35 +298,15 @@ export class TrickService {
       
       console.log(`🍃 Card steal selection saved. Winner: ${trickWinner}. Score will be calculated in finishTrick after processing the steal.`);
     } else {
-      // No hay robo (PICK_NEXT_LEAD), calcular score normalmente
-      const trickCards = currentTrick.cards
-        .map(cardId => game.deck.find(c => c.id === cardId))
-        .filter(c => c !== undefined) as PlayingCard[];
-      
-      const trickScore = TrickScoreService.calculateAndUpdateTrickScore(
-        game,
-        trickWinner,
-        trickCards,
-        currentTrick.trick_number
-      );
-      
+      // No hay robo (PICK_NEXT_LEAD), guardar ganador solamente
+      // El score se calculará en finishTrick para evitar doble cálculo
       currentTrick.score = {
         trick_winner: trickWinner,
-        trick_points: trickScore.trick_points,
-        trick_collections: trickScore.trick_collections
+        trick_points: 0, // Se calculará en finishTrick
+        trick_collections: null
       };
       
-      console.log(`🫐 Trick ${currentTrick.trick_number} completed after next lead selection! Winner: ${trickWinner}, Points: ${trickScore.trick_points}`);
-      
-      // Crear evento TRICK_COMPLETED solo si no hay robo
-      trickCompletedEvent = createTrickCompletedEvent(
-        currentTrick.trick_number,
-        trickWinner,
-        currentTrick.winning_card || '',
-        trickScore.trick_points,
-        trickCards,
-        trickScore.trick_collections
-      );
+      console.log(`🫐 Trick ${currentTrick.trick_number} next lead selected. Winner: ${trickWinner}. Score will be calculated in finishTrick.`);
     }
     
     // Cambiar estado a 'resolve' para permitir finishTrick

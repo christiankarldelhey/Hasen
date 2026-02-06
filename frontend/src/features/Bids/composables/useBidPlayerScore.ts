@@ -121,7 +121,7 @@ export function usePlayerScore(
     if (!trickBid.value) return false
     
     const condition = trickBid.value.win_condition
-    const tricksWonCount = tricksWon.value.length
+    const tricksWonCount = new Set(tricksWon.value).size
     const tricksPlayed = Math.max(0, currentTrick.value - 1)
     const tricksRemaining = 5 - tricksPlayed
 
@@ -151,7 +151,7 @@ export function usePlayerScore(
 
   const trickDisplays = computed((): TrickDisplayInfo[] => {
     const trickNumbers: TrickNumber[] = [1, 2, 3, 4, 5]
-    const tricksWonCount = tricksWon.value.length
+    const tricksWonCount = new Set(tricksWon.value).size
 
     return trickNumbers.map(num => {
       const isPast = num < currentTrick.value
