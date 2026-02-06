@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, provide, ref } from 'vue';
+import { onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
@@ -13,12 +13,18 @@ import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
+import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.vue';
+import { provideAnimationCoords, useDealAnimation } from '@/features/Animations';
 import type { GameEvent } from '@domain/events/GameEvents';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
 const socketGame = useSocketGame();
 const gameStore = useGameStore();
+
+// Animation system
+const animCoords = provideAnimationCoords();
+const { isDealing, animatedCards, dealProgress, startDeal } = useDealAnimation({ coords: animCoords });
 
 const {
   playerHand,
@@ -50,6 +56,28 @@ provide('specialCards', {
   isCardSelectable,
   handlePlayerClick,
   handleCardClick
+});
+
+// Proveer estado de dealing a componentes hijos
+provide('isDealing', isDealing);
+provide('dealProgress', dealProgress);
+
+function triggerDealAnimation() {
+  // Small delay to ensure components have mounted and registered coords
+  setTimeout(() => {
+    const playerKeys = ['player-hand']
+    for (const op of opponentPositions.value) {
+      playerKeys.push(`opponent-${op.position}`)
+    }
+    startDeal(playerKeys)
+  }, 100)
+}
+
+// Watch round number — triggers on initial load AND on new rounds
+watch(() => gameStore.currentRound, (newRound, oldRound) => {
+  if (newRound > 0 && newRound !== oldRound) {
+    triggerDealAnimation()
+  }
 });
 
 // Modal de Round Ended
@@ -130,9 +158,12 @@ onUnmounted(() => {
       <!-- Trick en el centro exacto de la pantalla -->
       <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
       
+      <!-- Animation overlay -->
+      <AnimationOverlay :cards="animatedCards" />
+      
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 
-        :cards="playerHand" 
+        :cards="isDealing ? playerHand.slice(0, dealProgress['player-hand'] ?? 0) : playerHand" 
         :mode="handMode"
         :is-my-turn="isMyTurn"
         :is-trick-in-resolve="isTrickInResolve"

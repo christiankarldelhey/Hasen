@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import { useHasenStore } from '@/stores/hasenStore';
 import { useGameStore } from '@/stores/gameStore';
+import { useAnimationCoords } from '@/features/Animations';
 import PlayerBids from '../Bids/PlayerBids.vue';
 import PlayerInfo from '@/common/components/PlayerInfo.vue';
 import PlayerCards from './PlayerCards.vue';
@@ -35,6 +36,11 @@ const emit = defineEmits<{
 const hasenStore = useHasenStore();
 const gameStore = useGameStore();
 const selectedCardId = ref<string | null>(null);
+
+const playerHandEl = ref<HTMLElement | null>(null);
+const coords = useAnimationCoords();
+onMounted(() => coords.register('player-hand', playerHandEl));
+onUnmounted(() => coords.unregister('player-hand'));
 const hasPlayedCard = ref<boolean>(false);
 
 // Reset hasPlayedCard when it becomes my turn
@@ -77,7 +83,7 @@ const handleFinishTurn = () => {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0 right-0 pointer-events-none h-[300px]">
+  <div ref="playerHandEl" class="fixed bottom-0 left-0 right-0 pointer-events-none h-[300px]">
     <div class="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
       <PlayerCards 
         :cards="cards"

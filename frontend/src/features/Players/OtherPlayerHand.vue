@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import PlayerPopover from '@/common/components/PlayerPopover.vue'
 import StackedCards from '@/common/components/StackedCards.vue'
 import type { PlayerId } from '@domain/interfaces/Player'
+import { useAnimationCoords } from '@/features/Animations'
 
 interface Props {
   playerId: PlayerId
@@ -15,6 +16,16 @@ const props = defineProps<Props>()
 const gameStore = useGameStore()
 
 const specialCards = inject<any>('specialCards', null)
+const isDealing = inject<import('vue').Ref<boolean>>('isDealing', ref(false))
+const dealProgress = inject<import('vue').Ref<Record<string, number>>>('dealProgress', ref({}))
+
+const handEl = ref<HTMLElement | null>(null)
+const coords = useAnimationCoords()
+const coordKey = computed(() => `opponent-${props.position}`)
+onMounted(() => coords.register(coordKey.value, handEl))
+onUnmounted(() => coords.unregister(coordKey.value))
+
+const arrivedCards = computed(() => dealProgress.value[coordKey.value] ?? 0)
 
 const isSelectable = computed(() => 
   specialCards?.isPlayerSelectable(props.playerId) ?? false
@@ -79,13 +90,14 @@ const positionClasses = computed(() => {
 
 <template>
   <div 
+    ref="handEl"
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
     <div :class="position === 'top' ? 'flex flex-row gap-5 items-center' : 'flex flex-col gap-5'">
       <PlayerPopover :player-id="playerId" :position="position" :disableHover="isSelectable" />
       <StackedCards 
-        :count="privateHandsCount" 
-        :public-card="publicCard || undefined" 
+        :count="isDealing ? Math.max(0, arrivedCards - (publicCard && arrivedCards >= 5 ? 1 : 0)) : privateHandsCount" 
+        :public-card="isDealing ? (arrivedCards >= 5 ? (publicCard || undefined) : undefined) : (publicCard || undefined)" 
         :player-id="playerId" 
       />
     </div>

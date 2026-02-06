@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import cardBack from '@/assets/decks/card-back.png'
+import { useAnimationCoords } from '@/features/Animations'
 
 const deckLayers = 5
+const deckEl = ref<HTMLElement | null>(null)
+
+const coords = useAnimationCoords()
+onMounted(() => coords.register('deck', deckEl))
+onUnmounted(() => coords.unregister('deck'))
 </script>
 
 <template>
-  <div class="z-10 relative" style="width: 98px; height: 150px;">
+  <div ref="deckEl" class="z-10 relative" style="width: 98px; height: 150px;">
     <div 
       v-for="index in deckLayers" 
       :key="index"
