@@ -29,6 +29,11 @@ export interface SuitDisplay {
   score: number | null
 }
 
+export interface BidScoreInfo {
+  score: number | null
+  onLose: number | null
+}
+
 export function usePlayerScore(
   playerBids: ComputedRef<PlayerBidEntry[]>,
   tricksWon: ComputedRef<TrickNumber[]>,
@@ -246,6 +251,31 @@ export function usePlayerScore(
     return displays
   })
 
+  const trickBidScore = computed((): BidScoreInfo => {
+    if (!trickBid.value) return { score: null, onLose: null }
+    const bidEntry = playerBids.value.find(entry => entry.bidId === trickBid.value?.bid_id)
+    return {
+      score: trickBid.value.bid_score,
+      onLose: bidEntry?.onLose ?? null
+    }
+  })
+
+  const setCollectionBidScore = computed((): BidScoreInfo => {
+    if (!setCollectionBid.value) return { score: null, onLose: null }
+    return {
+      score: setCollectionBid.value.bid.bid_score,
+      onLose: setCollectionBid.value.entry.onLose
+    }
+  })
+
+  const pointsBidScore = computed((): BidScoreInfo => {
+    if (!pointsBid.value) return { score: null, onLose: null }
+    return {
+      score: pointsBid.value.bid.bid_score,
+      onLose: pointsBid.value.entry.onLose
+    }
+  })
+
   return {
     trickBid,
     isBidLost,
@@ -254,6 +284,9 @@ export function usePlayerScore(
     setCollectionDisplay,
     pointsBid,
     pointsDisplay,
-    suitDisplays
+    suitDisplays,
+    trickBidScore,
+    setCollectionBidScore,
+    pointsBidScore
   }
 }

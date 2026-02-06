@@ -6,18 +6,17 @@ import { useGameStore } from '@/stores/gameStore'
 export function usePlayers() {
   const gameStore = useGameStore()
 
-  const getPlayerNameById = computed(() => {
-    return (id: PlayerId): string | undefined => {
-      const player = AVAILABLE_PLAYERS.find(p => p.id === id)
-      return player?.name
-    }
+  const getPlayerById = computed(() => {
+    return (id: PlayerId) => AVAILABLE_PLAYERS.find(p => p.id === id)
   })
 
-  // const isCurrentPlayer = computed(() => {
-  //   return (id: PlayerId): boolean => {
-  //     return id === gameStore.publicGameState?.playerTurn
-  //   }
-  // })
+  const getPlayerNameById = computed(() => {
+    return (id: PlayerId): string | undefined => getPlayerById.value(id)?.name
+  })
+
+  const getPlayerColorById = computed(() => {
+    return (id: PlayerId): string => getPlayerById.value(id)?.color || '#B89B5E'
+  })
 
   const isPlayerTurn = computed(() => {
     return (id: PlayerId): boolean => {
@@ -26,7 +25,9 @@ export function usePlayers() {
   })
 
   return {
+    getPlayerById,
     getPlayerNameById,
+    getPlayerColorById,
     isPlayerTurn
   }
 }

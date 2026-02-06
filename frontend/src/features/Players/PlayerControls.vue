@@ -39,12 +39,12 @@ const handleFinishTurn = () => {
   <div class="flex flex-col gap-3 pointer-events-auto">
     <template v-if="mode === 'card_replacement'">
       <ActionButton 
-        label="Confirm" 
+        label="Replace" 
         :disabled="!selectedCardId"
         @click="handleConfirm"
       />
       <ActionButton 
-        label="Skip" 
+        label="Skip (+3 points)" 
         variant="secondary"
         @click="$emit('skipReplacement')"
       />
