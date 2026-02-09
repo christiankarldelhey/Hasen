@@ -20,17 +20,16 @@ class SocketManager {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('✅ Conectado al servidor');
+      console.log('✅ Socket connected');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('❌ Desconectado del servidor');
+      console.log('❌ Socket disconnected');
     });
   }
 
   registerGameListeners() {
     if (this.listenersRegistered) {
-      console.log('⚠️ Listeners already registered, skipping...');
       return;
     }
     
@@ -40,12 +39,11 @@ class SocketManager {
 
     const handlers = {
       'lobby:player-count-changed': ({ gameId, currentPlayers }: any) => {
-        console.log(`🔄 Player count changed for ${gameId}: ${currentPlayers}`);
         lobbyStore.updateRoomPlayers(gameId, currentPlayers);
       },
       
       'game:deleted': ({ gameId }: any) => {
-        console.log(`🗑️ Game ${gameId} deleted`);
+        console.log(`🗑️ GAME_DELETED: ${gameId}`);
         lobbyStore.setRooms(lobbyStore.rooms.filter(r => r.gameId !== gameId));
         if (lobbyStore.currentRoomId === gameId) {
           lobbyStore.clearCurrentRoom();
@@ -63,7 +61,6 @@ class SocketManager {
     });
 
     this.listenersRegistered = true;
-    console.log('✅ Socket listeners registered');
   }
 
   unregisterGameListeners() {
@@ -75,7 +72,6 @@ class SocketManager {
 
     this.eventHandlers.clear();
     this.listenersRegistered = false;
-    console.log('🧹 Socket listeners unregistered');
   }
 
   disconnect() {

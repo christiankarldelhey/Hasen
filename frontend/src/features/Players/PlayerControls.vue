@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ActionButton from '@/common/components/ActionButton.vue';
+import { useI18n } from '@/common/composables/useI18n';
 
 interface Props {
   mode?: 'normal' | 'card_replacement';
@@ -26,6 +27,8 @@ const emit = defineEmits<{
   finishTrick: []
 }>();
 
+const { t } = useI18n();
+
 const handleConfirm = () => {
   emit('confirm');
 };
@@ -39,12 +42,12 @@ const handleFinishTurn = () => {
   <div class="flex flex-col gap-3 pointer-events-auto">
     <template v-if="mode === 'card_replacement'">
       <ActionButton 
-        label="Replace" 
+        :label="t('game.replace')" 
         :disabled="!selectedCardId"
         @click="handleConfirm"
       />
       <ActionButton 
-        label="Skip (+3 points)" 
+        :label="t('game.skipReplacement')" 
         variant="secondary"
         @click="$emit('skipReplacement')"
       />
@@ -52,14 +55,14 @@ const handleFinishTurn = () => {
 
     <ActionButton 
       v-else-if="mode === 'normal' && isMyTurn && !isTrickInResolve"
-      label="Finish Turn"
+      :label="t('game.finishTurn')"
       :disabled="!hasPlayedCard"
       @click="handleFinishTurn"
     />
 
     <ActionButton 
       v-else-if="isTrickInResolve"
-      label="Finish Trick"
+      :label="t('game.finishTrick')"
       :disabled="!canFinishTrick"
       @click="$emit('finishTrick')"
     />

@@ -10,6 +10,7 @@ import SuitSymbol from '@/common/components/SuitSymbol.vue'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
 import PlayerBidScoreRow from '@/features/Bids/PlayerBidScoreRow.vue'
+import GamePanel from '@/common/components/GamePanel.vue'
 import { IconStar } from '@tabler/icons-vue'
 
 interface Props {
@@ -74,7 +75,7 @@ const bidsTitle = computed(() => {
 </script>
 
 <template>
-  <div class="rounded-xl bg-black/60 px-4 pb-4 pt-2 flex flex-col gap-2">
+  <GamePanel class="flex flex-col gap-2">
     <div class="flex flex-row items-center justify-between gap-2"> 
       <span class="text-hasen-base text-sm">{{ bidsTitle }}</span>
       <div class="flex flex-row items-center gap-1">
@@ -162,5 +163,5 @@ const bidsTitle = computed(() => {
       </div>
     </PlayerBidScoreRow>
 
-  </div>
+  </GamePanel>
 </template>

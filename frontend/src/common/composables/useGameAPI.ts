@@ -20,7 +20,7 @@ export function useGameAPI() {
       lobbyStore.setRooms(games)
     } catch (err) {
       lobbyStore.setError('Error when fetching games')
-      console.error(err)
+      console.error('Error fetching games:', err)
     } finally {
       await stopLoading()
       lobbyStore.setLoading(false)
@@ -52,7 +52,7 @@ export function useGameAPI() {
       return result
     } catch (err: any) {
       lobbyStore.setError(err.message || 'Error creating new game')
-      console.error('Error creating new game:', err)
+      console.error('Error creating game:', err)
       throw err
     } finally {
       await stopLoading()

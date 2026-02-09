@@ -37,7 +37,7 @@ const handleDeckShuffled: GameEventHandler = (event, _context) => {
   if (event.type !== 'DECK_SHUFFLED') return
   
   const payload = (event as DeckShuffledEvent).payload
-  console.log(`🎴 Deck shuffled for round ${payload.round}, ${payload.deckSize} cards`)
+  console.log(`🎴 DECK_SHUFFLED: Round ${payload.round}`)
 }
 
 const handleRoundSetupCompleted: GameEventHandler = (event, context) => {
@@ -52,14 +52,13 @@ const handleRoundSetupCompleted: GameEventHandler = (event, context) => {
   context.publicGameState.round.currentTrick = payload.currentTrick
   context.publicGameState.round.roundScore = []
   
-  console.log(`✅ Round ${payload.round} setup completed, phase: ${payload.roundPhase}, turn: ${payload.playerTurn}`)
+  console.log(`✅ ROUND_SETUP_COMPLETED: Round ${payload.round}`)
 }
 
 const handleFirstCardDealt: GameEventHandler = (event, context) => {
   if (event.type !== 'FIRST_CARD_DEALT') return
   
   const payload = (event as FirstCardDealtEvent).payload
-  console.log('🃏 First cards dealt (visible):', payload.firstCards)
   
   if (!context.currentPlayerId || !context.publicGameState) return
   
@@ -82,7 +81,6 @@ const handleFirstCardDealt: GameEventHandler = (event, context) => {
   
   if (myFirstCard && context.privateGameState) {
     context.privateGameState.hand = [myFirstCard.card]
-    console.log('🃏 Received first visible card')
   }
 }
 
@@ -97,8 +95,6 @@ const handleRemainingCardsDealtPrivate: GameEventHandler = (event, context) => {
     ...(context.privateGameState.hand || []),
     ...payload.cards
   ]
-  
-  console.log('🃏 Received 4 private cards. Total hand:', context.privateGameState.hand.length)
 }
 
 const handleCardReplacedPrivate: GameEventHandler = (event, context) => {
@@ -113,8 +109,6 @@ const handleCardReplacedPrivate: GameEventHandler = (event, context) => {
     card => card.id !== payload.cardToReplace.id
   )
   context.privateGameState.hand.push(payload.replacementCard)
-  
-  console.log(`🔄 Card replaced: ${payload.cardToReplace.char} → ${payload.replacementCard.char}`)
 }
 
 const handleTrickStarted: GameEventHandler = (event, context) => {
@@ -145,7 +139,7 @@ const handleTrickStarted: GameEventHandler = (event, context) => {
     }
   }
   
-  console.log(`🎯 Trick ${payload.trickNumber} started, lead: ${payload.leadPlayer}, turn: ${payload.leadPlayer}, phase: playing`)
+  console.log(`🎯 TRICK_STARTED: Trick ${payload.trickNumber}, Lead: ${payload.leadPlayer}`)
 }
 
 const handleCardPlayed: GameEventHandler = (event, context) => {
@@ -172,7 +166,7 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
     )
   }
   
-  console.log(`🃏 Card played by ${payload.playerId}: ${payload.card.char} of ${payload.card.suit}, next: ${payload.nextPlayer}`)
+  console.log(`🃏 CARD_PLAYED: ${payload.card.char}${payload.card.suit} by ${payload.playerId}`)
 }
 
 const handleTrickCompleted: GameEventHandler = (event, context) => {
@@ -239,10 +233,9 @@ const handleTrickCompleted: GameEventHandler = (event, context) => {
       thiefScore.setCollection.berries += payload.stolenCardInfo.collections.berries || 0
       thiefScore.setCollection.flowers += payload.stolenCardInfo.collections.flowers || 0
     }
-    console.log(`🍃 Thief ${payload.stolenCardInfo.thiefId} scored ${payload.stolenCardInfo.points} points`)
   }
   
-  console.log(`🏆 Trick ${payload.trickNumber} completed! Winner: ${payload.winner} (${payload.points} points)`)
+  console.log(`🏆 TRICK_COMPLETED: Trick ${payload.trickNumber}, Winner: ${payload.winner}`)
 }
 
 const handleRoundEnded: GameEventHandler = (event, context) => {
@@ -256,11 +249,7 @@ const handleRoundEnded: GameEventHandler = (event, context) => {
     context.publicGameState.playerScores = payload.playerScores
   }
   
-  console.log('🏁 Round ended:', payload.round)
-  console.log('📊 Round scores:', payload.scores)
-  if (payload.playerScores) {
-    console.log('📈 Accumulated scores:', payload.playerScores)
-  }
+  console.log(`🏁 ROUND_ENDED: Round ${payload.round}`)
 }
 
 const handleBidMade: GameEventHandler = (event, context) => {
@@ -283,7 +272,7 @@ const handleBidMade: GameEventHandler = (event, context) => {
     isPlayerWinning: null
   })
   
-  console.log(`🎯 Bid made by ${payload.playerId}: ${payload.bidType} on trick ${payload.trickNumber} (${payload.bidScore} points)`)
+  console.log(`🎯 BID_MADE: ${payload.bidType} by ${payload.playerId}`)
 }
 
 const handleTurnFinished: GameEventHandler = (event, context) => {
@@ -293,7 +282,7 @@ const handleTurnFinished: GameEventHandler = (event, context) => {
   const payload = (event as TurnFinishedEvent).payload
   context.publicGameState.round.playerTurn = payload.nextPlayer
   
-  console.log(`🔄 Turn finished: ${payload.playerId} → ${payload.nextPlayer}`)
+  console.log(`🔄 TURN_FINISHED: ${payload.playerId} → ${payload.nextPlayer}`)
 }
 
 const handleTrickFinished: GameEventHandler = (event, context) => {
@@ -305,7 +294,7 @@ const handleTrickFinished: GameEventHandler = (event, context) => {
   // Clear current trick (moved to history)
   context.publicGameState.round.currentTrick = null
   
-  console.log(`✅ Trick ${payload.trickNumber} moved to history, ready for trick ${payload.nextTrickNumber}`)
+  console.log(`✅ TRICK_FINISHED: Trick ${payload.trickNumber}`)
 }
 
 const handleCardReplacementSkipped: GameEventHandler = (event, context) => {
@@ -315,7 +304,7 @@ const handleCardReplacementSkipped: GameEventHandler = (event, context) => {
   const payload = (event as CardReplacementSkippedEvent).payload
   context.publicGameState.round.playerTurn = payload.nextPlayerId
   
-  console.log(`⏭️ ${payload.playerId} skipped card replacement, next turn: ${payload.nextPlayerId}`)
+  console.log(`⏭️ CARD_REPLACEMENT_SKIPPED: ${payload.playerId}`)
 }
 
 const handleCardReplacementCompleted: GameEventHandler = (event, context) => {
@@ -325,7 +314,7 @@ const handleCardReplacementCompleted: GameEventHandler = (event, context) => {
   const payload = (event as CardReplacementCompletedEvent).payload
   context.publicGameState.round.playerTurn = payload.nextPlayerId
   
-  console.log(`🔄 ${payload.playerId} replaced card, next turn: ${payload.nextPlayerId}`)
+  console.log(`🔄 CARD_REPLACEMENT_COMPLETED: ${payload.playerId}`)
 }
 
 const handlePickNextLead: GameEventHandler = (event, context) => {
@@ -344,7 +333,7 @@ const handlePickNextLead: GameEventHandler = (event, context) => {
   // Mantener el turno en el jugador que debe seleccionar
   context.publicGameState.round.playerTurn = payload.playerId
   
-  console.log(`🫐 Pick next lead activated for ${payload.playerId}`)
+  console.log(`🫐 PICK_NEXT_LEAD: ${payload.playerId}`)
 }
 
 const handleNextLeadPlayerSelected: GameEventHandler = (event, context) => {
@@ -361,7 +350,7 @@ const handleNextLeadPlayerSelected: GameEventHandler = (event, context) => {
   // Cambiar el trick state a resolve
   context.publicGameState.round.currentTrick.trick_state = 'resolve'
   
-  console.log(`🫐 Next lead player selected: ${payload.selectedLeadPlayer}`)
+  console.log(`🫐 NEXT_LEAD_SELECTED: ${payload.selectedLeadPlayer}`)
 }
 
 const handlePickCardFromTrick: GameEventHandler = (event, context) => {
@@ -380,7 +369,7 @@ const handlePickCardFromTrick: GameEventHandler = (event, context) => {
   // Mantener el turno en el jugador que debe seleccionar
   context.publicGameState.round.playerTurn = payload.playerId
   
-  console.log(`🍃 Pick card from trick activated for ${payload.playerId}`)
+  console.log(`🍃 PICK_CARD_FROM_TRICK: ${payload.playerId}`)
 }
 
 const handleCardStolenFromTrick: GameEventHandler = (event, context) => {
@@ -397,7 +386,7 @@ const handleCardStolenFromTrick: GameEventHandler = (event, context) => {
   // Cambiar el trick state a resolve
   context.publicGameState.round.currentTrick.trick_state = 'resolve'
   
-  console.log(`🍃 Card stolen from trick: ${payload.stolenCardId}`)
+  console.log(`🍃 CARD_STOLEN: ${payload.stolenCardId}`)
 }
 
 const handleGameEnded: GameEventHandler = (event, context) => {
@@ -409,7 +398,7 @@ const handleGameEnded: GameEventHandler = (event, context) => {
   context.publicGameState.gamePhase = 'ended'
   context.publicGameState.winner = payload.winnerId
   
-  console.log(`🏆 Game ended! Winner: ${payload.winnerName}`)
+  console.log(`🏆 GAME_ENDED: Winner ${payload.winnerName}`)
   
   setTimeout(() => {
     alert(`🎉 ¡${payload.winnerName} ha ganado el juego!\n\nPuntuación final:\n${payload.finalScores.map(s => `${s.playerId}: ${s.score} puntos`).join('\n')}`)

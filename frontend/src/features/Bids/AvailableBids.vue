@@ -4,9 +4,12 @@ import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { useBidValidation } from '@/features/Bids/composables/useBidValidation'
 import Bid from './Bid.vue'
+import { useI18n } from '@/common/composables/useI18n'
+import GamePanel from '@/common/components/GamePanel.vue'
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
+const { t } = useI18n()
 
 const game = computed(() => gameStore.publicGameState)
 const playerId = computed(() => hasenStore.currentPlayerId || null)
@@ -29,10 +32,10 @@ watch(roundBids, (newVal) => {
 </script>
 
 <template>
-  <div class="fixed top-0 right-0 rounded-xl bg-black/60 px-4 pb-4 pt-2 z-10 m-4">
+  <GamePanel class="fixed top-0 right-0 z-10 m-4">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <div class="flex flex-row">
-        <span class="text-hasen-base text-sm">Available bids</span>
+        <span class="text-hasen-base text-sm">{{ t('game.availableBids') }}</span>
       </div>
       <!-- Fila de Tricks / tricks (2 bids) -->
       <div class="flex flex-row gap-2">
@@ -74,5 +77,5 @@ watch(roundBids, (newVal) => {
     <div v-else class="bg-red-500 text-white p-2 rounded">
       No round bids data
     </div>
-  </div>
+  </GamePanel>
 </template>

@@ -131,7 +131,7 @@ const handleGameEvent = async (event: GameEvent) => {
   }
 
   if (event.type === 'ROUND_ENDED') {
-    console.log('🎯 ROUND_ENDED received, showing modal');
+    console.log('🎯 ROUND_ENDED');
     showRoundEndedModal.value = true;
     readyPlayers.value = [];
     totalPlayers.value = gameStore.publicGameState?.activePlayers.length || 0;
@@ -141,12 +141,10 @@ const handleGameEvent = async (event: GameEvent) => {
     const payload = (event as any).payload;
     readyPlayers.value = payload.readyPlayers;
     totalPlayers.value = payload.totalPlayers;
-    console.log(`📊 Ready status: ${payload.readyPlayers.length}/${payload.totalPlayers}`);
   }
   // Cerrar modal cuando empieza nuevo round
   if (event.type === 'ROUND_SETUP_COMPLETED') {
     if (showRoundEndedModal.value) {
-      console.log('🔄 New round started, closing modal');
       showRoundEndedModal.value = false;
       readyPlayers.value = [];
     }
@@ -155,18 +153,15 @@ const handleGameEvent = async (event: GameEvent) => {
 
 const handleCloseRoundModal = () => {
   showRoundEndedModal.value = false;
-  console.log('✅ Round modal closed manually');
 };
 
 const handleContinueRound = () => {
-  console.log('✅ Player ready for next round');
   socketGame.readyForNextRound(gameId);
 };
 
 onMounted(() => {
   initialize();
   socketGame.onGameEvent(handleGameEvent);
-  console.log('🎮 GameView mounted with async round modal');
 });
 
 onUnmounted(() => {

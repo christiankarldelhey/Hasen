@@ -23,8 +23,6 @@ socket.on('round:start', async ({ gameId }) => {
       const { game, setupEvent, firstCardsEvent, privateCards } = 
         await RoundService.startNewRound(gameId);
       
-      console.log('handler: round:start - setup completed');
-      
       // 1. Emitir evento de setup (público - bids)
       io.to(gameId).emit('game:event', setupEvent);
       
@@ -41,13 +39,12 @@ socket.on('round:start', async ({ gameId }) => {
         
         if (playerSocketId) {
           io.to(playerSocketId).emit('game:event', privateEvent);
-          console.log(`🃏 Sent private cards to ${playerId}`);
         } else {
           console.warn(`⚠️ Socket not found for player ${playerId}`);
         }
       }
       
-      console.log('✅ Round setup, first cards dealt, and private cards sent');
+      console.log('✅ ROUND_STARTED');
       
     } catch (error: any) {
       socket.emit('error', { message: error.message });
@@ -55,7 +52,6 @@ socket.on('round:start', async ({ gameId }) => {
   });
 
   socket.on('round:next-phase', async ({ gameId }) => {
-    console.log('next phase');
     const game = await GameModel.findOne({ gameId });
     
     switch (game?.round.roundPhase) {
@@ -80,8 +76,6 @@ socket.on('round:start', async ({ gameId }) => {
       if (result.trickEvent) {
         io.to(gameId).emit('game:event', result.trickEvent);
       }
-
-      console.log(`✅ Player ${playerData.playerId} skipped card replacement`);
       
     } catch (error: any) {
       console.error('Error in skipCardReplacement:', error);
@@ -145,14 +139,13 @@ socket.on('round:start', async ({ gameId }) => {
         const specialCardEvent = TrickService.getSpecialCardEvents(game, currentTrick);
         if (specialCardEvent) {
           io.to(gameId).emit('game:event', specialCardEvent);
-          const emoji = specialCardEvent.type === 'PICK_CARD_FROM_TRICK' ? '🍃' : '🫐';
-          console.log(`${emoji} Emitted ${specialCardEvent.type} event for ${specialCardEvent.payload.playerId}`);
+          console.log(`🎴 ${specialCardEvent.type}: ${specialCardEvent.payload.playerId}`);
         }
       }
 
       // Verificar si el round pasó a fase 'scoring' (todos los tricks completados)
       if (game.round.roundPhase === 'scoring') {
-        console.log(`🏁 Round ${game.round.round} completed! Starting next round...`);
+        console.log(`🏁 ROUND_SCORING: Round ${game.round.round}`);
         
         setTimeout(async () => {
           try {
@@ -162,7 +155,7 @@ socket.on('round:start', async ({ gameId }) => {
             
             if (result.gameEndedEvent) {
               io.to(gameId).emit('game:event', result.gameEndedEvent);
-              console.log(`🏆 Game ended! Winner: ${result.gameEndedEvent.payload.winnerName}`);
+              console.log(`🏆 GAME_ENDED: ${result.gameEndedEvent.payload.winnerName}`);
               return;
             }
             
@@ -179,14 +172,12 @@ socket.on('round:start', async ({ gameId }) => {
               }
             }
             
-            console.log(`✅ Round ${result.game.round.round} started automatically`);
+            console.log(`✅ ROUND_AUTO_STARTED: ${result.game.round.round}`);
           } catch (error: any) {
             console.error('Error starting next round:', error);
           }
         }, 2000);
       }
-
-      console.log(`✅ Player ${playerData.playerId} played card ${cardId}`);
       
     } catch (error: any) {
       console.error('Error in playCard:', error);
@@ -211,8 +202,6 @@ socket.on('round:start', async ({ gameId }) => {
       );
 
       io.to(gameId).emit('game:event', event);
-
-      console.log(`✅ Player ${playerData.playerId} made bid ${bidType} on trick ${trickNumber}`);
       
     } catch (error: any) {
       console.error('Error in makeBid:', error);

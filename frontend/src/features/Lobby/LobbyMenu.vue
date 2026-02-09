@@ -24,7 +24,6 @@ onMounted(async () => {
   await gameAPI.fetchGames();
   
   socketLobby.onGameStarted(({ gameId }) => {
-    console.log('Game started, redirecting...');
     router.push(`/game/${gameId}`);
   });
 });

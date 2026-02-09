@@ -5,6 +5,7 @@ import { useLobbyStore } from '../../stores/lobbyStore';
 import { userIdService } from '../../services/userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
 import ActionButton from '@/common/components/ActionButton.vue';
+import { useI18n } from '@/common/composables/useI18n';
 
 const props = defineProps<{
   currentGame: LobbyGame;
@@ -19,6 +20,7 @@ const emit = defineEmits<{
 
 const lobbyStore = useLobbyStore();
 const socketLobby = useSocketLobby();
+const { t } = useI18n();
 
 const currentPlayers = computed(() => {
   if (lobbyStore.currentRoom) {
@@ -50,33 +52,33 @@ onUnmounted(() => {
 <template>
   <div class="flex flex-col gap-4">
     <ActionButton 
-      label="← Back to menu" 
+      :label="t('lobby.backToMenu')" 
       variant="primary"
       @click="emit('back')"
     />
     
     <div class="text-center">
       <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
-      <p v-if="lobbyStore.isHost(playerId)" class="text-hasen-green font-semibold">👑 You are the host</p>
+      <p v-if="lobbyStore.isHost(playerId)" class="text-hasen-green font-semibold">{{ t('lobby.youAreHost') }}</p>
       <p class="text-black font-semibold mt-4">
-        Players: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
+        {{ t('lobby.players') }}: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
       </p>
     </div>
     
     <div class="text-center text-gray-500 mt-4">
-      Waiting for other players to join...
+      {{ t('lobby.waitingForPlayers') }}
     </div>
 
     <ActionButton 
       v-if="lobbyStore.isHost(playerId)"
-      label="Start Game"
+      :label="t('lobby.startGame')"
       variant="primary"
       :disabled="currentPlayers < currentGame.minPlayers"
       @click="emit('startGame')"
     />
 
     <ActionButton 
-      :label="lobbyStore.isHost(playerId) ? 'Delete Game' : 'Leave Game'"
+      :label="lobbyStore.isHost(playerId) ? t('lobby.deleteGame') : t('lobby.leaveGame')"
       variant="danger"
       @click="emit('leaveGame')"
     />
