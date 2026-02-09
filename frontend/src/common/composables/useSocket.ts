@@ -2,10 +2,22 @@ import { io, Socket } from 'socket.io-client';
 import { useLobbyStore } from '../../stores/lobbyStore';
 import { useGameStore } from '../../stores/gameStore';
 import type { GameEvent } from '@domain/events/GameEvents';
+import type { PlayerId } from '@domain/interfaces/Player';
 
 interface PlayerCountChangedPayload {
   gameId: string;
   currentPlayers: number;
+}
+
+interface RoomCreatedPayload {
+  gameId: string;
+  gameName: string;
+  hostPlayer: PlayerId;
+  currentPlayers: 1 | 2 | 3 | 4;
+  maxPlayers: 4;
+  minPlayers: 2;
+  hasSpace: boolean;
+  createdAt: string;
 }
 
 interface GameDeletedPayload {
@@ -50,6 +62,14 @@ class SocketManager {
     const handlers = {
       'lobby:player-count-changed': ({ gameId, currentPlayers }: PlayerCountChangedPayload) => {
         lobbyStore.updateRoomPlayers(gameId, currentPlayers);
+      },
+      
+      'lobby:room-created': (newRoom: RoomCreatedPayload) => {
+        console.log(`🎮 NEW_ROOM_CREATED: ${newRoom.gameId}`);
+        const roomExists = lobbyStore.rooms.some(r => r.gameId === newRoom.gameId);
+        if (!roomExists) {
+          lobbyStore.setRooms([newRoom, ...lobbyStore.rooms]);
+        }
       },
       
       'game:deleted': ({ gameId }: GameDeletedPayload) => {

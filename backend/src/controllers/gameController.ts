@@ -16,6 +16,19 @@ export const createGame = async (req: Request, res: Response) => {
     
     const newGame = await GameService.createGame(gameName, hostPlayerId, userId);
     
+    // Emitir evento de socket para que todos en lobby-list vean el nuevo room
+    const io = req.app.get('io');
+    io.to('lobby-list').emit('lobby:room-created', {
+      gameId: newGame.gameId,
+      gameName: gameName,
+      hostPlayer: newGame.hostPlayer,
+      currentPlayers: newGame.activePlayers.length,
+      maxPlayers: newGame.gameSettings.maxPlayers,
+      minPlayers: newGame.gameSettings.minPlayers,
+      hasSpace: newGame.activePlayers.length < newGame.gameSettings.maxPlayers,
+      createdAt: newGame.createdAt
+    });
+    
     res.status(201).json({
       success: true,
       data: {
