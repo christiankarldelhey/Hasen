@@ -61,8 +61,8 @@ const cardPositions = computed(() => {
   if (totalCards === 0) return [];
   
   const cardWidth = 180;
-  const maxRotation = Math.min(45, totalCards * 4);
-  const cardSpacing = Math.min(80, 400 / totalCards);
+  const maxRotation = Math.min(70, totalCards * 6);
+  const cardSpacing = Math.min(110, 550 / totalCards);
   
   return props.cards.map((card, index) => {
     const rotation = totalCards === 1 
@@ -73,7 +73,7 @@ const cardPositions = computed(() => {
     const translateX = index * cardSpacing - totalWidth / 2 - cardWidth / 2;
     
     const normalizedPos = totalCards === 1 ? 0 : index / (totalCards - 1) - 0.5;
-    const translateY = Math.abs(normalizedPos) * 20;
+    const translateY = Math.abs(normalizedPos) * 55;
     
     return {
       card,
@@ -87,7 +87,7 @@ const cardPositions = computed(() => {
 </script>
 
 <template>
-  <div class="relative h-[260px]" style="transform: translateY(40%);">
+  <div class="relative h-[260px]" style="transform: translateY(35%);">
     <TransitionGroup name="card">
       <div
         v-for="(pos, _index) in cardPositions"

@@ -1,11 +1,21 @@
 import { io, Socket } from 'socket.io-client';
 import { useLobbyStore } from '../../stores/lobbyStore';
 import { useGameStore } from '../../stores/gameStore';
+import type { GameEvent } from '@domain/events/GameEvents';
+
+interface PlayerCountChangedPayload {
+  gameId: string;
+  currentPlayers: number;
+}
+
+interface GameDeletedPayload {
+  gameId: string;
+}
 
 class SocketManager {
   private socket: Socket | null = null;
   private listenersRegistered = false;
-  private eventHandlers = new Map<string, Function>();
+  private eventHandlers = new Map<string, (...args: any[]) => void>();
 
   getSocket(): Socket {
     if (!this.socket) {
@@ -38,11 +48,11 @@ class SocketManager {
     const gameStore = useGameStore();
 
     const handlers = {
-      'lobby:player-count-changed': ({ gameId, currentPlayers }: any) => {
+      'lobby:player-count-changed': ({ gameId, currentPlayers }: PlayerCountChangedPayload) => {
         lobbyStore.updateRoomPlayers(gameId, currentPlayers);
       },
       
-      'game:deleted': ({ gameId }: any) => {
+      'game:deleted': ({ gameId }: GameDeletedPayload) => {
         console.log(`🗑️ GAME_DELETED: ${gameId}`);
         lobbyStore.setRooms(lobbyStore.rooms.filter(r => r.gameId !== gameId));
         if (lobbyStore.currentRoomId === gameId) {
@@ -50,14 +60,14 @@ class SocketManager {
         }
       },
       
-      'game:event': (event: any) => {
+      'game:event': (event: GameEvent) => {
         gameStore.handleGameEvent(event);
       }
     };
 
     Object.entries(handlers).forEach(([event, handler]) => {
       this.eventHandlers.set(event, handler);
-      socket.on(event, handler as any);
+      socket.on(event, handler);
     });
 
     this.listenersRegistered = true;
@@ -67,7 +77,7 @@ class SocketManager {
     if (!this.listenersRegistered || !this.socket) return;
 
     this.eventHandlers.forEach((handler, event) => {
-      this.socket!.off(event, handler as any);
+      this.socket!.off(event, handler);
     });
 
     this.eventHandlers.clear();

@@ -6,6 +6,7 @@ import type {
   RoundSetupCompletedEvent,
   FirstCardDealtEvent,
   RemainingCardsDealtEvent,
+  CardReplacedPrivateEvent,
   TrickStartedEvent,
   CardPlayedEvent,
   TrickCompletedEvent,
@@ -64,19 +65,19 @@ const handleFirstCardDealt: GameEventHandler = (event, context) => {
   
   // Populate publicCards map
   context.publicGameState.publicCards = {}
-  payload.firstCards.forEach((fc: any) => {
+  payload.firstCards.forEach((fc) => {
     context.publicGameState!.publicCards[fc.card.id] = fc.card
   })
   
   // Populate opponentsPublicInfo with references and initial hand count
-  context.publicGameState.opponentsPublicInfo = payload.firstCards.map((fc: any) => ({
+  context.publicGameState.opponentsPublicInfo = payload.firstCards.map((fc) => ({
     playerId: fc.playerId,
     publicCardId: fc.card.id,
     handCardsCount: 5
   }))
   
   const myFirstCard = payload.firstCards.find(
-    (fc: any) => fc.playerId === context.currentPlayerId
+    (fc) => fc.playerId === context.currentPlayerId
   )
   
   if (myFirstCard && context.privateGameState) {
@@ -101,7 +102,7 @@ const handleCardReplacedPrivate: GameEventHandler = (event, context) => {
   if (event.type !== 'CARD_REPLACED_PRIVATE') return
   if (!context.privateGameState || !context.privateGameState.hand) return
   
-  const payload = (event as any).payload
+  const payload = (event as CardReplacedPrivateEvent).payload
   if (context.privateGameState.playerId !== payload.playerId) return
   
   // Remove the old card and add the new card

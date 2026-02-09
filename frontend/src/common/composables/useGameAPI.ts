@@ -50,8 +50,9 @@ export function useGameAPI() {
       hasenStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
       
       return result
-    } catch (err: any) {
-      lobbyStore.setError(err.message || 'Error creating new game')
+    } catch (err) {
+      const error = err as Error
+      lobbyStore.setError(error.message || 'Error creating new game')
       console.error('Error creating game:', err)
       throw err
     } finally {
@@ -70,8 +71,9 @@ export function useGameAPI() {
       hasenStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
       
       return result
-    } catch (err: any) {
-      lobbyStore.setError(err.message || 'Error joining game')
+    } catch (err) {
+      const error = err as Error
+      lobbyStore.setError(error.message || 'Error joining game')
       console.error('Error joining game:', err)
       throw err
     } finally {
@@ -86,8 +88,9 @@ export function useGameAPI() {
     try {
       await gameService.deleteGame(gameId, hostPlayerId)
       lobbyStore.clearCurrentRoom()
-    } catch (err: any) {
-      lobbyStore.setError(err.message || 'Error deleting game')
+    } catch (err) {
+      const error = err as Error
+      lobbyStore.setError(error.message || 'Error deleting game')
       console.error('Error deleting game:', err)
       throw err
     } finally {
@@ -113,8 +116,9 @@ export function useGameAPI() {
       }
       
       return gameData
-    } catch (err: any) {
-      lobbyStore.setError(err.message || 'Error fetching game state')
+    } catch (err) {
+      const error = err as Error
+      lobbyStore.setError(error.message || 'Error fetching game state')
       console.error('Error fetching game state:', err)
       throw err
     } finally {
@@ -129,8 +133,9 @@ export function useGameAPI() {
     lobbyStore.setError(null)
     try {
       await gameService.startGame(gameId, hostPlayerId)
-    } catch (err: any) {
-      lobbyStore.setError(err.message || 'Error starting game')
+    } catch (err) {
+      const error = err as Error
+      lobbyStore.setError(error.message || 'Error starting game')
       console.error('Error starting game:', err)
       throw err
     } finally {
