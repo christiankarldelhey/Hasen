@@ -7,6 +7,7 @@ import { useGameStore } from '@/stores/gameStore'
 import PlayerAvatar from './PlayerAvatar.vue'
 import { IconStar } from '@tabler/icons-vue'
 import TrickCircle from './TrickCircle.vue'
+import ScoreBadge from './ScoreBadge.vue'
 
 interface Props {
   playerId: PlayerId
@@ -106,22 +107,8 @@ const handleClick = () => {
  
       
       <!-- Score badge with points - BOTTOM CENTERED -->
-      <div
-        class="absolute -bottom-2 left-1/2 -translate-x-1/2
-              bg-hasen-base rounded-full
-              pl-2 pr-4 py-1
-              flex items-center gap-1
-              border border-hasen-dark
-              whitespace-nowrap box-border"
-      >
-        <img
-          src="@/assets/symbols/win-points.png"
-          class="w-3 h-3 block"
-          alt="Win points"
-        />
-        <span class="text-hasen-dark font-bold text-xs leading-none">
-          {{ points }}
-        </span>
+      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2">
+        <ScoreBadge :points="points" variant="win-points" size="medium" />
       </div>
 
       <!-- Tricks stack con TrickCircle - TOP RIGHT -->

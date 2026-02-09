@@ -6,6 +6,7 @@ import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
 import { isWinningBid } from '@domain/rules/BidRules'
 import BaseModal from '@/common/components/BaseModal.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
+import PlayerNameLabel from '@/common/components/PlayerNameLabel.vue'
 import BidWinCondition from '@/features/Bids/BidWinCondition.vue'
 
 interface Props {
@@ -141,7 +142,9 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
         <div class="flex items-center gap-3 pb-2 border-b border-hasen-dark/20">
           <PlayerAvatar :playerId="playerInfo.playerId" size="small" />
           <div class="flex-1">
-            <h3 class="font-bold text-lg">{{ playerInfo.playerName }}</h3>
+            <h3 class="font-bold text-lg">
+              <PlayerNameLabel :playerId="playerInfo.playerId" :showYou="false" size="large" />
+            </h3>
             <p class="text-sm text-hasen-dark/70">
               Total Score: <span class="font-bold" :style="{ color: playerInfo.playerColor }">{{ playerInfo.totalScore }}</span>
             </p>
