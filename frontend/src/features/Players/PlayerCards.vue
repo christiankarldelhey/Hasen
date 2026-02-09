@@ -32,16 +32,16 @@ const isCardDisabled = (card: Card) => {
     return true;
   }
   
-  // Deshabilitar acorns-U en primer turno del primer trick si el jugador es lead player
+  // Deshabilitar acorns-S en primer turno del primer trick si el jugador es lead player
   const currentTrick = gameStore.publicGameState?.round.currentTrick;
   if (!currentTrick) return false;
   
-  const isAcornsU = card.suit === 'acorns' && card.char === 'U';
+  const isAcornsS = card.suit === 'acorns' && card.char === 'S';
   const isFirstCardOfTrick = currentTrick.cards.length === 0;
   const isFirstTrick = currentTrick.trick_number === 1;
   const isLeadPlayer = currentTrick.lead_player === hasenStore.currentPlayerId;
   
-  if (isAcornsU && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
+  if (isAcornsS && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
     return true;
   }
   

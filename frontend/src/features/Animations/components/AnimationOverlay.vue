@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import cardBack from '@/assets/decks/card-back.png'
-import deckSprite from '@/assets/sprites/deck-sprite_v2.jpg'
+import deckSprite from '@/assets/sprites/deck-sprite_v3.jpg'
 import type { AnimatedCard } from '../composables/useDealAnimation'
 
 interface Props {
@@ -21,7 +21,7 @@ interface FlyingCard {
 
 const props = defineProps<Props>()
 
-const cardWidth = 90
+const cardWidth = 85
 const cardHeight = 150
 const flyingCards = ref<FlyingCard[]>([])
 let styleEl: HTMLStyleElement | null = null
@@ -85,9 +85,9 @@ onUnmounted(() => {
           width: `${cardWidth}px`,
           height: `${cardHeight}px`,
           backgroundImage: card.spritePos ? `url(${deckSprite})` : `url(${cardBack})`,
-          backgroundSize: card.spritePos ? '800% 400%' : 'cover',
+          backgroundSize: card.spritePos ? '900% 400%' : 'cover',
           backgroundPosition: card.spritePos
-            ? `${(card.spritePos.col / 7) * 100}% ${(card.spritePos.row / 3) * 100}%`
+            ? `${(card.spritePos.col / 8) * 100}% ${(card.spritePos.row / 3) * 100}%`
             : 'center',
           left: `${card.left}px`,
           top: `${card.top}px`,

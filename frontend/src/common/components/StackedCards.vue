@@ -23,7 +23,7 @@ const stackedCards = computed(() => {
 })
 
 const stackedCardsWidth = computed(() => {
-  return props.count > 0 ? 90 + (props.count - 1) * 18 : 0
+  return props.count > 0 ? 85 + (props.count - 1) * 18 : 0
 })
 </script>
 
@@ -39,7 +39,7 @@ const stackedCardsWidth = computed(() => {
     <div 
       v-for="(_, index) in stackedCards" 
       :key="index"
-      class="absolute rounded-lg w-[90px] h-[150px]"
+      class="absolute rounded-lg w-[85px] h-[150px]"
       :style="{
         backgroundImage: `url(${cardBack})`,
         backgroundSize: 'cover',

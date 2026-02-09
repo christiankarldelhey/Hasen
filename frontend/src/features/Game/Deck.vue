@@ -12,11 +12,11 @@ onUnmounted(() => coords.unregister('deck'))
 </script>
 
 <template>
-  <div ref="deckEl" class="z-10 relative" style="width: 98px; height: 150px;">
+  <div ref="deckEl" class="z-10 relative" style="width: 93px; height: 150px;">
     <div 
       v-for="index in deckLayers" 
       :key="index"
-      class="absolute rounded-lg w-[90px] h-[150px]"
+      class="absolute rounded-lg w-[85px] h-[150px]"
       :style="{
         backgroundImage: `url(${cardBack})`,
         backgroundSize: 'cover',

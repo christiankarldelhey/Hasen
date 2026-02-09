@@ -33,14 +33,14 @@ export function canPlayCard(
     if (playerTurn !== playerId) {
       return { valid: false, reason: 'Not your turn to play a card' }
     }
-    // 6. SPECIAL RULE: Acorns U cannot be played as first card of first trick if you are lead player
-    const isAcornsU = card.suit === 'acorns' && card.char === 'U';
+    // 6. SPECIAL RULE: Acorns S cannot be played as first card of first trick if you are lead player
+    const isAcornsS = card.suit === 'acorns' && card.char === 'S';
     const isFirstCardOfTrick = currentTrick.cards.length === 0;
     const isFirstTrick = currentTrick.trick_number === 1;
     const isLeadPlayer = currentTrick.lead_player === playerId;
     
-    if (isAcornsU && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
-      return { valid: false, reason: 'Acorns U cannot be played as first card of the first trick' }
+    if (isAcornsS && isFirstCardOfTrick && isFirstTrick && isLeadPlayer) {
+      return { valid: false, reason: 'Acorns S cannot be played as first card of the first trick' }
     }
     
     return { valid: true }
@@ -56,10 +56,10 @@ export function getEffectiveRank(
   leadSuit: LeadSuit | null,
   _trickNumber: TrickNumber
 ): number {
-  // SPECIAL: Acorns U (rank 40) has high rank when it leads ANY trick
+  // SPECIAL: Acorns S (rank 40) has high rank when it leads ANY trick
   // In all other cases, it uses its base rank (1)
   if (card.rank.onSuit === 40) {
-    // Use high rank whenever acorns-U is the lead card (any trick)
+    // Use high rank whenever acorns-S is the lead card (any trick)
     if (leadSuit === 'acorns') {
       return card.rank.onSuit; // 40
     }
@@ -89,7 +89,7 @@ export function compareCards(
     const currentCardRank = getEffectiveRank(current_card, leadSuit, trick_number);
     const winningCardRank = getEffectiveRank(winning_card, leadSuit, trick_number);
 
-    // EXCEPTION: Flowers U (rank 31) beats Acorns U (rank 40) when Acorns U leads
+    // EXCEPTION: Flowers Q (rank 31) beats Acorns S (rank 40) when Acorns S leads
     if (currentCardRank === 31 && winningCardRank === 40) {
       return current_card as PlayingCard;
     }

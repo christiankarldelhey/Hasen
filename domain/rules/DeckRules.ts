@@ -9,15 +9,30 @@ function getSpritePosition(suit: Suit, char: Character): SpritePosition {
     'leaves': 2,
     'acorns': 3
   }
-  
-  const charCol: Record<Character, number> = {
-    '6': 0, '7': 1, '8': 2, '9': 3, '10': 4,
-    'U': 5, 'O': 6, 'K': 7
+
+  // Sprite v3: different column layout per suit
+  // Row 0 (flowers): [card-back], 1, 2, 3, 4, 5, Q, K, A, [decorative]
+  // Rows 1-3 (berries/leaves/acorns): 5, 6, 7, 8, 9, 10, S, U, O
+  const flowersCharCol: Partial<Record<Character, number>> = {
+    '1': 1, '2': 2, '3': 3, '4': 4, '5': 5,
+    'Q': 6, 'K': 7, 'A': 8
   }
-  
+
+  const normalCharCol: Partial<Record<Character, number>> = {
+    '5': 0, '6': 1, '7': 2, '8': 3, '9': 4, '10': 5,
+    'S': 6, 'U': 7, 'O': 8
+  }
+
+  const charCol = suit === 'flowers' ? flowersCharCol : normalCharCol
+  const col = charCol[char]
+
+  if (col === undefined) {
+    throw new Error(`Invalid char '${char}' for suit '${suit}'`)
+  }
+
   return {
     row: suitRow[suit],
-    col: charCol[char]
+    col
   }
 }
 
