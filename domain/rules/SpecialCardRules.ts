@@ -15,14 +15,14 @@ export interface SpecialCardDetection {
 }
 
 /**
- * Verifica si una carta es "Pick Next Lead" (Berries U)
+ * Verifica si una carta es "Pick Next Lead" (Acorns S)
  */
 export function isPickNextLeadCard(card: PlayingCard): boolean {
-  return card.suit === 'berries' && card.char === 'S';
+  return card.suit === 'acorns' && card.char === 'S';
 }
 
 /**
- * Verifica si una carta es "Steal Card" (Leaves U)
+ * Verifica si una carta es "Steal Card" (Leaves S)
  */
 export function isStealCardCard(card: PlayingCard): boolean {
   return card.suit === 'leaves' && card.char === 'S';
