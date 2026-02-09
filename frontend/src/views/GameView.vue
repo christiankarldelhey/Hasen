@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
@@ -14,17 +14,29 @@ import Trick from '@/features/Trick/Trick.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
 import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.vue';
-import { provideAnimationCoords, useDealAnimation } from '@/features/Animations';
-import type { GameEvent } from '@domain/events/GameEvents';
+import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/features/Animations';
+import type { GameEvent, CardPlayedEvent, TrickCompletedEvent } from '@domain/events/GameEvents';
+import { useHasenStore } from '@/stores/hasenStore';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
 const socketGame = useSocketGame();
 const gameStore = useGameStore();
+const hasenStore = useHasenStore();
 
 // Animation system
 const animCoords = provideAnimationCoords();
 const { isDealing, animatedCards, dealProgress, startDeal } = useDealAnimation({ coords: animCoords });
+const { flyingCards: cardAnimCards, animatePlayCard, animateWinTrick } = useCardAnimation({ coords: animCoords });
+
+// Merge all animated cards into a single array for the overlay
+const allAnimatedCards = computed(() => [
+  ...animatedCards.value,
+  ...cardAnimCards.value,
+]);
+
+// Pending trick winner info for win-trick animation
+const pendingTrickWinner = ref<{ winnerId: PlayerId; cards: any[] } | null>(null);
 
 const {
   playerHand,
@@ -85,7 +97,39 @@ const showRoundEndedModal = ref(false);
 const readyPlayers = ref<PlayerId[]>([]);
 const totalPlayers = ref(0);
 
-const handleGameEvent = (event: GameEvent) => {
+const handleGameEvent = async (event: GameEvent) => {
+  // Play card animation
+  if (event.type === 'CARD_PLAYED') {
+    const payload = (event as CardPlayedEvent).payload;
+    await animatePlayCard(
+      payload.card,
+      payload.playerId,
+      hasenStore.currentPlayerId || null,
+      opponentPositions.value
+    );
+  }
+
+  // Store trick winner info when trick completes (cards still visible)
+  if (event.type === 'TRICK_COMPLETED') {
+    const payload = (event as TrickCompletedEvent).payload;
+    pendingTrickWinner.value = {
+      winnerId: payload.winner,
+      cards: payload.cards,
+    };
+  }
+
+  // Win trick animation when trick is finished (cards about to be cleared)
+  if (event.type === 'TRICK_FINISHED' && pendingTrickWinner.value) {
+    const { winnerId, cards } = pendingTrickWinner.value;
+    pendingTrickWinner.value = null;
+    await animateWinTrick(
+      cards,
+      winnerId,
+      hasenStore.currentPlayerId || null,
+      opponentPositions.value
+    );
+  }
+
   if (event.type === 'ROUND_ENDED') {
     console.log('🎯 ROUND_ENDED received, showing modal');
     showRoundEndedModal.value = true;
@@ -159,7 +203,7 @@ onUnmounted(() => {
       <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
       
       <!-- Animation overlay -->
-      <AnimationOverlay :cards="animatedCards" />
+      <AnimationOverlay :cards="allAnimatedCards" />
       
       <!-- Mano del jugador (fixed en el bottom) -->
       <PlayerHand 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import cardBack from '@/assets/decks/card-back.png'
+import deckSprite from '@/assets/sprites/deck-sprite_v2.jpg'
 import type { AnimatedCard } from '../composables/useDealAnimation'
 
 interface Props {
@@ -15,6 +16,7 @@ interface FlyingCard {
   dy: number
   delay: number
   duration: number
+  spritePos?: { row: number; col: number }
 }
 
 const props = defineProps<Props>()
@@ -44,12 +46,13 @@ watch(() => props.cards, (newCards) => {
     const dy = card.endY - card.startY
     const safeId = card.id.replace(/[^a-zA-Z0-9-]/g, '')
 
-    cards.push({ id: card.id, left, top, dx, dy, delay: card.delay, duration: card.duration })
+    cards.push({ id: card.id, left, top, dx, dy, delay: card.delay, duration: card.duration, spritePos: card.spritePos })
 
+    const fadeStart = card.spritePos ? '40%' : '85%'
     keyframes += `
       @keyframes fly-${safeId} {
         0% { transform: translate(0, 0); opacity: 1; }
-        85% { opacity: 1; }
+        ${fadeStart} { opacity: 1; }
         100% { transform: translate(${dx}px, ${dy}px); opacity: 0; }
       }
     `
@@ -77,13 +80,15 @@ onUnmounted(() => {
       <div
         v-for="card in flyingCards"
         :key="card.id"
-        class="absolute rounded-lg"
+        class="absolute rounded-lg drop-shadow-2xl"
         :style="{
           width: `${cardWidth}px`,
           height: `${cardHeight}px`,
-          backgroundImage: `url(${cardBack})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundImage: card.spritePos ? `url(${deckSprite})` : `url(${cardBack})`,
+          backgroundSize: card.spritePos ? '800% 400%' : 'cover',
+          backgroundPosition: card.spritePos
+            ? `${(card.spritePos.col / 7) * 100}% ${(card.spritePos.row / 3) * 100}%`
+            : 'center',
           left: `${card.left}px`,
           top: `${card.top}px`,
           opacity: 0,

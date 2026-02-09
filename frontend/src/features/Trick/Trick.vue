@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, ref, onMounted, onUnmounted } from 'vue';
 import type { PlayingCard as Card, TrickState } from '@domain/interfaces';
 import PlayingCard from '@/common/components/PlayingCard.vue';
+import { useAnimationCoords } from '@/features/Animations';
 
 const props = defineProps<{
   cards: Card[];
   winningCardId?: string | null;
   trickState?: TrickState | null;
 }>();
+
+const trickEl = ref<HTMLElement | null>(null)
+const coords = useAnimationCoords()
+onMounted(() => coords.register('trick', trickEl))
+onUnmounted(() => coords.unregister('trick'))
 
 // Inyectar métodos de special cards
 const specialCards = inject<any>('specialCards', null)
@@ -69,7 +75,7 @@ const cardPositions = computed(() => {
 </script>
 
 <template>
-  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+  <div ref="trickEl" class="absolute inset-0 flex items-center justify-center pointer-events-none">
     <div class="relative h-[260px] w-[800px]">
       <template v-if="props.cards.length > 0">
         <div

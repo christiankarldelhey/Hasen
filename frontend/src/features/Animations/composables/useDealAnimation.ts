@@ -10,6 +10,7 @@ export interface AnimatedCard {
   endY: number
   delay: number
   duration: number
+  spritePos?: { row: number; col: number }
 }
 
 interface DealAnimationOptions {
