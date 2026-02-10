@@ -6,6 +6,7 @@ import { useGameAPI } from '../../common/composables/useGameAPI';
 import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { userIdService } from '../../services/userIdService';
 import { useRouter } from 'vue-router';
+import { useAudio } from '../../common/composables/useAudio';
 import LobbyOptions from './LobbyOptions.vue';
 import Room from './Room.vue';
 import RoomSettings from './RoomSettings.vue';
@@ -14,7 +15,8 @@ const lobbyStore = useLobbyStore();
 const hasenStore = useHasenStore();
 const gameAPI = useGameAPI();
 const socketLobby = useSocketLobby();
-const router = useRouter(); 
+const router = useRouter();
+const { playMusic } = useAudio(); 
 
 type ViewState = 'menu' | 'room' | 'settings';
 const currentView = ref<ViewState>('menu');
@@ -38,10 +40,12 @@ const handleViewChange = (view: ViewState) => {
 };
 
 const handleGameSettings = () => {
+  playMusic('lobby');
   handleViewChange('settings');
 };
 
 const handleCreateGame = async (gameName: string, playerId: string) => {
+  playMusic('lobby');
   try {
     await gameAPI.createGame(gameName, playerId as import('@domain/interfaces/Player').PlayerId);
     handleViewChange('room');
@@ -51,6 +55,7 @@ const handleCreateGame = async (gameName: string, playerId: string) => {
 };
 
 const handleJoinGame = async (gameId: string) => {
+  playMusic('lobby');
   try {
     await gameAPI.joinGame(gameId);
     handleViewChange('room');
@@ -115,7 +120,7 @@ const handleStartGame = async () => {
 </script>
 
 <template>
-  <div class="card card-border bg-hasen-base w-full md:w-[45%] h-[90vh] shadow-lg flex flex-col relative overflow-hidden">
+  <div class="card card-border bg-hasen-base w-full md:w-[40%] h-[85vh] shadow-lg flex flex-col relative overflow-hidden">
     <!-- Background image that ignores padding -->
     <div class="absolute bottom-0 left-0 right-0 pointer-events-none z-0">
       <img 
