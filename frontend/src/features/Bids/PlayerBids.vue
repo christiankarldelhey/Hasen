@@ -24,7 +24,7 @@ const { getPlayerNameById, getPlayerColorById } = usePlayers()
 
 const targetPlayerId = computed(() => props.playerId ?? hasenStore.currentPlayerId)
 
-const { playerScore, playerRoundScore } = useGameScore(targetPlayerId.value)
+const { playerScore, playerRoundScore } = useGameScore(targetPlayerId.value || '' as PlayerId)
 
 const points = computed(() => playerRoundScore.value?.points ?? 0)
 

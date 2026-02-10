@@ -65,12 +65,7 @@ const {
   sfxVolume,
   musicEnabled,
   sfxEnabled,
-  playSfx,
 } = useAudio();
-
-const testSfx = () => {
-  playSfx('click');
-};
 </script>
 
 <style scoped>
