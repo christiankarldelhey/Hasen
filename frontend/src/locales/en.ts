@@ -34,6 +34,12 @@ export default {
     noBidsMade: 'No bids made',
     waitingForOthers: 'Waiting for other players...',
     playersReady: '{count} / {total} players ready',
+    gamePaused: 'Game Paused',
+    playerDisconnected: '{players} disconnected',
+    playersDisconnected: '{players} disconnected',
+    waitingForReconnection: 'Waiting for reconnection...',
+    disconnected: 'Disconnected',
+    reconnecting: 'Reconnecting...',
   },
   bids: {
     scorePoints: 'Score {min}+ points',

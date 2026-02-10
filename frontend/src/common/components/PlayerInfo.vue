@@ -8,6 +8,7 @@ import PlayerAvatar from './PlayerAvatar.vue'
 import { IconStar } from '@tabler/icons-vue'
 import TrickCircle from './TrickCircle.vue'
 import ScoreBadge from './ScoreBadge.vue'
+import PlayerConnectionBadge from '@/features/PlayerConnection/components/PlayerConnectionBadge.vue'
 
 interface Props {
   playerId: PlayerId
@@ -15,12 +16,16 @@ interface Props {
   position?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-const { isPlayerTurn } = usePlayers()
-const gameStore = useGameStore()
-
 const props = withDefaults(defineProps<Props>(), {
   isPlayer: false,
   position: 'bottom'
+})
+
+const { isPlayerTurn } = usePlayers()
+const gameStore = useGameStore()
+
+const playerConnectionStatus = computed(() => {
+  return gameStore.publicGameState?.playerConnectionStatus?.[props.playerId] || 'connected'
 })
 
 const isCurrentTurn = computed(() => isPlayerTurn.value(props.playerId))
@@ -149,12 +154,15 @@ const handleClick = () => {
 
     </div>
     
-    <!-- Player name label -->
-    <div 
-      :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
-      :style="{ borderColor: playerColor }"
-    >
-      {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-semibold text-xs', playerScore >= 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
+    <!-- Player name label with connection badge -->
+    <div class="flex flex-col items-center gap-1">
+      <div 
+        :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
+        :style="{ borderColor: playerColor }"
+      >
+        {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-semibold text-xs', playerScore >= 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
+      </div>
+      <PlayerConnectionBadge :player-id="playerId" :status="playerConnectionStatus" />
     </div>
   </div>
 </template>

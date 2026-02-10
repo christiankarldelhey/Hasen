@@ -69,4 +69,40 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
       message: 'Host deleted the game' 
     });
   });
+
+  // Handler: Reconexión de jugador durante partida activa
+  socket.on('game:player-reconnected', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
+    try {
+      console.log(`🔄 Player ${playerId} reconnecting to game ${gameId}`)
+      
+      const result = await GameService.markPlayerReconnected(gameId, playerId)
+      
+      // Registrar el nuevo socket
+      socket.join(gameId)
+      socketToPlayer.set(socket.id, { gameId, playerId, userId })
+      
+      // Notificar a todos
+      io.to(gameId).emit('player:reconnected', {
+        playerId,
+        shouldResume: result.shouldResume
+      })
+      
+      // Actualizar estado del juego
+      const updatedState = await GameService.getPlayerGameState(gameId, userId)
+      io.to(gameId).emit('game:stateUpdate', {
+        publicGameState: updatedState.publicState
+      })
+      
+      // Enviar estado privado al jugador reconectado
+      if (updatedState.privateState) {
+        socket.emit('game:privateStateUpdate', {
+          privateGameState: updatedState.privateState
+        })
+      }
+      
+    } catch (error: any) {
+      console.error('Error reconnecting player:', error)
+      socket.emit('error', { message: error.message })
+    }
+  })
 }

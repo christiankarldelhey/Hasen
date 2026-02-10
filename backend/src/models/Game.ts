@@ -173,7 +173,32 @@ const GameSchema = new Schema<GameDocument>({
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
-    pointsToWin: { type: Number, required: true, default: 300 }
+    pointsToWin: { type: Number, required: true, default: 300 },
+    reconnectionTimeoutMinutes: { type: Number, required: true, default: 5 }
+  },
+  playerConnectionStatus: {
+    type: Map,
+    of: String,
+    enum: ['connected', 'disconnected', 'reconnecting'],
+    default: new Map(),
+    required: false
+  },
+  disconnectionTimestamps: {
+    type: Map,
+    of: Number,
+    default: new Map(),
+    required: false
+  },
+  isPaused: {
+    type: Boolean,
+    default: false,
+    required: false
+  },
+  pauseReason: {
+    type: String,
+    enum: ['player_disconnected', null],
+    default: null,
+    required: false
   }
 }, {
   timestamps: true,

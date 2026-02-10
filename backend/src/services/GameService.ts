@@ -98,8 +98,23 @@ export class GameService {
     },
     gameSettings: game.gameSettings,
     playerScores: game.playerScores,
-    winner: game.winner || null
+    winner: game.winner || null,
+    playerConnectionStatus: {} as Record<string, string>,
+    isPaused: game.isPaused || false,
+    pauseReason: game.pauseReason || null
   };
+  
+  // Agregar estado de conexión al publicState
+  if (game.playerConnectionStatus) {
+    game.activePlayers.forEach((playerId: PlayerId) => {
+      publicState.playerConnectionStatus[playerId] = game.playerConnectionStatus!.get(playerId) || 'connected';
+    });
+  } else {
+    // Si no existe, inicializar todos como conectados
+    game.activePlayers.forEach((playerId: PlayerId) => {
+      publicState.playerConnectionStatus[playerId] = 'connected';
+    });
+  }
 
   // Agregar las cartas públicas visibles al mapa
   const visibleCards = game.deck.filter((card: any) => 
@@ -212,6 +227,14 @@ export class GameService {
       card.state = 'in_deck';
       card.owner = null;
     });
+    
+    // Inicializar estado de conexión para todos los jugadores activos
+    game.playerConnectionStatus = new Map();
+    game.activePlayers.forEach(playerId => {
+      game.playerConnectionStatus!.set(playerId, 'connected');
+    });
+    game.isPaused = false;
+    game.pauseReason = null;
     
     await game.save();
     const event = createDeckShuffledEvent(game.round.round, game.deck.length);
@@ -409,5 +432,80 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     );
     
     return { game, publicEvent, privateEvent };
+  }
+
+  static async markPlayerDisconnected(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    // Solo aplicar durante partida activa
+    if (game.gamePhase !== 'playing') {
+      return { game, shouldPause: false };
+    }
+    
+    if (!game.playerConnectionStatus) {
+      game.playerConnectionStatus = new Map();
+    }
+    if (!game.disconnectionTimestamps) {
+      game.disconnectionTimestamps = new Map();
+    }
+    
+    game.playerConnectionStatus.set(playerId, 'disconnected');
+    game.disconnectionTimestamps.set(playerId, Date.now());
+    
+    // Pausar el juego automáticamente
+    game.isPaused = true;
+    game.pauseReason = 'player_disconnected';
+    
+    await game.save();
+    
+    return { game, shouldPause: true };
+  }
+
+  static async markPlayerReconnected(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    if (!game.playerConnectionStatus) {
+      game.playerConnectionStatus = new Map();
+    }
+    
+    game.playerConnectionStatus.set(playerId, 'connected');
+    
+    if (game.disconnectionTimestamps) {
+      game.disconnectionTimestamps.delete(playerId);
+    }
+    
+    // Despausar si todos están conectados
+    const allConnected = Array.from(game.playerConnectionStatus.values())
+      .every(status => status === 'connected');
+    
+    if (allConnected) {
+      game.isPaused = false;
+      game.pauseReason = null;
+    }
+    
+    await game.save();
+    
+    return { game, shouldResume: allConnected };
+  }
+
+  static async checkDisconnectionTimeouts(gameId: string) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+    
+    const timeoutMs = game.gameSettings.reconnectionTimeoutMinutes * 60 * 1000;
+    const now = Date.now();
+    const timedOutPlayers: PlayerId[] = [];
+    
+    if (game.disconnectionTimestamps) {
+      game.disconnectionTimestamps.forEach((timestamp, playerId) => {
+        if (now - timestamp > timeoutMs) {
+          timedOutPlayers.push(playerId);
+        }
+      });
+    }
+    
+    return { game, timedOutPlayers };
   }
 }

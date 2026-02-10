@@ -17,6 +17,7 @@ import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.
 import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/features/Animations';
 import type { GameEvent, CardPlayedEvent, TrickCompletedEvent } from '@domain/events/GameEvents';
 import { useHasenStore } from '@/stores/hasenStore';
+import { usePlayerConnection, GamePausedOverlay } from '@/features/PlayerConnection';
 
 const route = useRoute();
 const gameId = route.params.gameId as string;
@@ -61,6 +62,16 @@ const {
   handleFinishTrick,
   initialize
 } = useGameSession(gameId);
+
+// Player connection management
+const playerConnection = usePlayerConnection(gameId);
+const {
+  isPaused,
+  pauseReason,
+  disconnectedPlayerIds,
+  setupListeners: setupConnectionListeners,
+  cleanupListeners: cleanupConnectionListeners
+} = playerConnection;
 
 // Proveer métodos de special cards a componentes hijos
 provide('specialCards', {
@@ -162,10 +173,12 @@ const handleContinueRound = () => {
 onMounted(() => {
   initialize();
   socketGame.onGameEvent(handleGameEvent);
+  setupConnectionListeners();
 });
 
 onUnmounted(() => {
   socketGame.offGameEvent();
+  cleanupConnectionListeners();
 });
 
 </script>
@@ -214,6 +227,13 @@ onUnmounted(() => {
         @finish-trick="handleFinishTrick"
       />
     </div>
+
+    <!-- Game Paused Overlay -->
+    <GamePausedOverlay
+      :is-paused="isPaused"
+      :pause-reason="pauseReason"
+      :disconnected-player-ids="disconnectedPlayerIds"
+    />
 
     <!-- Round Ended Modal -->
     <RoundEndedModal 

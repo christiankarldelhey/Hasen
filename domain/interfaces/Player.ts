@@ -1,6 +1,15 @@
 export type PlayerId = 'player_1' | 'player_2' | 'player_3' | 'player_4'
 export type ActivePlayers = PlayerId[];
 
+export type PlayerConnectionStatus = 'connected' | 'disconnected' | 'reconnecting'
+
+export interface PlayerConnectionInfo {
+  playerId: PlayerId
+  status: PlayerConnectionStatus
+  disconnectedAt?: number
+  lastSeenAt: number
+}
+
 export interface Player {
   id: PlayerId
   name: string,

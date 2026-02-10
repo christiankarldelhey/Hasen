@@ -1,4 +1,4 @@
-import type { PlayerId } from './Player'
+import type { PlayerId, PlayerConnectionStatus } from './Player'
 import type { PlayingCard, PlayerHand } from './Card'
 import type { Round, PlayerRoundScore } from './Round'
 import type { Trick } from './Trick'
@@ -28,10 +28,15 @@ export interface Game {
   bidsHistory: Bid[];
   playerScores: PlayerScore[];
   winner: PlayerId | null;
+  playerConnectionStatus?: Map<PlayerId, PlayerConnectionStatus>
+  disconnectionTimestamps?: Map<PlayerId, number>
+  isPaused?: boolean
+  pauseReason?: 'player_disconnected' | null
   gameSettings: {
     minPlayers: number
     maxPlayers: number
     pointsToWin: number
+    reconnectionTimeoutMinutes: number
   }
 }
 
@@ -81,9 +86,13 @@ export interface PublicGameState {
   round: PublicRoundState
   playerScores: PlayerScore[];
   winner: PlayerId | null;
+  playerConnectionStatus: Record<PlayerId, PlayerConnectionStatus>
+  isPaused: boolean
+  pauseReason: 'player_disconnected' | null
   gameSettings: {
     minPlayers: number
     maxPlayers: number
     pointsToWin: number
+    reconnectionTimeoutMinutes: number
   }
 }
