@@ -162,18 +162,18 @@ const handleStartGame = async () => {
     <div class="card-header z-10">
       <h1 class="text-center text-2xl font-semibold text-black mt-4">{{ getTitle() }}</h1>
     </div>
-    <div class="card-body flex flex-col z-10">
+    <div class="card-body z-10 !p-0 flex flex-col overflow-hidden">
       <!-- Back to Menu button for all views except menu and room - FIXED -->
-      <ActionButton 
-        v-if="currentView !== 'menu' && currentView !== 'room'"
-        :label="t('lobby.backToMenu')" 
-        variant="tertiary"
-        class="mb-4 flex-shrink-0"
-        @click="handleViewChange('menu')"
-      />
+      <div v-if="currentView !== 'menu' && currentView !== 'room'" class="px-8 pt-8 pb-4 flex-shrink-0">
+        <ActionButton 
+          :label="t('lobby.backToMenu')" 
+          variant="tertiary"
+          @click="handleViewChange('menu')"
+        />
+      </div>
       
       <!-- Scrollable content area -->
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto px-8 pb-8" :class="{ 'pt-8': currentView === 'menu' || currentView === 'room' }">
         <div v-if="currentView === 'menu'" class="flex flex-col justify-center h-full">
           <LobbyOptions
             @create-game="handleCreateGameView"
@@ -216,7 +216,7 @@ const handleStartGame = async () => {
       </div>
     </div>
     <!-- Background image that ignores padding -->
-    <div class="pointer-events-none z-0">
+    <div v-if="currentView !== 'rules'" class="pointer-events-none z-0">
       <img 
         src="../../assets/backgrounds/lobby-menu-background.png" 
         alt="Lobby background"

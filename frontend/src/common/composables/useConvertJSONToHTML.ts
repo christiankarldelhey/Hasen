@@ -58,13 +58,13 @@ export function useConvertJSONToHTML() {
 
       case 'table':
         return h('div', { class: 'overflow-x-auto mb-4' }, [
-          h('table', { class: 'min-w-full border-collapse border border-gray-300' }, [
+          h('table', { class: 'min-w-full border-collapse border border-hasen-green' }, [
             // Table header
-            h('thead', { class: 'bg-gray-100' }, [
+            h('thead', { class: 'bg-hasen-green' }, [
               h('tr', 
                 content.headers?.map(header => 
                   h('th', { 
-                    class: 'border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900'
+                    class: 'border border-hasen-green px-4 py-2 text-left font-semibold text-white'
                   }, header)
                 )
               )
@@ -72,10 +72,10 @@ export function useConvertJSONToHTML() {
             // Table body
             h('tbody',
               content.rows?.map(row => 
-                h('tr', { class: 'hover:bg-gray-50' },
+                h('tr', { class: 'hover:bg-hasen-green hover:text-white' },
                   row.map(cell => 
                     h('td', { 
-                      class: 'border border-gray-300 px-4 py-2 text-gray-800'
+                      class: 'border border-hasen-green px-4 py-2 text-black'
                     }, cell)
                   )
                 )
@@ -103,7 +103,7 @@ export function useConvertJSONToHTML() {
       id: section.id,
       class: 'mb-8 scroll-mt-4'
     }, [
-      h('h2', { class: 'text-2xl font-bold mb-4 text-gray-900 border-b-2 border-gray-300 pb-2' }, section.title),
+      h('h2', { class: 'text-2xl font-bold mb-4 text-gray-900 border-b-2 border-hasen-green pb-2' }, section.title),
       h('div', { class: 'space-y-2' }, 
         section.content.flatMap(content => convertContentToVNode(content))
       )
@@ -136,14 +136,14 @@ export function useConvertJSONToHTML() {
    * Generates a table of contents from rules data
    */
   const generateTableOfContents = (rulesData: RulesData): VNode => {
-    return h('nav', { class: 'mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200' }, [
-      h('h2', { class: 'text-xl font-bold mb-3 text-gray-900' }, 'Table of Contents'),
+    return h('nav', { class: 'mb-8 p-4 bg-hasen-green rounded-lg border border-hasen-green' }, [
+      h('h2', { class: 'text-xl font-bold mb-3 text-white' }, 'Table of Contents'),
       h('ul', { class: 'space-y-2' },
         rulesData.sections.map(section => 
           h('li', [
             h('a', {
               href: `#${section.id}`,
-              class: 'text-blue-600 hover:text-blue-800 hover:underline'
+              class: 'text-white hover:text-hasen-light hover:underline'
             }, section.title)
           ])
         )

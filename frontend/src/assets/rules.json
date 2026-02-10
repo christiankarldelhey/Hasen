@@ -46,21 +46,21 @@
                 "7 — 0 points",
                 "6 — 0 points",
                 "5 — 0 points",
-                "Ober (O) — 4 points",
-                "Unter (U) — 3 points"
+                "Ober (O) — 6 points",
+                "Unter (U) — 5 points"
               ]
             },
             {
               "type": "heading",
               "level": 4,
-              "text": "Special S Cards (1 in each non-trump suit)"
+              "text": "The birds (Special S cards) (1 in each non-trump suit)"
             },
             {
               "type": "list",
               "items": [
-                "Berries S — \"The Scythe\" — 0 points",
-                "Leaves S — \"The Collector\" — 0 points",
-                "Acorns S — \"The Leader's Choice\" — 0 points"
+                "Berries S — \"The Owl\" — 0 points",
+                "Leaves S — \"The Sparrow\" — 0 points",
+                "Acorns S — \"The Woodpecker\" — 0 points"
               ]
             }
           ]
@@ -175,7 +175,7 @@
       "content": [
         {
           "type": "paragraph",
-          "text": "A round consists of 6 tricks. In each trick, all players play 1 card."
+          "text": "A round consists of 5 tricks. In each trick, all players play 1 card."
         },
         {
           "type": "subsection",
@@ -186,7 +186,7 @@
               "items": [
                 "The player who opens the 1st trick of the game is the player who most recently saw a rabbit",
                 "In subsequent rounds, the lead player rotates clockwise",
-                "The winner of each trick leads the next trick, unless someone played Acorns S (Leader's Choice)"
+                "The winner of each trick leads the next trick, unless someone played the Woodpecker (Acorns S)"
               ]
             }
           ]
@@ -237,7 +237,7 @@
           "content": [
             {
               "type": "paragraph",
-              "text": "These cards always win except against The Scythe when it leads."
+              "text": "These cards always win except against The Owl when it leads."
             },
             {
               "type": "list",
@@ -249,7 +249,7 @@
             },
             {
               "type": "paragraph",
-              "text": "Special Karnoffel Rule: The only card capable of beating The Scythe when The Scythe leads the trick."
+              "text": "Special Karnoffel Rule: The only card capable of beating The Owl when The Owl leads the trick."
             }
           ]
         },
@@ -264,8 +264,8 @@
             {
               "type": "list",
               "items": [
-                "Obers of Leaves / Berries / Acorns — 4 pts",
-                "Unters of Leaves / Berries / Acorns — 3 pts"
+                "Obers of Leaves / Berries / Acorns — 6 pts",
+                "Unters of Leaves / Berries / Acorns — 5 pts"
               ]
             },
             {
@@ -322,11 +322,11 @@
     },
     {
       "id": "special-cards",
-      "title": "5. Special S Cards",
+      "title": "5. The birds (Special cards)",
       "content": [
         {
           "type": "subsection",
-          "title": "🔴 Berries S — \"The Scythe\"",
+          "title": "🔴 Berries S — \"The Owl\"",
           "content": [
             {
               "type": "list",
@@ -344,7 +344,7 @@
         },
         {
           "type": "subsection",
-          "title": "🔵 Acorns S — \"The Leader's Choice\"",
+          "title": "🔵 Acorns S — \"The Woodpecker\"",
           "content": [
             {
               "type": "list",
@@ -361,7 +361,7 @@
         },
         {
           "type": "subsection",
-          "title": "🟤 Leaves S — \"The Collector\"",
+          "title": "🟤 Leaves S — \"The Sparrow\"",
           "content": [
             {
               "type": "list",
