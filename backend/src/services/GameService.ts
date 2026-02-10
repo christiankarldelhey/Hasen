@@ -15,7 +15,7 @@ import { TrickService } from './TrickService.js'
 
 export class GameService {
   
-  static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string) {
+  static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string, maxPlayers?: number, pointsToWin?: number) {
     console.log("Creating game");
     const gameId = uuidv4();
     let deck = createDeck();
@@ -54,7 +54,12 @@ export class GameService {
       playerTurnOrder: [],
       tricksHistory: [],
       bidsHistory: [],
-      playerScores: []
+      playerScores: [],
+      gameSettings: {
+        minPlayers: 2,
+        maxPlayers: maxPlayers || 4,
+        pointsToWin: pointsToWin || 300
+      }
     });
     
     await newGame.save();

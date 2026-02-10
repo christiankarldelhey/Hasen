@@ -14,9 +14,10 @@ interface RoomCreatedPayload {
   gameName: string;
   hostPlayer: PlayerId;
   currentPlayers: 1 | 2 | 3 | 4;
-  maxPlayers: 4;
+  maxPlayers: 2 | 3 | 4;
   minPlayers: 2;
   hasSpace: boolean;
+  pointsToWin: number;
   createdAt: string;
 }
 

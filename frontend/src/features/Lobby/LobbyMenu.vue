@@ -9,16 +9,22 @@ import { useRouter } from 'vue-router';
 import { useAudio } from '../../common/composables/useAudio';
 import LobbyOptions from './LobbyOptions.vue';
 import Room from './Room.vue';
-import RoomSettings from './RoomSettings.vue';
+import CreateGameMenu from './CreateGameMenu.vue';
+import JoinGameMenu from './JoinGameMenu.vue';
+import RulesMenu from './RulesMenu.vue';
+import SettingsMenu from './SettingsMenu.vue';
+import ActionButton from '../../common/components/ActionButton.vue';
+import { useI18n } from '../../common/composables/useI18n';
 
 const lobbyStore = useLobbyStore();
 const hasenStore = useHasenStore();
 const gameAPI = useGameAPI();
 const socketLobby = useSocketLobby();
 const router = useRouter();
-const { playMusic } = useAudio(); 
+const { playMusic } = useAudio();
+const { t } = useI18n(); 
 
-type ViewState = 'menu' | 'room' | 'settings';
+type ViewState = 'menu' | 'room' | 'create-game' | 'join-game' | 'rules' | 'settings';
 const currentView = ref<ViewState>('menu');
 
 onMounted(async () => {
@@ -39,18 +45,48 @@ const handleViewChange = (view: ViewState) => {
   currentView.value = view;
 };
 
-const handleGameSettings = () => {
-  playMusic('lobby');
+const handleCreateGameView = () => {
+  handleViewChange('create-game');
+};
+
+const handleJoinGameView = () => {
+  handleViewChange('join-game');
+};
+
+const handleRulesView = () => {
+  handleViewChange('rules');
+};
+
+const handleSettingsView = () => {
   handleViewChange('settings');
 };
 
-const handleCreateGame = async (gameName: string, playerId: string) => {
+const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, pointsToWin: number) => {
   playMusic('lobby');
   try {
-    await gameAPI.createGame(gameName, playerId as import('@domain/interfaces/Player').PlayerId);
+    await gameAPI.createGame(gameName, playerId as import('@domain/interfaces/Player').PlayerId, maxPlayers, pointsToWin);
     handleViewChange('room');
   } catch (err) {
     console.error('Error creating game:', err);
+  }
+};
+
+const getTitle = () => {
+  switch (currentView.value) {
+    case 'menu':
+      return 'Hasen';
+    case 'create-game':
+      return t('lobby.createGameTitle');
+    case 'join-game':
+      return t('lobby.joinGameTitle');
+    case 'rules':
+      return t('lobby.rulesTitle');
+    case 'settings':
+      return t('lobby.settingsTitle');
+    case 'room':
+      return lobbyStore.currentRoomData?.gameName || 'Hasen';
+    default:
+      return 'Hasen';
   }
 };
 
@@ -121,42 +157,70 @@ const handleStartGame = async () => {
 
 <template>
   <div class="card card-border bg-hasen-base w-full md:w-[40%] h-[85vh] shadow-lg flex flex-col relative overflow-hidden">
+    
+    
+    <div class="card-header z-10">
+      <h1 class="text-center text-2xl font-semibold text-black mt-4">{{ getTitle() }}</h1>
+    </div>
+    <div class="card-body flex flex-col z-10">
+      <!-- Back to Menu button for all views except menu and room - FIXED -->
+      <ActionButton 
+        v-if="currentView !== 'menu' && currentView !== 'room'"
+        :label="t('lobby.backToMenu')" 
+        variant="tertiary"
+        class="mb-4 flex-shrink-0"
+        @click="handleViewChange('menu')"
+      />
+      
+      <!-- Scrollable content area -->
+      <div class="flex-1 overflow-y-auto">
+        <div v-if="currentView === 'menu'" class="flex flex-col justify-center h-full">
+          <LobbyOptions
+            @create-game="handleCreateGameView"
+            @join-game="handleJoinGameView"
+            @rules="handleRulesView"
+            @settings="handleSettingsView"
+          />
+        </div>
+        
+        <CreateGameMenu
+          v-if="currentView === 'create-game'"
+          @create-game="handleCreateGame"
+        />
+        
+        <JoinGameMenu
+          v-if="currentView === 'join-game'"
+          :games="lobbyStore.rooms"
+          :loading="lobbyStore.loading"
+          :error="lobbyStore.error"
+          :joining-game-id="lobbyStore.joiningRoomId"
+          @join-game="handleJoinGame"
+        />
+        
+        <RulesMenu
+          v-if="currentView === 'rules'"
+        />
+        
+        <SettingsMenu
+          v-if="currentView === 'settings'"
+        />
+        
+        <Room
+          v-if="currentView === 'room' && lobbyStore.currentRoomData"
+          :current-game="lobbyStore.currentRoomData"
+          :player-id="hasenStore.currentPlayerId"
+          @back="handleBackToMenu"
+          @start-game="handleStartGame"
+          @leave-game="handleLeaveGame"
+        />
+      </div>
+    </div>
     <!-- Background image that ignores padding -->
-    <div class="absolute bottom-0 left-0 right-0 pointer-events-none z-0">
+    <div class="pointer-events-none z-0">
       <img 
         src="../../assets/backgrounds/lobby-menu-background.png" 
         alt="Lobby background"
         class="w-full object-cover object-bottom opacity-95"
-      />
-    </div>
-    
-    <div class="card-header relative z-10">
-      <h2 class="text-center text-xxl font-bold text-black my-4">Hasen</h2>
-    </div>
-    <div class="card-body flex flex-col gap-4 overflow-y-auto relative z-10">
-      <LobbyOptions
-        v-if="currentView === 'menu'"
-        :games="lobbyStore.rooms"
-        :loading="lobbyStore.loading"
-        :error="lobbyStore.error"
-        :joining-game-id="lobbyStore.joiningRoomId"
-        @game-settings="handleGameSettings"
-        @join-game="handleJoinGame"
-      />
-      
-      <RoomSettings
-        v-if="currentView === 'settings'"
-        @create-game="handleCreateGame"
-        @back="handleViewChange('menu')"
-      />
-      
-      <Room
-        v-if="currentView === 'room' && lobbyStore.currentRoomData"
-        :current-game="lobbyStore.currentRoomData"
-        :player-id="hasenStore.currentPlayerId"
-        @back="handleBackToMenu"
-        @start-game="handleStartGame"
-        @leave-game="handleLeaveGame"
       />
     </div>
   </div>

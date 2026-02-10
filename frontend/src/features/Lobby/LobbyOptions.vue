@@ -1,54 +1,41 @@
 <script setup lang="ts">
-import type { LobbyGame } from '@domain/interfaces/Game';
 import ActionButton from '@/common/components/ActionButton.vue';
-import RabbitLoader from '@/common/components/RabbitLoader.vue';
-
-defineProps<{
-  games: LobbyGame[];
-  loading: boolean;
-  error: string | null;
-  joiningGameId: string | null;
-}>();
+import { useI18n } from '@/common/composables/useI18n';
 
 const emit = defineEmits<{
-  gameSettings: [];
-  joinGame: [gameId: string];
+  createGame: [];
+  joinGame: [];
+  rules: [];
+  settings: [];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-5">
     <ActionButton 
-      label="Create new game"
+      :label="t('lobby.createNewGame')"
       variant="primary"
-      @click="emit('gameSettings')"
+      @click="emit('createGame')"
     />
     
-    <h2 class="text-center text-md font-semibold text-black mt-4">Join game</h2>
+    <ActionButton 
+      :label="t('lobby.joinGame')"
+      variant="primary"
+      @click="emit('joinGame')"
+    />
     
-    <div v-if="loading">
-      <RabbitLoader size="xl" />
-    </div>
+    <ActionButton 
+      :label="t('lobby.rules')"
+      variant="primary"
+      @click="emit('rules')"
+    />
     
-    <div v-else-if="error" class="text-center text-red-600">
-      {{ error }}
-    </div>
-    
-    <div v-else-if="games.length === 0" class="text-center text-gray-600">
-      There are no available games at the moment.
-    </div>
-    
-    <div 
-      v-for="game in games" 
-      :key="game.gameId"
-      class="w-full"
-    >
-      <ActionButton 
-        :label="`${game.gameName} - ${joiningGameId === game.gameId ? 'Joining...' : game.currentPlayers + '/' + game.maxPlayers + ' players'}`"
-        variant="primary"
-        :disabled="!game.hasSpace || joiningGameId === game.gameId"
-        @click="emit('joinGame', game.gameId)"
-      />
-    </div>
+    <ActionButton 
+      :label="t('lobby.settings')"
+      variant="primary"
+      @click="emit('settings')"
+    />
   </div>
 </template>

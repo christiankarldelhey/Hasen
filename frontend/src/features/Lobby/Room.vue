@@ -58,11 +58,15 @@ onUnmounted(() => {
     />
     
     <div class="text-center">
-      <h2 class="text-xl font-bold text-black mb-2">{{ currentGame.gameName }}</h2>
       <p v-if="lobbyStore.isHost(playerId)" class="text-hasen-green font-semibold">{{ t('lobby.youAreHost') }}</p>
-      <p class="text-black font-semibold mt-4">
-        {{ t('lobby.players') }}: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
-      </p>
+      <div class="mt-4 space-y-2">
+        <p class="text-black font-semibold">
+          {{ t('lobby.players') }}: {{ currentPlayers }} / {{ currentGame.maxPlayers }}
+        </p>
+        <p class="text-black text-sm">
+          🎯 {{ currentGame.pointsToWin || 300 }} points to win
+        </p>
+      </div>
     </div>
     
     <div class="text-center text-gray-500 mt-4">

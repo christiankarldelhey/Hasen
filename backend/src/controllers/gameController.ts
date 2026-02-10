@@ -8,13 +8,13 @@ import { socketToPlayer } from '../socket/handlers/lobbyHandlers.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
-    const { gameName, hostPlayerId, userId } = req.body;
+    const { gameName, hostPlayerId, userId, maxPlayers, pointsToWin } = req.body;
     
     if (!userId) {
       return res.status(400).json({ success: false, error: 'userId is required' });
     }
     
-    const newGame = await GameService.createGame(gameName, hostPlayerId, userId);
+    const newGame = await GameService.createGame(gameName, hostPlayerId, userId, maxPlayers, pointsToWin);
     
     // Emitir evento de socket para que todos en lobby-list vean el nuevo room
     const io = req.app.get('io');
@@ -26,6 +26,7 @@ export const createGame = async (req: Request, res: Response) => {
       maxPlayers: newGame.gameSettings.maxPlayers,
       minPlayers: newGame.gameSettings.minPlayers,
       hasSpace: newGame.activePlayers.length < newGame.gameSettings.maxPlayers,
+      pointsToWin: newGame.gameSettings.pointsToWin,
       createdAt: newGame.createdAt
     });
     
@@ -83,6 +84,7 @@ export const getGames = async (req: Request, res: Response) => {
       maxPlayers: game.gameSettings.maxPlayers,
       minPlayers: game.gameSettings.minPlayers,
       hasSpace: game.activePlayers.length < game.gameSettings.maxPlayers,
+      pointsToWin: game.gameSettings.pointsToWin,
       createdAt: game.createdAt
     }));
     

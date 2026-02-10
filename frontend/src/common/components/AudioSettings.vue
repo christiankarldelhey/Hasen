@@ -1,69 +1,58 @@
 <template>
-  <div class="audio-settings">
-    <h3>Audio Settings</h3>
-    
-    <div class="setting-group">
-      <label>
-        <input type="checkbox" v-model="musicEnabled" />
-        Music Enabled
+  <div class="flex flex-col gap-4">
+    <div class="form-control">
+      <label class="label cursor-pointer justify-start gap-3">
+        <input type="checkbox" v-model="musicEnabled" class="checkbox border-hasen-green [--chkbg:theme(colors.hasen.green)] [--chkfg:white]" />
+        <span class="label-text text-black font-semibold">Music Enabled</span>
       </label>
     </div>
 
-    <div class="setting-group">
-      <label>
-        <input type="checkbox" v-model="sfxEnabled" />
-        Sound Effects Enabled
+    <div class="form-control">
+      <label class="label cursor-pointer justify-start gap-3">
+        <input type="checkbox" v-model="sfxEnabled" class="checkbox border-hasen-green [--chkbg:theme(colors.hasen.green)] [--chkfg:white]" />
+        <span class="label-text text-black font-semibold">Sound Effects Enabled</span>
       </label>
     </div>
 
-    <div class="setting-group">
-      <label>
-        Master Volume: {{ Math.round(masterVolume * 100) }}%
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.01" 
-          v-model.number="masterVolume" 
-        />
-      </label>
+    <div class="form-control">
+      <span class="label-text text-black font-semibold block mb-2">Master Volume</span>
+      <input 
+        type="range" 
+        min="0" 
+        max="1" 
+        step="0.01" 
+        v-model.number="masterVolume"
+        class="range range-primary w-full"
+      />
     </div>
 
-    <div class="setting-group">
-      <label>
-        Music Volume: {{ Math.round(musicVolume * 100) }}%
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.01" 
-          v-model.number="musicVolume"
-          :disabled="!musicEnabled"
-        />
-      </label>
+    <div class="form-control">
+      <span class="label-text text-black font-semibold block mb-2">Music Volume</span>
+      <input 
+        type="range" 
+        min="0" 
+        max="1" 
+        step="0.01" 
+        v-model.number="musicVolume"
+        :disabled="!musicEnabled"
+        class="range range-primary w-full"
+      />
     </div>
 
-    <div class="setting-group">
-      <label>
-        SFX Volume: {{ Math.round(sfxVolume * 100) }}%
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.01" 
-          v-model.number="sfxVolume"
-          :disabled="!sfxEnabled"
-        />
-      </label>
+    <div class="form-control">
+      <span class="label-text text-black font-semibold block mb-2">FX Volume</span>
+      <input 
+        type="range" 
+        min="0" 
+        max="1" 
+        step="0.01" 
+        v-model.number="sfxVolume"
+        :disabled="!sfxEnabled"
+        class="range range-primary w-full"
+      />
     </div>
 
-    <div class="setting-group">
-      <button @click="testSfx">Test Sound Effect</button>
-    </div>
 
-    <div v-if="currentTrack" class="current-track">
-      Now Playing: {{ currentTrack }}
-    </div>
   </div>
 </template>
 
@@ -76,7 +65,6 @@ const {
   sfxVolume,
   musicEnabled,
   sfxEnabled,
-  currentTrack,
   playSfx,
 } = useAudio();
 
@@ -86,34 +74,11 @@ const testSfx = () => {
 </script>
 
 <style scoped>
-.audio-settings {
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+.range {
+    height: 1rem;
 }
-
-.setting-group {
-  margin: 1rem 0;
-}
-
-.setting-group label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.setting-group input[type="range"] {
-  width: 100%;
-}
-
-.setting-group button {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-}
-
-.current-track {
-  margin-top: 1rem;
-  font-style: italic;
-  color: #666;
+.range-primary {
+    color: var(--color-hasen-green);
+    --range-thumb: var(--color-hasen-green);
 }
 </style>

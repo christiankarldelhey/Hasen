@@ -1,0 +1,603 @@
+{
+  "title": "HASEN — Official Rules",
+  "subtitle": "A trick-taking and betting game with fixed trumps and asymmetric interactions",
+  "sections": [
+    {
+      "id": "components",
+      "title": "1. Game Components",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "1.1 Hasen Deck (33 cards)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The deck consists of 33 cards divided into 4 suits:"
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Fixed Trump Suit: Flowers (8 cards)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Ace (A) — 12 points",
+                "King (K) — 11 points",
+                "Queen (Q) — Karnoffel — 0 points (special trump)",
+                "5 — 5 points",
+                "4 — 4 points",
+                "3 — 3 points",
+                "2 — 2 points",
+                "1 — 1 point"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Other Suits (Leaves, Berries, Acorns — 8 cards each)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "10 — 10 points",
+                "9 — 0 points",
+                "8 — 0 points",
+                "7 — 0 points",
+                "6 — 0 points",
+                "5 — 0 points",
+                "Ober (O) — 4 points",
+                "Unter (U) — 3 points"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Special S Cards (1 in each non-trump suit)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Berries S — \"The Scythe\" — 0 points",
+                "Leaves S — \"The Collector\" — 0 points",
+                "Acorns S — \"The Leader's Choice\" — 0 points"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "1.2 Bid Cards",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "There are 3 types of bids available during each round:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "7 Points Bids — Predict your point total at round end",
+                "6 Set Collection Bids — Collect specific suits while avoiding others",
+                "5 Trick Bids — Win specific tricks or trick counts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "During each round, 9 bids are randomly selected (3 of each type) and made available to players."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "1.3 Other Components",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Rabbit Tokens: 3 per player",
+                "Score tracker or app"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-setup",
+      "title": "2. Round Setup",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "2.1 Bid Pool",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "At the start of each round, 9 bid cards are randomly selected from the bid decks:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "3 Points bids",
+                "3 Set Collection bids",
+                "3 Trick bids"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "These bids are available for players to claim during the betting windows."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "2.2 Initial Deal",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Each player receives 5 cards:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "1 visible card (face-up, visible to all players, cannot be exchanged, joins hand after replacement phase)",
+                "4 hidden cards (face-down in your hand)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "2.3 Card Replacement Phase (Optional)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "In turn order, each player may:"
+            },
+            {
+              "type": "list",
+              "ordered": true,
+              "items": [
+                "Discard 1 hidden card from their hand, reveal it to all players, and draw a new card from the deck or from the discard pile",
+                "Skip replacement and immediately gain +3 points"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Discarded cards remain visible. Later players may take a discarded card instead of drawing from the deck."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-play",
+      "title": "3. Round Play (Tricks)",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "A round consists of 6 tricks. In each trick, all players play 1 card."
+        },
+        {
+          "type": "subsection",
+          "title": "3.1 Leadership Rule",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "The player who opens the 1st trick of the game is the player who most recently saw a rabbit",
+                "In subsequent rounds, the lead player rotates clockwise",
+                "The winner of each trick leads the next trick, unless someone played Acorns S (Leader's Choice)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.2 Leading the Suit",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The first card played in a trick establishes the led suit. This becomes the most powerful suit for that trick (except for trumps)."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.3 No Suit Following Required",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Players may play any card regardless of the led suit."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.4 Trick Resolution",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The trick is won by the strongest card according to the Card Hierarchy (section 4)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card-hierarchy",
+      "title": "4. Complete Card Hierarchy",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Cards are divided into 4 power levels, plus 3 special S cards with unique rules."
+        },
+        {
+          "type": "subsection",
+          "title": "Level 1 — Major Trumps (strongest in the game)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "These cards always win except against The Scythe when it leads."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Ace of Flowers — 12 pts",
+                "King of Flowers — 11 pts",
+                "Queen of Flowers (Karnoffel) — 0 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Special Karnoffel Rule: The only card capable of beating The Scythe when The Scythe leads the trick."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Level 2 — Major Colors (only when led suit matches)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "These cards are only strong when the led suit matches their suit."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Obers of Leaves / Berries / Acorns — 4 pts",
+                "Unters of Leaves / Berries / Acorns — 3 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Beat: all minor trumps. Lose to: major trumps."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Level 3 — Minor Trumps (common Flowers)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Function as trumps but don't beat Obers/Unters of the led suit."
+            },
+            {
+              "type": "list",
+              "items": [
+                "5 of Flowers — 5 pts",
+                "4 of Flowers — 4 pts",
+                "3 of Flowers — 3 pts",
+                "2 of Flowers — 2 pts",
+                "1 of Flowers — 1 pt"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Beat: any card from another suit that isn't a Major Color. Lose to: Major Colors of the led suit."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Level 4 — Minor Colors",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Only participate if their suit is led."
+            },
+            {
+              "type": "list",
+              "items": [
+                "10, 9, 8, 7, 6, 5 of the led suit"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Rule: If the suit is not led → always lose to any trump."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "special-cards",
+      "title": "5. Special S Cards",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "🔴 Berries S — \"The Scythe\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Cannot open the 1st trick of the round",
+                "If it leads → wins against everything except Karnoffel (Flowers Q)",
+                "If it doesn't lead → functions as a Minor Color"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Typical use: Finish a round or force a guaranteed win by leading."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "🔵 Acorns S — \"The Leader's Choice\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Cannot win the trick",
+                "When played, its owner chooses who leads the next trick, completely ignoring the current winner"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Typical use: Tactical control of play order."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "🟤 Leaves S — \"The Collector\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Cannot win the trick",
+                "At the end of the trick where it was played, the player takes one card from the trick and places it in their personal score reserve"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Typical use: Acquire Aces, Kings, or major trumps without winning them by strength."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "betting-phase",
+      "title": "6. Betting Phase",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "There are 3 betting windows during the round:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "From the start until the end of the 1st trick",
+            "From playing the 1st card of the 2nd trick until its end",
+            "From playing the 1st card of the 3rd trick until its end"
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.1 Betting Rules",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Each player can make one bet per window (max 3 bids per round)",
+                "Place a rabbit token on the chosen bid card",
+                "You can bet before or after playing your card in the trick",
+                "Bets are public",
+                "You can combine bids only if they are of different categories",
+                "Maximum 2 players per specific bid"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.2 Penalty for Failed Bids",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Set Collection bids:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Window 1 → -10 pts",
+                "Window 2 → -15 pts",
+                "Window 3 → -20 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Points and Trick bids:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Window 1 → -20 pts",
+                "Window 2 → -25 pts",
+                "Window 3 → -30 pts"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.3 Bid Conflicts",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "If two or more players choose the same bid in the same window:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "If all win or all lose → no additional effect",
+                "If some win and others lose:",
+                "  • Winners: +5 pts",
+                "  • Losers: -5 pts (in addition to normal penalty)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bid-types",
+      "title": "7. Bid Types",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "7.1 Points Bids",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objective: Predict how many card points you'll accumulate by round end."
+            },
+            {
+              "type": "table",
+              "headers": ["Bid Name", "Condition", "Success Reward"],
+              "rows": [
+                ["Smallest", "Score 2-10 pts", "+40 pts"],
+                ["Tiny", "Score 3-15 pts", "+40 pts"],
+                ["Small", "Score 5-20 pts", "+30 pts"],
+                ["Normal", "Score 11-30 pts", "+40 pts"],
+                ["Medium", "Score 22-40 pts", "+35 pts"],
+                ["Large", "Score 35+ pts", "+45 pts"],
+                ["Largest", "Score 45+ pts", "+55 pts"]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "7.2 Set Collection Bids",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objective: Collect cards of certain suits and avoid others. All cards won in tricks plus those acquired by effects (like The Collector) are evaluated."
+            },
+            {
+              "type": "paragraph",
+              "text": "Available combinations:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Collect Acorns / Avoid Leaves",
+                "Collect Acorns / Avoid Berries",
+                "Collect Berries / Avoid Acorns",
+                "Collect Berries / Avoid Leaves",
+                "Collect Leaves / Avoid Berries",
+                "Collect Leaves / Avoid Acorns"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "How Set Collection Bids are Scored"
+            },
+            {
+              "type": "paragraph",
+              "text": "Success: You receive +10 points per collected card of the target suit."
+            },
+            {
+              "type": "paragraph",
+              "text": "Failure: You receive a penalty for each forbidden card you obtained:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Window 1: -10 per forbidden card",
+                "Window 2: -15 per forbidden card",
+                "Window 3: -20 per forbidden card"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Net calculation: (collected cards × 10) - (forbidden cards × penalty). You win the bid if the net is ≥ 10 points."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "7.3 Trick Bids",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objective: Win specific tricks or trick counts."
+            },
+            {
+              "type": "table",
+              "headers": ["Bid Name", "Condition", "Success Reward", "Notes"],
+              "rows": [
+                ["Final Double", "Win the last 2 tricks", "+30 pts", "2 available"],
+                ["Only Final Double", "Win exactly the last 2 tricks and no others", "+40 pts", "2 available"],
+                ["Four Tricks", "Win 4 tricks", "+45 pts", ""],
+                ["Single Trick", "Win exactly 1 trick", "+45 pts", ""],
+                ["Perfect", "Win all 6 tricks", "+55 pts", ""]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-end",
+      "title": "8. Round End and Game End",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "8.1 Round End",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Points are totaled from:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Cards won (if no bids were made)",
+                "Successful bids",
+                "Failed bids (penalties)",
+                "Special card effects",
+                "Card replacement bonus (+3 if skipped)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "8.2 Game End",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "The game ends when a player reaches the agreed-upon target score (e.g., 200 or 300 points). The player with the highest total score wins."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
