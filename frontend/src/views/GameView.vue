@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
@@ -96,13 +96,6 @@ function triggerDealAnimation() {
   }, 100)
 }
 
-// Watch round number — triggers on initial load AND on new rounds
-watch(() => gameStore.currentRound, (newRound, oldRound) => {
-  if (newRound > 0 && newRound !== oldRound) {
-    triggerDealAnimation()
-  }
-});
-
 // Modal de Round Ended
 const showRoundEndedModal = ref(false);
 const readyPlayers = ref<PlayerId[]>([]);
@@ -153,12 +146,13 @@ const handleGameEvent = async (event: GameEvent) => {
     readyPlayers.value = payload.readyPlayers;
     totalPlayers.value = payload.totalPlayers;
   }
-  // Cerrar modal cuando empieza nuevo round
+  // Cerrar modal cuando empieza nuevo round y animar reparto de cartas
   if (event.type === 'ROUND_SETUP_COMPLETED') {
     if (showRoundEndedModal.value) {
       showRoundEndedModal.value = false;
       readyPlayers.value = [];
     }
+    triggerDealAnimation();
   }
 };
 

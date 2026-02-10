@@ -41,12 +41,21 @@ const playerHandEl = ref<HTMLElement | null>(null);
 const coords = useAnimationCoords();
 onMounted(() => coords.register('player-hand', playerHandEl));
 onUnmounted(() => coords.unregister('player-hand'));
-const hasPlayedCard = ref<boolean>(false);
+// Derive initial hasPlayedCard from game state (handles refresh correctly)
+const getHasPlayedCardFromState = (): boolean => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick;
+  const publicCards = gameStore.publicGameState?.publicCards;
+  const myPlayerId = hasenStore.currentPlayerId;
+  if (!currentTrick || !publicCards || !myPlayerId) return false;
+  return currentTrick.cards.some(cardId => publicCards[cardId]?.owner === myPlayerId);
+};
+
+const hasPlayedCard = ref<boolean>(getHasPlayedCardFromState());
 
 // Reset hasPlayedCard when it becomes my turn
 watch(() => props.isMyTurn, (newVal) => {
   if (newVal) {
-    hasPlayedCard.value = false;
+    hasPlayedCard.value = getHasPlayedCardFromState();
   }
 });
 

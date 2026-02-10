@@ -10,7 +10,8 @@ export function canPlayCard(
     playerId: PlayerId,
     playerTurn: PlayerId,
     playerHand: PlayingCard[],
-    currentTrick: Trick
+    currentTrick: Trick,
+    trickCardOwners?: Map<string, PlayerId>
   ): CardValidationResult {
     // 1. Verify card belongs to player
     if (card.owner !== playerId) {
@@ -33,7 +34,14 @@ export function canPlayCard(
     if (playerTurn !== playerId) {
       return { valid: false, reason: 'Not your turn to play a card' }
     }
-    // 6. SPECIAL RULE: Berries S cannot be played as first card of first trick if you are lead player
+    // 6. Check if player already played a card in this trick
+    if (trickCardOwners) {
+      const alreadyPlayed = currentTrick.cards.some(cardId => trickCardOwners.get(cardId) === playerId)
+      if (alreadyPlayed) {
+        return { valid: false, reason: 'You already played a card in this trick' }
+      }
+    }
+    // 7. SPECIAL RULE: Berries S cannot be played as first card of first trick if you are lead player
     const isBerriesS = card.suit === 'berries' && card.char === 'S';
     const isFirstCardOfTrick = currentTrick.cards.length === 0;
     const isFirstTrick = currentTrick.trick_number === 1;

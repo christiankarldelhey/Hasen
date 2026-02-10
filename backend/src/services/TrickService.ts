@@ -104,13 +104,23 @@ export class TrickService {
     // Obtener la mano del jugador
     const playerHand = game.deck.filter(c => c.owner === playerId && (c.state === 'in_hand_visible' || c.state === 'in_hand_hidden'));
 
+    // Build a map of trick card IDs to their owners for the "already played" check
+    const trickCardOwners = new Map<string, PlayerId>();
+    for (const trickCardId of currentTrick.cards) {
+      const trickCard = game.deck.find(c => c.id === trickCardId);
+      if (trickCard && trickCard.owner) {
+        trickCardOwners.set(trickCardId, trickCard.owner as PlayerId);
+      }
+    }
+
     // Validar si el jugador puede jugar la carta usando la rule
     const validation = canPlayCard(
       card as PlayingCard,
       playerId,
       game.round.playerTurn!,
       playerHand as PlayingCard[],
-      currentTrick
+      currentTrick,
+      trickCardOwners
     );
 
     if (!validation.valid) {

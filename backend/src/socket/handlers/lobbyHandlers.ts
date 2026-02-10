@@ -48,10 +48,29 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
 })
 
   // Handler: Registrar jugador en juego activo (después del refresh)
-  socket.on('game:register-player', ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
+  socket.on('game:register-player', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
     socket.join(gameId)
     socketToPlayer.set(socket.id, { gameId, playerId, userId })
     console.log(`🎮 Socket ${socket.id} registered in active game: ${gameId} as ${playerId} (userId: ${userId})`)
+    
+    // Marcar jugador como reconectado y despausar si todos están conectados
+    try {
+      const result = await GameService.markPlayerReconnected(gameId, playerId)
+      
+      // Notificar a todos en el juego
+      io.to(gameId).emit('player:reconnected', {
+        playerId,
+        shouldResume: result.shouldResume
+      })
+      
+      // Enviar estado actualizado solo a los demás jugadores (el que hizo refresh ya tiene el estado del API)
+      const updatedState = await GameService.getPlayerGameState(gameId, userId)
+      socket.to(gameId).emit('game:stateUpdate', {
+        publicGameState: updatedState.publicState
+      })
+    } catch (error) {
+      console.error(`Error marking player as reconnected:`, error)
+    }
   })
 
   // Handler: Desregistrar jugador del juego activo

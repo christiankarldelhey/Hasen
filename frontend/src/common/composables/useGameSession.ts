@@ -175,6 +175,17 @@ export function useGameSession(gameId: string) {
       const userId = userIdService.getUserId()
       const playerId = hasenStore.currentPlayerId
       if (playerId && userId) {
+        // Optimistically mark ourselves as connected to avoid showing paused overlay briefly
+        if (gameStore.publicGameState?.playerConnectionStatus) {
+          gameStore.publicGameState.playerConnectionStatus[playerId] = 'connected'
+          // Si somos el único desconectado, despausar optimistamente
+          const allConnected = Object.values(gameStore.publicGameState.playerConnectionStatus)
+            .every(status => status === 'connected')
+          if (allConnected) {
+            gameStore.publicGameState.isPaused = false
+            gameStore.publicGameState.pauseReason = null
+          }
+        }
         socketLobby.registerPlayer({ gameId, playerId, userId })
       }
       

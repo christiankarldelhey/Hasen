@@ -42,12 +42,36 @@ export function usePlayerConnection(gameId: string) {
     console.log(`⏸️ Player ${data.playerId} disconnected`)
     disconnectedPlayers.value.add(data.playerId)
     reconnectionTimestamps.value.set(data.playerId, data.disconnectedAt)
+    
+    // Actualizar estado de conexión en el publicGameState
+    if (gameStore.publicGameState) {
+      if (!gameStore.publicGameState.playerConnectionStatus) {
+        gameStore.publicGameState.playerConnectionStatus = {} as Record<PlayerId, PlayerConnectionStatus>
+      }
+      gameStore.publicGameState.playerConnectionStatus[data.playerId] = 'disconnected'
+      if (data.isPaused) {
+        gameStore.publicGameState.isPaused = true
+        gameStore.publicGameState.pauseReason = 'player_disconnected'
+      }
+    }
   }
   
   const handlePlayerReconnected = (data: { playerId: PlayerId; shouldResume: boolean }) => {
     console.log(`✅ Player ${data.playerId} reconnected`)
     disconnectedPlayers.value.delete(data.playerId)
     reconnectionTimestamps.value.delete(data.playerId)
+    
+    // Actualizar estado de conexión en el publicGameState
+    if (gameStore.publicGameState) {
+      if (!gameStore.publicGameState.playerConnectionStatus) {
+        gameStore.publicGameState.playerConnectionStatus = {} as Record<PlayerId, PlayerConnectionStatus>
+      }
+      gameStore.publicGameState.playerConnectionStatus[data.playerId] = 'connected'
+      if (data.shouldResume) {
+        gameStore.publicGameState.isPaused = false
+        gameStore.publicGameState.pauseReason = null
+      }
+    }
   }
   
   const attemptReconnection = async () => {
