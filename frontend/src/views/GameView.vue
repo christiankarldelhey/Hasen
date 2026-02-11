@@ -146,12 +146,15 @@ const handleGameEvent = async (event: GameEvent) => {
     readyPlayers.value = payload.readyPlayers;
     totalPlayers.value = payload.totalPlayers;
   }
-  // Cerrar modal cuando empieza nuevo round y animar reparto de cartas
+  // Cerrar modal cuando empieza nuevo round
   if (event.type === 'ROUND_SETUP_COMPLETED') {
     if (showRoundEndedModal.value) {
       showRoundEndedModal.value = false;
       readyPlayers.value = [];
     }
+  }
+  // Animar reparto de cartas después de que opponentPositions esté populado
+  if (event.type === 'FIRST_CARD_DEALT') {
     triggerDealAnimation();
   }
 };

@@ -58,7 +58,7 @@ const isCurrentPlayerTurn = computed(() => {
 const bidCardClasses = computed(() => {
   const baseClasses = 'rounded-xl p-2 shadow-lg max-h-16 min-w-55 transition-all duration-150 relative'
   const stateClasses = props.disabled 
-    ? 'bg-hasen-base cursor-not-allowed bg-color-hasen' 
+    ? 'bg-hasen-base cursor-not-allowed' 
     : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
   
   return `${baseClasses} ${stateClasses}`

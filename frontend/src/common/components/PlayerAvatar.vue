@@ -5,7 +5,7 @@ import Hare from './Hare.vue'
 
 interface Props {
   playerId: PlayerId
-  size?: 'small' | 'medium' | 'large'
+  size?: 'tiny' | 'small' | 'medium' | 'large'
   showGlow?: boolean
   clickable?: boolean
   disableHover?: boolean
@@ -30,25 +30,29 @@ const playerColor = computed(() => player.value?.color || '#000000')
 
 const sizeClasses = computed(() => {
   switch (props.size) {
+    case 'tiny':
+      return 'w-6 h-6'
     case 'small':
       return 'w-12 h-12'
     case 'large':
       return 'w-24 h-24'
     case 'medium':
     default:
-      return 'w-18 h-18'
+      return 'w-16 h-16'
   }
 })
 
 const hareSize = computed(() => {
   switch (props.size) {
+    case 'tiny':
+      return '15px'
     case 'small':
       return '24px'
     case 'large':
       return '56px'
     case 'medium':
     default:
-      return '40px'
+      return '38px'
   }
 })
 
