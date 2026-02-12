@@ -22,6 +22,7 @@ import type {
   TurnFinishedEvent,
   TrickFinishedEvent
 } from '@domain/events/GameEvents'
+import { audioService } from '../common/services/AudioService'
 
 export interface GameEventContext {
   publicGameState: PublicGameState | null
@@ -96,6 +97,8 @@ const handleRemainingCardsDealtPrivate: GameEventHandler = (event, context) => {
     ...(context.privateGameState.hand || []),
     ...payload.cards
   ]
+  
+  audioService.playSoundEffect('dealCards')
 }
 
 const handleCardReplacedPrivate: GameEventHandler = (event, context) => {
@@ -110,6 +113,8 @@ const handleCardReplacedPrivate: GameEventHandler = (event, context) => {
     card => card.id !== payload.cardToReplace.id
   )
   context.privateGameState.hand.push(payload.replacementCard)
+  
+  audioService.playSoundEffect('replaceCard')
 }
 
 const handleTrickStarted: GameEventHandler = (event, context) => {
@@ -175,6 +180,18 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
     context.privateGameState.hand = context.privateGameState.hand.filter(
       card => card.id !== payload.card.id
     )
+  }
+
+  // Lógica de sonido específico por carta
+  if (payload.card.suit === 'berries' && payload.card.char === 'S') {
+    audioService.playSoundEffect('berriesS');
+  } else if (payload.card.suit === 'leaves' && payload.card.char === 'S') {
+    audioService.playSoundEffect('leavesS');
+  } else if (payload.card.suit === 'acorns' && payload.card.char === 'S') {
+    audioService.playSoundEffect('acornsS');
+  } else {
+    // Para todas las demás cartas, usar el sonido normal
+    audioService.playSoundEffect('playCard');
   }
   
   console.log(`🃏 CARD_PLAYED: ${payload.card.char}${payload.card.suit} by ${payload.playerId}`)
@@ -246,6 +263,8 @@ const handleTrickCompleted: GameEventHandler = (event, context) => {
     }
   }
   
+  audioService.playSoundEffect('trickWon')
+  
   console.log(`🏆 TRICK_COMPLETED: Trick ${payload.trickNumber}, Winner: ${payload.winner}`)
 }
 
@@ -282,6 +301,8 @@ const handleBidMade: GameEventHandler = (event, context) => {
     onLose: payload.onLose,
     isPlayerWinning: null
   })
+  
+  audioService.playSoundEffect('makeBid')
   
   console.log(`🎯 BID_MADE: ${payload.bidType} by ${payload.playerId}`)
 }

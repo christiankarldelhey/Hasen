@@ -8,7 +8,15 @@ export type SoundEffect =
   | 'defeat'
   | 'click'
   | 'hover'
-  | 'notification';
+  | 'notification'
+  | 'dealCards'
+  | 'playCard'
+  | 'makeBid'
+  | 'replaceCard'
+  | 'trickWon'
+  | 'berriesS'
+  | 'leavesS'
+  | 'acornsS';
 
 export type MusicTrack = 
   | 'lobby'
@@ -53,6 +61,14 @@ class AudioService {
     click: '/audio/sfx/click.mp3',
     hover: '/audio/sfx/hover.mp3',
     notification: '/audio/sfx/notification.mp3',
+    dealCards: '/audio/sfx/deal_cards.mp3',
+    playCard: '/audio/sfx/play_card.mp3',
+    makeBid: '/audio/sfx/make_bid.mp3',
+    replaceCard: '/audio/sfx/replace_card.mp3',
+    trickWon: '/audio/sfx/trick_won.mp3',
+    berriesS: '/audio/sfx/owl.mp3',
+    leavesS: '/audio/sfx/sparrow.mp3',
+    acornsS: '/audio/sfx/woodpecker.mp3',
   };
 
   constructor() {
