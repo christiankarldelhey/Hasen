@@ -16,7 +16,7 @@ const paddingClasses = {
 </script>
 
 <template>
-  <div :class="['rounded-xl bg-black/60', paddingClasses[padding]]">
+  <div :class="['rounded-xl bg-black/70', paddingClasses[padding]]">
     <slot />
   </div>
 </template>

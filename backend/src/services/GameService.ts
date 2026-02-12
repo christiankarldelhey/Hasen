@@ -219,6 +219,11 @@ export class GameService {
 
     game.gamePhase = 'playing';
     game.playerTurnOrder = [...game.activePlayers];
+    // Inicializar playerScores con todos los jugadores activos
+    game.playerScores = game.activePlayers.map(playerId => ({
+      playerId,
+      score: 0
+    }));
     game.round.round = 0;
     game.round.roundPhase = 'round_setup';
     game.deck = shuffleDeck(game.deck);

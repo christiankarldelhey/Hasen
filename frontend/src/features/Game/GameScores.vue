@@ -2,18 +2,19 @@
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
-import { IconTrophyFilled, IconStar } from '@tabler/icons-vue'
+import { IconStar } from '@tabler/icons-vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
+import { IconStarFilled } from '@tabler/icons-vue'
 import acornIcon from '@/assets/symbols/acorn.png'
 import berryIcon from '@/assets/symbols/berry.png'
 import leaveIcon from '@/assets/symbols/leave.png'
-import trickIcon from '@/assets/symbols/trick.png'
 
 const gameStore = useGameStore()
 
 const currentTrick = computed(() => gameStore.publicGameState?.round.currentTrick)
 const leadSuit = computed(() => currentTrick.value?.lead_suit)
 const trickNumber = computed(() => currentTrick.value?.trick_number)
+const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
 const suitIcons: Record<string, string> = {
   'acorns': acornIcon,
@@ -26,22 +27,8 @@ const leadSuitIcon = computed(() => {
   return suitIcons[leadSuit.value]
 })
 
-const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
-
 const sortedPlayerScores = computed(() => {
   const scores = gameStore.publicGameState?.playerScores || []
-  
-  // If scores is empty, populate with all available players
-  if (scores.length === 0) {
-    return AVAILABLE_PLAYERS
-      .map(player => ({
-        playerId: player.id,
-        score: 0,
-        color: player.color,
-        name: player.name
-      }))
-      .sort((a, b) => b.score - a.score)
-  }
   
   return [...scores]
     .map(ps => {
@@ -58,41 +45,31 @@ const sortedPlayerScores = computed(() => {
 </script>
 
 <template>
-  <!-- <div class="bg-transparent flex flex-col items-start gap-5">
-    
-      <div v-if="currentTrick" 
-        class="bg-hasen-base rounded-full px-2 py-2 shadow-lg flex items-center justify-center">
-          <div v-if="leadSuitIcon" 
-            class="w-8 h-8 flex items-center justify-center">
-            <img 
-              :src="leadSuitIcon" 
-              alt="Lead suit" 
-              class="w-full h-full object-contain" 
-            />
-          </div>
-          <div v-else 
-            class="w-8 h-8 opacity-70 flex items-center justify-center text-hasen-dark text-2xl font-bold">
-            ?
-          </div>
-      </div>
 
-      <div v-if="trickNumber" class="relative w-12 h-16 flex items-center justify-center">
-        <img :src="trickIcon" alt="Trick" class="w-full h-full object-contain" />
-        <div class="absolute inset-0 flex items-center opacity-70 justify-center text-hasen-dark text-2xl font-semibold">
-          {{ trickNumber }}
+  <div class="bg-transparent flex flex-col items-start gap-1.5">
+    <!-- Ranking de jugadores ordenado por score -->
+      <div class="flex flex-row w-full justify-between">
+          <div v-if="currentTrick" 
+            class="flex items-center">
+            <span class="text-sm pr-2 text-hasen-base">Lead:</span>
+              <div v-if="leadSuitIcon" 
+                class="w-4 flex">
+                <img 
+                  :src="leadSuitIcon" 
+                  alt="Lead suit" 
+                  class="w-full h-full object-contain" 
+                />
+              </div>
+              <div v-else 
+                class="w-4 flex items-center text-hasen-base justify-center text-sm">
+                ?
+              </div>
+          </div>
+        <div v-if="pointsToWin" class="flex items-center px-1 shadow-md">
+          <IconStarFilled :size="14" class="text-hasen-base" />
+          <span class="pl-1 text-hasen-base text-md">{{ pointsToWin }}</span>
         </div>
       </div>
-    
-  </div> -->
-  <div class="bg-transparent flex flex-col items-start gap-2">
-    <!-- Objetivo: puntos para ganar -->
-    <!-- <div v-if="pointsToWin" class="flex items-center gap-1 bg-hasen-dark/80 rounded-full px-3 py-1 shadow-md">
-      <IconTrophyFilled :size="14" class="text-yellow-400" />
-      <IconStarFilled :size="10" class="text-yellow-400" />
-      <span class="text-hasen-base text-xs font-bold">{{ pointsToWin }}</span>
-    </div> -->
-
-    <!-- Ranking de jugadores ordenado por score -->
     <div 
       v-for="ps in sortedPlayerScores" 
       :key="ps.playerId"

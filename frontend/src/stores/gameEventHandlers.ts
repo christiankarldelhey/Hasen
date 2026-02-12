@@ -155,6 +155,16 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
   // Agregar la carta al trick actual
   context.publicGameState.round.currentTrick.cards.push(payload.card.id)
   
+  // Determinar lead_suit si es la primera carta del trick
+  if (context.publicGameState.round.currentTrick.cards.length === 1 && 
+      !context.publicGameState.round.currentTrick.lead_suit) {
+    // El lead_suit es el suit de la primera carta, excepto si es 'flowers' (que no puede ser lead suit)
+    const cardSuit = payload.card.suit
+    if (cardSuit !== 'flowers') {
+      context.publicGameState.round.currentTrick.lead_suit = cardSuit as 'acorns' | 'leaves' | 'berries'
+    }
+  }
+  
   // NO actualizar playerTurn aquí - se actualizará cuando llegue TURN_FINISHED
   // Esto permite que el jugador vea el botón "Finish Turn" y pueda hacer bids
   

@@ -72,7 +72,7 @@ export const getGame = async (req: Request, res: Response) => {
 export const getGames = async (req: Request, res: Response) => {
   try {
     const games = await GameModel.find({ gamePhase: 'setup' })
-      .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers')
+      .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers gameSettings.pointsToWin')
       .sort({ createdAt: -1 })
       .lean();
     

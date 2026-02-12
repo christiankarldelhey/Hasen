@@ -5,7 +5,6 @@ import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useGameStore } from '@/stores/gameStore'
 import PlayerAvatar from './PlayerAvatar.vue'
-import { IconStar } from '@tabler/icons-vue'
 import TrickCircle from './TrickCircle.vue'
 import ScoreBadge from './ScoreBadge.vue'
 import PlayerConnectionBadge from '@/features/PlayerConnection/components/PlayerConnectionBadge.vue'
@@ -30,7 +29,7 @@ const playerConnectionStatus = computed(() => {
 
 const isCurrentTurn = computed(() => isPlayerTurn.value(props.playerId))
 
-const { playerScore, playerRoundScore } = useGameScore(props.playerId)
+const { playerRoundScore } = useGameScore(props.playerId)
 
 const currentTrickNumber = computed(() => {
   return gameStore.publicGameState?.round.currentTrick?.trick_number || 1
@@ -160,7 +159,7 @@ const handleClick = () => {
         :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
         :style="{ borderColor: playerColor }"
       >
-        {{ playerName }} {{ isPlayer ? '(You)' : '' }}  <IconStar :size="12" class="text-hasen-base" /> <span :class="['font-semibold text-xs', playerScore >= 0 ? '' : 'text-hasen-red']">{{ playerScore }}</span>
+        {{ playerName }} {{ isPlayer ? '(You)' : '' }}
       </div>
       <PlayerConnectionBadge :player-id="playerId" :status="playerConnectionStatus" />
     </div>
