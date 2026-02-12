@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'small':
-      return 'w-[85px] h-[150px]'
+      return 'w-[45px] h-[110px]'
     case 'medium':
       return 'w-[127px] h-[225px]'
     case 'large':

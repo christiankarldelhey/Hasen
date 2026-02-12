@@ -2,6 +2,7 @@
 import GameScores from './GameScores.vue'
 import Deck from './Deck.vue'
 import GamePanel from '@/common/components/GamePanel.vue'
+import { IconDoor, IconVolume } from '@tabler/icons-vue'
 
 
 </script>
@@ -11,7 +12,10 @@ import GamePanel from '@/common/components/GamePanel.vue'
     <div class="flex flex-col gap-1">
       <div class="flex flex-row gap-2 px-2">
         <div class="flex flex-col gap-1">
-          <div class="flex flex-row gap-2"></div>
+          <!-- <div class="flex flex-row justify-around gap-2">
+            <IconDoor :size="22" class="text-hasen-base" /> 
+            <IconVolume :size="22" class="text-hasen-base" />
+          </div> -->
           <Deck />
         </div>
         <GameScores />
