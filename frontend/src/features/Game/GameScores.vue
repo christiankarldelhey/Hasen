@@ -12,7 +12,7 @@ const gameStore = useGameStore()
 
 const currentTrick = computed(() => gameStore.publicGameState?.round.currentTrick)
 const leadSuit = computed(() => currentTrick.value?.lead_suit)
-const trickNumber = computed(() => currentTrick.value?.trick_number)
+// const trickNumber = computed(() => currentTrick.value?.trick_number)
 const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
 const suitIcons: Record<string, string> = {
@@ -48,8 +48,7 @@ const sortedPlayerScores = computed(() => {
   <div class="bg-transparent flex flex-col items-start gap-1.5">
     <!-- Ranking de jugadores ordenado por score -->
       <div class="flex flex-row w-full justify-between">
-          <div v-if="currentTrick" 
-            class="flex items-center">
+          <div class="flex items-center">
             <span class="text-sm pr-2 text-hasen-base">Lead:</span>
               <div v-if="leadSuitIcon" 
                 class="w-4 flex">

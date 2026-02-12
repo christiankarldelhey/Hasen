@@ -2,8 +2,6 @@
 import GameScores from './GameScores.vue'
 import Deck from './Deck.vue'
 import GamePanel from '@/common/components/GamePanel.vue'
-import { IconDoor, IconVolume } from '@tabler/icons-vue'
-
 
 </script>
 
