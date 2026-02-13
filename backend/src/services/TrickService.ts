@@ -4,7 +4,7 @@ import type { PlayerId, Trick, TrickNumber, PlayingCard, LeadSuit } from '@domai
 import { canPlayCard, compareCards } from '@domain/rules/CardRules.js'
 import { determineLeadSuit, hasTrickEnded, determineTrickWinner } from '@domain/rules/TrickRules.js'
 import { randomUUID } from 'crypto'
-import { SpecialCardsService } from './specialCards/SpecialCardsService.js';
+import { SpecialCardsService } from './SpecialCardsService.js';
 import { TrickScoreService } from './TrickScoreService.js'
 
 export class TrickService {

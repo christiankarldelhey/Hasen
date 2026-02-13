@@ -121,20 +121,16 @@ export class RoundService {
     return { game };
   }
 
-  static async finishRoundAndStartNext(gameId: string) {
-    console.log(`🏁 Finishing round and starting next for game ${gameId}`);
-    
+  static async finishRound(gameId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
 
-    // 1. CALCULAR SCORES DEL ROUND
     const roundScores: Partial<Record<PlayerId, number>> = {};
-    
+
     for (const playerId of game.activePlayers) {
       const scoreFromRound = getPlayerScoreFromRound(game, playerId);
       roundScores[playerId] = scoreFromRound;
-      
-      // Actualizar playerScores acumulados
+
       const playerScore = game.playerScores.find(ps => ps.playerId === playerId);
       if (playerScore) {
         playerScore.score += scoreFromRound;
@@ -143,34 +139,48 @@ export class RoundService {
       }
     }
 
+    game.round.playersReadyForNextRound = [];
     await game.save();
-    
-    console.log(`📊 Round ${game.round.round} scores calculated:`, roundScores);
-    
-    // 2. CREAR EVENTO ROUND_ENDED
+
     const roundEndedEvent = createRoundEndedEvent(
-      game.round.round, 
+      game.round.round,
       roundScores as Record<PlayerId, number>,
       game.playerScores
     );
-    
-    // 3. CHEQUEAR SI EL JUEGO HA TERMINADO
+
     const gameEndCheck = hasGameEnded(game);
-    
     if (gameEndCheck.hasEnded && gameEndCheck.winner) {
-      console.log(`🏆 Game ended! Winner: ${gameEndCheck.winner}`);
-      
       game.gamePhase = 'ended';
       game.winner = gameEndCheck.winner;
       await game.save();
-      
+
       const winnerName = getWinnerName(gameEndCheck.winner);
       const gameEndedEvent = createGameEndedEvent(
         gameEndCheck.winner,
         winnerName,
         game.playerScores
       );
-      
+
+      return {
+        game,
+        roundEndedEvent,
+        gameEndedEvent
+      };
+    }
+
+    return {
+      game,
+      roundEndedEvent,
+      gameEndedEvent: null
+    };
+  }
+
+  static async finishRoundAndStartNext(gameId: string) {
+    console.log(`🏁 Finishing round and starting next for game ${gameId}`);
+
+    const { game, roundEndedEvent, gameEndedEvent } = await RoundService.finishRound(gameId);
+
+    if (gameEndedEvent) {
       return {
         game,
         roundEndedEvent,

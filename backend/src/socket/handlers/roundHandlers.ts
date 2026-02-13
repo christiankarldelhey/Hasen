@@ -5,15 +5,14 @@ import { BidService } from '@/services/BidService';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
+import { emitPrivateCards, emitFullStateToGamePlayers } from './roundHandlers.helpers.js'
 import type { PlayerId } from '@domain/interfaces'
 import { 
-  createRemainingCardsDealtEvent, 
   createTurnFinishedEvent, 
   createTrickFinishedEvent, 
   createTrickStartedEvent,
   createNextLeadPlayerSelectedEvent,
-  createCardStolenFromTrickEvent,
-  createRoundEndedEvent
+  createCardStolenFromTrickEvent
 } from '@domain/events/GameEvents.js'
 
 export function setupRoundHandlers(io: Server, socket: Socket) {
@@ -30,19 +29,7 @@ socket.on('round:start', async ({ gameId }) => {
       io.to(gameId).emit('game:event', firstCardsEvent);
       
       // 3. Emitir cartas privadas a cada jugador individualmente
-      for (const [playerId, cards] of privateCards) {
-        const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
-        
-        // Encontrar el socket del jugador
-        const playerSocketId = Array.from(socketToPlayer.entries())
-          .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
-        
-        if (playerSocketId) {
-          io.to(playerSocketId).emit('game:event', privateEvent);
-        } else {
-          console.warn(`⚠️ Socket not found for player ${playerId}`);
-        }
-      }
+      emitPrivateCards(io, gameId, privateCards);
       
       console.log('✅ ROUND_STARTED');
       
@@ -161,16 +148,7 @@ socket.on('round:start', async ({ gameId }) => {
             
             io.to(gameId).emit('game:event', result.setupEvent);
             io.to(gameId).emit('game:event', result.firstCardsEvent);
-            
-            for (const [playerId, cards] of result.privateCards) {
-              const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
-              const playerSocketId = Array.from(socketToPlayer.entries())
-                .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
-              
-              if (playerSocketId) {
-                io.to(playerSocketId).emit('game:event', privateEvent);
-              }
-            }
+            emitPrivateCards(io, gameId, result.privateCards);
             
             console.log(`✅ ROUND_AUTO_STARTED: ${result.game.round.round}`);
           } catch (error: any) {
@@ -279,61 +257,13 @@ socket.on('round:start', async ({ gameId }) => {
         
         setTimeout(async () => {
           try {
-            const updatedGame = await GameModel.findOne({ gameId });
-            if (!updatedGame) throw new Error('Game not found');
+            const { roundEndedEvent, gameEndedEvent } = await RoundService.finishRound(gameId);
 
-            // Calcular scores del round
-            const { getPlayerScoreFromRound } = await import('@domain/rules/BidRules');
-            const roundScores: Partial<Record<PlayerId, number>> = {};
-            
-            for (const playerId of updatedGame.activePlayers) {
-              const scoreFromRound = getPlayerScoreFromRound(updatedGame, playerId);
-              roundScores[playerId] = scoreFromRound;
-              
-              const playerScore = updatedGame.playerScores.find(ps => ps.playerId === playerId);
-              if (playerScore) {
-                playerScore.score += scoreFromRound;
-              } else {
-                updatedGame.playerScores.push({ playerId, score: scoreFromRound });
-              }
-            }
-
-            // Resetear lista de ready players para el próximo round
-            updatedGame.round.playersReadyForNextRound = [];
-            await updatedGame.save();
-            
-            console.log(`� Round ${updatedGame.round.round} scores calculated:`, roundScores);
-            
-            // Verificar si el juego terminó
-            const { hasGameEnded, getWinnerName } = await import('@domain/rules/GameEndRules');
-            const gameEndCheck = hasGameEnded(updatedGame);
-
-            if (gameEndCheck.hasEnded && gameEndCheck.winner) {
-              console.log(`🏆 Game ended! Winner: ${gameEndCheck.winner}`);
-              
-              updatedGame.gamePhase = 'ended';
-              updatedGame.winner = gameEndCheck.winner;
-              await updatedGame.save();
-              
-              const { createGameEndedEvent } = await import('@domain/events/GameEvents');
-              const winnerName = getWinnerName(gameEndCheck.winner);
-              const gameEndedEvent = createGameEndedEvent(
-                gameEndCheck.winner,
-                winnerName,
-                updatedGame.playerScores
-              );
-              
+            if (gameEndedEvent) {
               io.to(gameId).emit('game:event', gameEndedEvent);
               return;
             }
-            
-            // Emitir ROUND_ENDED para mostrar modal
-            const roundEndedEvent = createRoundEndedEvent(
-              updatedGame.round.round,
-              roundScores as Record<PlayerId, number>,
-              updatedGame.playerScores
-            );
-            
+
             io.to(gameId).emit('game:event', roundEndedEvent);
             console.log(`📢 ROUND_ENDED event emitted, waiting for all players to be ready...`);
             
@@ -466,27 +396,10 @@ socket.on('round:start', async ({ gameId }) => {
             
             io.to(gameId).emit('game:event', result.setupEvent);
             io.to(gameId).emit('game:event', result.firstCardsEvent);
-            
-            for (const [playerId, cards] of result.privateCards) {
-              const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
-              const playerSocketId = Array.from(socketToPlayer.entries())
-                .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
-              
-              if (playerSocketId) {
-                io.to(playerSocketId).emit('game:event', privateEvent);
-              }
-            }
+            emitPrivateCards(io, gameId, result.privateCards);
 
             // Enviar estado completo a cada jugador para garantizar sincronización
-            for (const [socketId, data] of socketToPlayer.entries()) {
-              if (data.gameId === gameId) {
-                const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
-                io.to(socketId).emit('game:stateUpdate', {
-                  publicGameState: publicState,
-                  privateGameState: privateState
-                });
-              }
-            }
+            await emitFullStateToGamePlayers(io, gameId);
             
             console.log(`✅ Round ${result.game.round.round} started after all players ready`);
           } catch (error: any) {

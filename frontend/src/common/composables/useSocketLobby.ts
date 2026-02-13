@@ -1,5 +1,4 @@
 import { useSocket } from './useSocket';
-import { useRouter } from 'vue-router';
 import type { PlayerId } from '@domain/interfaces/Player';
 
 export interface LobbyJoinPayload {
@@ -27,7 +26,6 @@ export interface GameStartedPayload {
 
 export function useSocketLobby() {
   const socket = useSocket();
-  const router = useRouter();
 
   return {
     // Lobby list management
@@ -78,17 +76,6 @@ export function useSocketLobby() {
 
     deleteGameByHost: (gameId: string) => {
       socket.emit('game:deleted-by-host', { gameId });
-    },
-
-    // Navegación integrada
-    startGameAndNavigate: (gameId: string) => {
-      socket.on('game:started', (_payload: GameStartedPayload) => {
-        router.push(`/game/${gameId}`);
-      });
-    },
-
-    cleanupGameStartedListener: () => {
-      socket.off('game:started');
     }
   };
 }

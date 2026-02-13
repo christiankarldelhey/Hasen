@@ -3,8 +3,7 @@ import { GameModel } from '../models/Game.js'
 import { GameService } from '../services/GameService.js'
 import { RoundService } from '../services/RoundService.js'
 import { PlayerId } from '../../../domain/interfaces/Player'
-import { createRemainingCardsDealtEvent } from '@domain/events/GameEvents.js'
-import { socketToPlayer } from '../socket/handlers/lobbyHandlers.js'
+import { GameSocketPublisher } from '../socket/services/gameSocketPublisher.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
@@ -18,7 +17,7 @@ export const createGame = async (req: Request, res: Response) => {
     
     // Emitir evento de socket para que todos en lobby-list vean el nuevo room
     const io = req.app.get('io');
-    io.to('lobby-list').emit('lobby:room-created', {
+    GameSocketPublisher.publishLobbyRoomCreated(io, {
       gameId: newGame.gameId,
       gameName: gameName,
       hostPlayer: newGame.hostPlayer,
@@ -108,10 +107,7 @@ export const joinGame = async (req: Request, res: Response) => {
     
     // Emitir evento de socket para actualizar contadores en tiempo real
     const io = req.app.get('io');
-    io.to('lobby-list').emit('lobby:player-count-changed', {
-      gameId: game.gameId,
-      currentPlayers: game.activePlayers.length
-    });
+    GameSocketPublisher.publishLobbyPlayerCountChanged(io, game.gameId, game.activePlayers.length);
     
     res.status(200).json({
       success: true,
@@ -146,7 +142,7 @@ export const startGame = async (req: Request, res: Response) => {
     const { game: updatedGame, event } = await GameService.startGame(gameId);
 
     const io = req.app.get('io');
-    io.to(gameId).emit('game:started', {
+    GameSocketPublisher.publishGameStarted(io, {
       gameId: updatedGame.gameId,
       gamePhase: updatedGame.gamePhase,
       activePlayers: updatedGame.activePlayers,
@@ -154,39 +150,16 @@ export const startGame = async (req: Request, res: Response) => {
     });
     
     if (event) {
-      io.to(gameId).emit('game:event', event);
+      GameSocketPublisher.publishGameEvent(io, gameId, event);
     }
 
     const { game: gameWithRound, setupEvent, firstCardsEvent, privateCards } = 
       await RoundService.startNewRound(gameId);
     
-    io.to(gameId).emit('game:event', setupEvent);
-    io.to(gameId).emit('game:event', firstCardsEvent);
-    
-    for (const [playerId, cards] of privateCards) {
-      const privateEvent = createRemainingCardsDealtEvent(playerId, cards);
-      
-      const playerSocketId = Array.from(socketToPlayer.entries())
-        .find(([_, data]) => data.gameId === gameId && data.playerId === playerId)?.[0];
-      
-      if (playerSocketId) {
-        io.to(playerSocketId).emit('game:event', privateEvent);
-        console.log(`🎴 Sent private cards to ${playerId}`);
-      } else {
-        console.warn(`⚠️ Socket not found for player ${playerId}`);
-      }
-    }
-    
+    GameSocketPublisher.publishRoundSetup(io, gameId, setupEvent, firstCardsEvent, privateCards);
+
     // Enviar estado actualizado del juego con playerTurn y fase player_drawing
-    for (const [socketId, data] of socketToPlayer.entries()) {
-      if (data.gameId === gameId) {
-        const { publicState, privateState } = await GameService.getPlayerGameState(gameId, data.userId);
-        io.to(socketId).emit('game:stateUpdate', {
-          publicGameState: publicState,
-          privateGameState: privateState
-        });
-      }
-    }
+    await GameSocketPublisher.publishGameStateSync(io, gameId);
 
     res.status(200).json({
       success: true,
