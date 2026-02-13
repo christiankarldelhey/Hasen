@@ -31,10 +31,21 @@ export function useDealAnimation(options: DealAnimationOptions) {
       const start = Date.now()
       const check = () => {
         if (keys.every(k => coords.getRect(k) !== null)) {
+          console.log('[deal-debug] waitForCoords:ready', {
+            keys,
+            waitedMs: Date.now() - start
+          })
           resolve(true)
           return
         }
         if (Date.now() - start >= maxWait) {
+          const missingKeys = keys.filter((k) => coords.getRect(k) === null)
+          console.warn('[deal-debug] waitForCoords:timeout', {
+            keys,
+            missingKeys,
+            waitedMs: Date.now() - start,
+            maxWait
+          })
           resolve(false)
           return
         }
@@ -45,13 +56,24 @@ export function useDealAnimation(options: DealAnimationOptions) {
   }
 
   async function startDeal(playerKeys: string[], cardsPerPlayer = 5): Promise<void> {
+    console.log('[deal-debug] startDeal:called', {
+      playerKeys,
+      cardsPerPlayer
+    })
+
     const allKeys = ['deck', ...playerKeys]
     const ready = await waitForCoords(allKeys)
-    if (!ready) return
+    if (!ready) {
+      console.warn('[deal-debug] startDeal:aborted_not_ready', {
+        allKeys
+      })
+      return
+    }
 
     return new Promise((resolve) => {
       const deckRect = coords.getRect('deck')
       if (!deckRect) {
+        console.warn('[deal-debug] startDeal:aborted_missing_deck_rect')
         resolve()
         return
       }
@@ -96,9 +118,24 @@ export function useDealAnimation(options: DealAnimationOptions) {
       }
 
       if (cards.length === 0) {
+        console.warn('[deal-debug] startDeal:aborted_no_cards_generated', {
+          playerKeys,
+          cardsPerPlayer
+        })
         resolve()
         return
       }
+
+      const cardsPerTarget = cards.reduce<Record<string, number>>((acc, card) => {
+        acc[card.targetKey] = (acc[card.targetKey] ?? 0) + 1
+        return acc
+      }, {})
+
+      console.log('[deal-debug] startDeal:cards_generated', {
+        totalCards: cards.length,
+        cardsPerTarget,
+        totalTime: (cards.length - 1) * cardDelay + cardDuration + 200
+      })
 
       isDealing.value = true
       animatedCards.value = cards

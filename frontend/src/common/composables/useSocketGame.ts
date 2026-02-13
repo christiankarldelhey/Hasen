@@ -19,7 +19,11 @@ export function useSocketGame() {
       socket.on('game:event', callback);
     },
 
-    offGameEvent: () => {
+    offGameEvent: (callback?: (event: GameEvent) => void) => {
+      if (callback) {
+        socket.off('game:event', callback);
+        return;
+      }
       socket.off('game:event');
     },
 

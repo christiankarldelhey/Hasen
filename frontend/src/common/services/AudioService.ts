@@ -108,6 +108,9 @@ class AudioService {
   playMusic(track: MusicTrack, loop: boolean = true): void {
     if (!this.settings.musicEnabled) return;
 
+    // Temporary: keep lobby music disabled during local testing.
+    if (track === 'lobby') return;
+
     if (this.currentTrack === track && this.musicAudio && !this.musicAudio.paused) {
       return;
     }

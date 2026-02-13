@@ -15,7 +15,7 @@ import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
 import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.vue';
 import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/features/Animations';
-import type { GameEvent, CardPlayedEvent, TrickCompletedEvent } from '@domain/events/GameEvents';
+import type { GameEvent, CardPlayedEvent, TrickCompletedEvent, FirstCardDealtEvent } from '@domain/events/GameEvents';
 import { useHasenStore } from '@/stores/hasenStore';
 import { usePlayerConnection, GamePausedOverlay } from '@/features/PlayerConnection';
 
@@ -85,15 +85,47 @@ provide('specialCards', {
 provide('isDealing', isDealing);
 provide('dealProgress', dealProgress);
 
-function triggerDealAnimation() {
-  // Small delay to ensure components have mounted and registered coords
-  setTimeout(() => {
-    const playerKeys = ['player-hand']
-    for (const op of opponentPositions.value) {
-      playerKeys.push(`opponent-${op.position}`)
+function getDealPlayerKeys() {
+  const playerKeys = ['player-hand']
+  for (const op of opponentPositions.value) {
+    playerKeys.push(`opponent-${op.position}`)
+  }
+  return playerKeys
+}
+
+async function triggerDealAnimation(expectedOpponents: number) {
+  console.log('[deal-debug] triggerDealAnimation:start', {
+    expectedOpponents,
+    activePlayers: gameStore.publicGameState?.activePlayers,
+    opponentPositions: opponentPositions.value.map((op) => op.position)
+  })
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await nextTick()
+    console.log('[deal-debug] triggerDealAnimation:attempt', {
+      attempt,
+      currentOpponents: opponentPositions.value.length,
+      expectedOpponents,
+      positions: opponentPositions.value.map((op) => op.position)
+    })
+
+    if (opponentPositions.value.length >= expectedOpponents) {
+      console.log('[deal-debug] triggerDealAnimation:ready', {
+        attempt,
+        keys: getDealPlayerKeys()
+      })
+      await startDeal(getDealPlayerKeys())
+      return
     }
-    startDeal(playerKeys)
-  }, 100)
+    await new Promise((resolve) => setTimeout(resolve, 75))
+  }
+
+  console.warn('[deal-debug] triggerDealAnimation:timeout -> fallback startDeal', {
+    expectedOpponents,
+    finalOpponents: opponentPositions.value.length,
+    keys: getDealPlayerKeys()
+  })
+  await startDeal(getDealPlayerKeys())
 }
 
 // Modal de Round Ended
@@ -159,7 +191,16 @@ const handleGameEvent = async (event: GameEvent) => {
   }
   // Animar reparto de cartas después de que opponentPositions esté populado
   if (event.type === 'FIRST_CARD_DEALT') {
-    triggerDealAnimation();
+    const payload = (event as FirstCardDealtEvent).payload
+    const expectedOpponents = Math.max(0, payload.firstCards.length - 1)
+
+    console.log('[deal-debug] FIRST_CARD_DEALT received', {
+      round: payload.round,
+      firstCardsPlayers: payload.firstCards.map((fc) => fc.playerId),
+      expectedOpponents
+    })
+
+    await triggerDealAnimation(expectedOpponents);
   }
 };
 
@@ -178,7 +219,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  socketGame.offGameEvent();
+  socketGame.offGameEvent(handleGameEvent);
   cleanupConnectionListeners();
 });
 

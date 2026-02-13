@@ -140,10 +140,13 @@ export function canMakeBid(
     }
   }
 
-  if (!game.round.currentTrick || game.round.currentTrick.trick_state !== 'in_progress') {
+  const trickState = game.round.currentTrick?.trick_state
+  const isBidWindowOpen = trickState === 'in_progress' || trickState === 'resolve'
+
+  if (!game.round.currentTrick || !isBidWindowOpen) {
     return {
       canMakeBid: false,
-      reason: 'Trick must be in progress to make a bid'
+      reason: 'Trick must be active to make a bid'
     }
   }
 
