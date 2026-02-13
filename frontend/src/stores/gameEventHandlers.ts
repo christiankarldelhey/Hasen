@@ -338,6 +338,24 @@ const handleCardReplacementSkipped: GameEventHandler = (event, context) => {
   
   const payload = (event as CardReplacementSkippedEvent).payload
   context.publicGameState.round.playerTurn = payload.nextPlayerId
+
+  const hasPlayerScore = context.publicGameState.playerScores.some(
+    score => score.playerId === payload.playerId
+  )
+
+  context.publicGameState.playerScores = hasPlayerScore
+    ? context.publicGameState.playerScores.map(score =>
+        score.playerId === payload.playerId
+          ? { ...score, score: payload.playerGameScore }
+          : score
+      )
+    : [
+        ...context.publicGameState.playerScores,
+        {
+          playerId: payload.playerId,
+          score: payload.playerGameScore
+        }
+      ]
   
   console.log(`⏭️ CARD_REPLACEMENT_SKIPPED: ${payload.playerId}`)
 }

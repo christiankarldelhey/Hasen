@@ -417,16 +417,20 @@ export interface CardReplacementSkippedEvent {
     playerId: PlayerId
     round: number
     nextPlayerId: PlayerId
+    awardedPoints: number
+    playerGameScore: number
   }
 }
 export function createCardReplacementSkippedEvent(
   playerId: PlayerId,
   round: number,
-  nextPlayerId: PlayerId
+  nextPlayerId: PlayerId,
+  awardedPoints: number,
+  playerGameScore: number
 ): CardReplacementSkippedEvent {
   return {
     type: 'CARD_REPLACEMENT_SKIPPED',
-    payload: { playerId, round, nextPlayerId }
+    payload: { playerId, round, nextPlayerId, awardedPoints, playerGameScore }
   }
 }
 

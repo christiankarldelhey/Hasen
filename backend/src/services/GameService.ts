@@ -15,6 +15,21 @@ import { TrickService } from './TrickService.js'
 
 export class GameService {
   
+  private static readonly SKIP_CARD_REPLACEMENT_POINTS = 3
+
+  private static applySkipCardReplacementBonus(game: Game, playerId: PlayerId): { awardedPoints: number; playerGameScore: number } {
+    const awardedPoints = this.SKIP_CARD_REPLACEMENT_POINTS
+    const playerScore = game.playerScores.find(ps => ps.playerId === playerId)
+
+    if (playerScore) {
+      playerScore.score += awardedPoints
+      return { awardedPoints, playerGameScore: playerScore.score }
+    }
+
+    game.playerScores.push({ playerId, score: awardedPoints })
+    return { awardedPoints, playerGameScore: awardedPoints }
+  }
+
   static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string, maxPlayers?: number, pointsToWin?: number) {
     console.log("Creating game");
     const gameId = uuidv4();
@@ -331,6 +346,8 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     if (!validation.valid) {
       throw new Error(validation.reason);
     }
+
+    const { awardedPoints, playerGameScore } = this.applySkipCardReplacementBonus(game, playerId)
     
     const nextPlayer = this.advancePlayerTurn(game);
     
@@ -346,7 +363,9 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
       const event = createCardReplacementSkippedEvent(
         playerId,
         game.round.round,
-        nextPlayer
+        nextPlayer,
+        awardedPoints,
+        playerGameScore
       );
       
       return { game: updatedGame, event, trickEvent };
@@ -357,7 +376,9 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     const event = createCardReplacementSkippedEvent(
       playerId,
       game.round.round,
-      nextPlayer
+      nextPlayer,
+      awardedPoints,
+      playerGameScore
     );
     
     return { game, event };
