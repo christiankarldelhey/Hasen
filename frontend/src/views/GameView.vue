@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, provide, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
@@ -136,9 +136,13 @@ const handleGameEvent = async (event: GameEvent) => {
 
   if (event.type === 'ROUND_ENDED') {
     console.log('🎯 ROUND_ENDED');
-    showRoundEndedModal.value = true;
-    readyPlayers.value = [];
-    totalPlayers.value = gameStore.publicGameState?.activePlayers.length || 0;
+    
+    // Let gameStore handle state first, then open modal with nextTick
+    nextTick(() => {
+      showRoundEndedModal.value = true;
+      readyPlayers.value = [];
+      totalPlayers.value = gameStore.publicGameState?.activePlayers.length || 0;
+    });
   }
   // Actualizar estado de ready players
   if (event.type === 'PLAYERS_READY_STATUS') {

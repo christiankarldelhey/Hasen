@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref, computed } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import type { Round } from '@domain/interfaces/Round'
-import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
-import { isWinningBid } from '@domain/rules/BidRules'
+import { useRoundScore } from '@/features/Score/composables/useRoundScore'
+import { useGameStore } from '@/stores/gameStore'
 import BaseModal from '@/common/components/BaseModal.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 import PlayerNameLabel from '@/common/components/PlayerNameLabel.vue'
@@ -46,117 +46,59 @@ const isPlayerReady = (playerId: PlayerId) => {
   return props.readyPlayers.includes(playerId)
 }
 
-interface PlayerBidInfo {
-  playerId: PlayerId
-  playerName: string
-  playerColor: string
-  bids: {
-    bid: Bid
-    bidEntry: PlayerBidEntry
-    isWinning: boolean | null
-    score: number
-  }[]
-  totalScore: number
-}
+const { playersResults } = useRoundScore()
+const gameStore = useGameStore()
 
-const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
-  if (!props.round) return []
+// Determinar si debemos mostrar resultados o espera
+const shouldShowResults = computed(() => {
+  // Siempre mostrar resultados si hay datos del round
+  const hasRoundData = gameStore.publicGameState?.round?.roundPhase === 'scoring'
+  const hasPlayersResults = playersResults.value.length > 0
 
-  const playersInfo: PlayerBidInfo[] = []
-
-  AVAILABLE_PLAYERS.forEach(player => {
-    const playerBidEntries = props.round!.roundBids.playerBids[player.id] || []
-    const playerRoundScore = props.round!.roundScore.find(s => s.playerId === player.id)
-    
-    if (!playerRoundScore) return
-
-    const bidsInfo = playerBidEntries.map(bidEntry => {
-      const bid = props.round!.roundBids.bids.find(b => b.bid_id === bidEntry.bidId)
-      if (!bid) return null
-
-      const isWinning = isWinningBid(bid, playerRoundScore, true)
-      let score = 0
-
-      if (isWinning === true) {
-        if (bid.bid_type === 'set_collection') {
-          const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
-          const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-          const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
-          const penaltyPerCard = Math.abs(bidEntry.onLose)
-          score = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
-        } else {
-          score = bid.bid_score
-        }
-      } else if (isWinning === false) {
-        if (bid.bid_type === 'set_collection') {
-          const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
-          const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-          const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
-          const penaltyPerCard = Math.abs(bidEntry.onLose)
-          const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
-          
-          if (netPoints >= -9 && netPoints <= 9) {
-            score = -10
-          } else {
-            score = netPoints
-          }
-        } else {
-          score = bidEntry.onLose
-        }
-      }
-
-      return {
-        bid,
-        bidEntry,
-        isWinning,
-        score
-      }
-    }).filter(b => b !== null) as any[]
-
-    // Si el jugador NO hizo apuestas, usar card points como fallback
-    // Si hizo apuestas, solo sumar bid scores
-    const totalScore = playerBidEntries.length === 0 
-      ? playerRoundScore.points 
-      : bidsInfo.reduce((sum, b) => sum + b.score, 0)
-
-    playersInfo.push({
-      playerId: player.id,
-      playerName: player.name,
-      playerColor: player.color,
-      bids: bidsInfo,
-      totalScore
-    })
-  })
-
-  return playersInfo.sort((a, b) => b.totalScore - a.totalScore)
+  // Mostrar resultados si hay datos del round Y no estamos esperando explícitamente
+  return (hasRoundData && hasPlayersResults) && !isWaiting.value
 })
+
 </script>
 
 <template>
-  <BaseModal :isOpen="isOpen" :title="isWaiting ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="handleClose">
+  <BaseModal :isOpen="isOpen" :title="!shouldShowResults ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="handleClose">
     <!-- Estado: Mostrando resultados -->
-    <div v-if="!isWaiting" class="space-y-4">
+    <div v-if="shouldShowResults" class="space-y-4">
       <!-- Player Results -->
-      <div v-for="playerInfo in playerBidsInfo" :key="playerInfo.playerId" class="space-y-2">
+      <div v-for="playerInfo in playersResults" :key="playerInfo.playerId" class="space-y-2">
         <!-- Player Header -->
-        <div class="flex items-center gap-3 pb-2 border-b border-hasen-dark/20">
+        <div class="flex items-center gap-3 pb-2">
           <PlayerAvatar :playerId="playerInfo.playerId" size="small" />
           <div class="flex-1">
             <h3 class="font-bold text-lg">
               <PlayerNameLabel :playerId="playerInfo.playerId" :showYou="false" size="large" />
             </h3>
-            <p class="text-sm text-hasen-dark/70">
-              Total Score: <span class="font-bold" :style="{ color: playerInfo.playerColor }">{{ playerInfo.totalScore }}</span>
-            </p>
+            <div class="text-sm text-hasen-dark/70 flex flex-row justify-between items-center gap-2">
+              <div>
+                Round Score: 
+                <span :class="playerInfo.roundScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
+                  {{ playerInfo.roundScore }}
+                </span>
+              </div>
+              
+              <div>
+                 Total Score: 
+                <span :class="playerInfo.totalScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
+                  {{ playerInfo.totalScore }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Player Bids -->
-        <div v-if="playerInfo.bids.length > 0" class="space-y-2 pl-4">
+        <div v-if="playerInfo.hasBids" class="space-y-2">
           <div 
             v-for="(bidInfo, index) in playerInfo.bids" 
             :key="index"
-            class="flex items-center justify-between p-2 rounded-lg bg-hasen-dark/5"
+            :class="['flex items-center justify-between p-2 rounded-lg', 
+              bidInfo.isWinning === true ? 'bg-hasen-green/20 text-hasen-green' : 'bg-hasen-red/20 text-hasen-red']"
           >
             <div class="flex items-center gap-2 flex-1">
               <BidWinCondition 
@@ -165,13 +107,7 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
               />
             </div>
             <div class="flex items-center gap-2">
-              <span 
-                :class="[
-                  'font-bold text-sm px-2 py-1 rounded',
-                  bidInfo.isWinning === true ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'
-                ]"
-              >
-                {{ bidInfo.isWinning === true ? '✓' : '✗' }}
+              <span class="font-bold px-2 py-1 rounded text-lg text-hasen-dark/70" >
                 {{ bidInfo.score > 0 ? '+' : '' }}{{ bidInfo.score }}
               </span>
             </div>
@@ -179,9 +115,15 @@ const playerBidsInfo = computed<PlayerBidInfo[]>(() => {
         </div>
 
         <!-- No Bids Message -->
-        <div v-else class="pl-4 text-sm text-hasen-dark/50 italic">
-          No bids made
-        </div>
+         <div v-else 
+          class="flex items-center justify-between px-2 rounded-lg bg-hasen-base border border-hasen-dark/20 py-3">
+          <div class="pl-2 text-md text-hasen-dark/70 italic">
+            Card Points (no bids)
+          </div>
+          <div class="font-bold px-2 rounded text-lg text-hasen-dark/70">
+            {{ playerInfo.cardPoints > 0 ? '+' : '' }}{{ playerInfo.cardPoints }}
+          </div>
+         </div>
       </div>
     </div>
 

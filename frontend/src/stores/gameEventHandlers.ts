@@ -274,6 +274,9 @@ const handleRoundEnded: GameEventHandler = (event, context) => {
   
   const payload = (event as RoundEndedEvent).payload
   
+  // Update round phase to scoring
+  context.publicGameState.round.roundPhase = 'scoring'
+  
   // Update accumulated player scores if provided
   if (payload.playerScores) {
     context.publicGameState.playerScores = payload.playerScores
