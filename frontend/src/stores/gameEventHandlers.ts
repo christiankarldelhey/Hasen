@@ -92,10 +92,16 @@ const handleRemainingCardsDealtPrivate: GameEventHandler = (event, context) => {
   
   const payload = (event as RemainingCardsDealtEvent).payload
   if (context.privateGameState.playerId !== payload.playerId) return
-  
+
+  const currentHand = context.privateGameState.hand || []
+  const existingCardIds = new Set(currentHand.map(card => card.id))
+  const newCards = payload.cards.filter(card => !existingCardIds.has(card.id))
+
+  if (newCards.length === 0) return
+
   context.privateGameState.hand = [
-    ...(context.privateGameState.hand || []),
-    ...payload.cards
+    ...currentHand,
+    ...newCards
   ]
   
   audioService.playSoundEffect('dealCards')
