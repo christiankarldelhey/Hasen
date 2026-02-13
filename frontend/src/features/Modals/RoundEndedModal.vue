@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import type { Round } from '@domain/interfaces/Round'
 import { useRoundScore } from '@/features/Score/composables/useRoundScore'
@@ -27,6 +27,17 @@ const emit = defineEmits<{
 }>()
 
 const isWaiting = ref(false)
+
+// Reset local waiting state each time the modal is opened for a new round.
+// Without this, a previous round's "waiting" state can leak into the next round.
+watch(
+  [() => props.isOpen, () => props.round?.round],
+  ([isOpen]) => {
+    if (isOpen) {
+      isWaiting.value = false
+    }
+  }
+)
 
 const handleContinue = () => {
   isWaiting.value = true
