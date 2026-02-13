@@ -71,6 +71,10 @@ const {
   isPaused,
   pauseReason,
   disconnectedPlayerIds,
+  remainingSeconds,
+  interruptionReason,
+  interruptedPlayerId,
+  resetInterruption,
   setupListeners: setupConnectionListeners,
   cleanupListeners: cleanupConnectionListeners
 } = playerConnection;
@@ -230,10 +234,15 @@ const handleStartNewGame = () => {
   router.push('/');
 };
 
+const handleConfirmInterruption = () => {
+  resetInterruption();
+  router.push('/');
+};
+
 watch(
   () => gameStore.publicGameState?.gamePhase,
   (phase) => {
-    if (phase === 'ended') {
+    if (phase === 'ended' && !interruptionReason.value) {
       showRoundEndedModal.value = false;
       showGameEndedModal.value = true;
     }
@@ -303,6 +312,10 @@ onUnmounted(() => {
       :is-paused="isPaused"
       :pause-reason="pauseReason"
       :disconnected-player-ids="disconnectedPlayerIds"
+      :remaining-seconds="remainingSeconds"
+      :interruption-reason="interruptionReason"
+      :interrupted-player-id="interruptedPlayerId"
+      @confirm-interruption="handleConfirmInterruption"
     />
 
     <!-- Round Ended Modal -->

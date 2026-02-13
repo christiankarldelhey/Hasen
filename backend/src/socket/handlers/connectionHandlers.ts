@@ -2,8 +2,89 @@ import { Server, Socket } from 'socket.io'
 import { GameService } from '../../services/GameService.js'
 import { socketToPlayer } from './lobbyHandlers.js'
 import { GameModel } from '../../models/Game.js'
+import { PlayerId } from '@domain/interfaces/Player.js'
+
+const disconnectionTimers = new Map<string, NodeJS.Timeout>()
+
+const getDisconnectionTimerKey = (gameId: string, playerId: PlayerId) => `${gameId}:${playerId}`
+
+export function clearDisconnectionTimeout(gameId: string, playerId: PlayerId) {
+  const key = getDisconnectionTimerKey(gameId, playerId)
+  const timer = disconnectionTimers.get(key)
+  if (!timer) {
+    return
+  }
+
+  clearTimeout(timer)
+  disconnectionTimers.delete(key)
+}
+
+function scheduleDisconnectionTimeout(io: Server, gameId: string, playerId: PlayerId, timeoutMs: number) {
+  clearDisconnectionTimeout(gameId, playerId)
+
+  const key = getDisconnectionTimerKey(gameId, playerId)
+  const timer = setTimeout(async () => {
+    try {
+      const { timedOutPlayers } = await GameService.checkDisconnectionTimeouts(gameId)
+      if (!timedOutPlayers.includes(playerId)) {
+        disconnectionTimers.delete(key)
+        return
+      }
+
+      const result = await GameService.interruptGame(gameId, 'player_disconnect_timeout', playerId)
+      if (!result.interrupted) {
+        disconnectionTimers.delete(key)
+        return
+      }
+
+      io.to(gameId).emit('game:interrupted', {
+        reason: 'player_disconnect_timeout',
+        playerId,
+      })
+
+      const updatedState = await GameService.getPlayerGameState(gameId)
+      io.to(gameId).emit('game:stateUpdate', {
+        publicGameState: updatedState.publicState,
+      })
+    } catch (error) {
+      console.error('Error in disconnection timeout handler:', error)
+    } finally {
+      disconnectionTimers.delete(key)
+    }
+  }, timeoutMs)
+
+  disconnectionTimers.set(key, timer)
+}
 
 export function setupConnectionHandlers(io: Server, socket: Socket) {
+
+socket.on('game:leave-match', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
+  try {
+    console.log(`🚪 Player ${playerId} left active match ${gameId}`)
+
+    socket.leave(gameId)
+    socketToPlayer.delete(socket.id)
+    clearDisconnectionTimeout(gameId, playerId)
+
+    const result = await GameService.interruptGame(gameId, 'player_left_game', playerId)
+    if (!result.interrupted) {
+      return
+    }
+
+    io.to(gameId).emit('game:interrupted', {
+      reason: 'player_left_game',
+      playerId,
+      userId
+    })
+
+    const updatedState = await GameService.getPlayerGameState(gameId)
+    io.to(gameId).emit('game:stateUpdate', {
+      publicGameState: updatedState.publicState
+    })
+  } catch (error) {
+    console.error('Error handling game:leave-match:', error)
+  }
+})
   
 socket.on('disconnect', async () => {
   console.log(`❌ Client disconnected: ${socket.id}`)
@@ -41,6 +122,9 @@ socket.on('disconnect', async () => {
           isPaused: result.shouldPause,
           disconnectedAt: Date.now()
         })
+
+        const timeoutMs = game.gameSettings.reconnectionTimeoutMinutes * 60 * 1000
+        scheduleDisconnectionTimeout(io, gameId, playerId, timeoutMs)
         
         // Actualizar estado del juego
         const updatedState = await GameService.getPlayerGameState(gameId)

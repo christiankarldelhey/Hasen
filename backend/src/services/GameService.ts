@@ -73,7 +73,8 @@ export class GameService {
       gameSettings: {
         minPlayers: 2,
         maxPlayers: maxPlayers || 4,
-        pointsToWin: pointsToWin || 300
+        pointsToWin: pointsToWin || 300,
+        reconnectionTimeoutMinutes: 3
       }
     });
     
@@ -317,6 +318,42 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     await game.save();
     
     return { game, winnerId: winnerId || null };
+  }
+
+  static async interruptGame(
+    gameId: string,
+    reason: 'player_left_game' | 'player_disconnect_timeout',
+    affectedPlayerId: PlayerId
+  ) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+
+    if (game.gamePhase === 'ended') {
+      return {
+        game,
+        interrupted: false,
+      };
+    }
+
+    game.gamePhase = 'ended';
+    game.isPaused = false;
+    game.pauseReason = null;
+    game.winner = null;
+
+    if (game.disconnectionTimestamps) {
+      game.disconnectionTimestamps.clear();
+    }
+
+    await game.save();
+
+    return {
+      game,
+      interrupted: true,
+      interruptionPayload: {
+        reason,
+        playerId: affectedPlayerId,
+      },
+    };
   }
 
   static advancePlayerTurn(game: Game): PlayerId {

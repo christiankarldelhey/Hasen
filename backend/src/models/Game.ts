@@ -174,7 +174,7 @@ const GameSchema = new Schema<GameDocument>({
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
     pointsToWin: { type: Number, required: true, default: 300 },
-    reconnectionTimeoutMinutes: { type: Number, required: true, default: 5 }
+    reconnectionTimeoutMinutes: { type: Number, required: true, default: 3 }
   },
   playerConnectionStatus: {
     type: Map,
