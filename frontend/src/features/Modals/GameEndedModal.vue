@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import type { PlayerScore } from '@domain/interfaces/Game'
+import { useI18n } from '@/common/composables/useI18n'
 import BaseModal from '@/common/components/BaseModal.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   close: []
@@ -35,7 +37,7 @@ const rankedPlayers = computed<PlayerRankInfo[]>(() => {
     
     return {
       playerId: playerScore.playerId,
-      playerName: player?.name || 'Player',
+      playerName: player?.name || t('common.player'),
       playerColor: player?.color || '#000000',
       score: playerScore.score,
       rank: index + 1,
@@ -55,7 +57,7 @@ const handleNewGame = () => {
 </script>
 
 <template>
-  <BaseModal :isOpen="isOpen" title="Game Has Ended" maxWidth="lg" @close="emit('close')">
+  <BaseModal :isOpen="isOpen" :title="t('game.gameEnded')" maxWidth="lg" @close="emit('close')">
     <!-- Winner Section -->
     <div v-if="winnerInfo" class="mb-6 text-center">
       <div class="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-xl border-2 border-yellow-400">
@@ -67,9 +69,9 @@ const handleNewGame = () => {
           </div>
         </div>
         <div>
-          <h3 class="text-2xl font-bold text-hasen-dark mb-1">{{ winnerInfo.playerName }} Wins!</h3>
+          <h3 class="text-2xl font-bold text-hasen-dark mb-1">{{ t('game.playerWins', { player: winnerInfo.playerName }) }}</h3>
           <p class="text-lg font-semibold" :style="{ color: winnerInfo.playerColor }">
-            {{ winnerInfo.score }} points
+            {{ winnerInfo.score }} {{ t('common.points') }}
           </p>
         </div>
       </div>
@@ -77,7 +79,7 @@ const handleNewGame = () => {
 
     <!-- Rankings -->
     <div class="space-y-3">
-      <h4 class="font-bold text-lg text-hasen-dark mb-3">Final Rankings</h4>
+      <h4 class="font-bold text-lg text-hasen-dark mb-3">{{ t('game.finalRankings') }}</h4>
       
       <div 
         v-for="playerInfo in rankedPlayers" 
@@ -116,7 +118,7 @@ const handleNewGame = () => {
           >
             {{ playerInfo.score }}
           </span>
-          <span class="text-sm text-hasen-dark/50 ml-1">pts</span>
+          <span class="text-sm text-hasen-dark/50 ml-1">{{ t('common.pointsShort') }}</span>
         </div>
       </div>
     </div>
@@ -127,13 +129,13 @@ const handleNewGame = () => {
           @click="emit('close')"
           class="px-6 py-2 bg-hasen-dark/10 text-hasen-dark rounded-lg font-semibold hover:bg-hasen-dark/20 transition-colors"
         >
-          Close
+          {{ t('common.close') }}
         </button>
         <button 
           @click="handleNewGame"
           class="px-6 py-2 bg-hasen-dark text-hasen-base rounded-lg font-semibold hover:bg-hasen-dark/80 transition-colors"
         >
-          New Game
+          {{ t('game.newGame') }}
         </button>
       </div>
     </template>

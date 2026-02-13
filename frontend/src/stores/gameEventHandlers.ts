@@ -432,14 +432,9 @@ const handleGameEnded: GameEventHandler = (event, context) => {
   
   context.publicGameState.gamePhase = 'ended'
   context.publicGameState.winner = payload.winnerId
+  context.publicGameState.playerScores = payload.finalScores
   
   console.log(`🏆 GAME_ENDED: Winner ${payload.winnerName}`)
-  
-  setTimeout(() => {
-    alert(`🎉 ¡${payload.winnerName} ha ganado el juego!\n\nPuntuación final:\n${payload.finalScores.map(s => `${s.playerId}: ${s.score} puntos`).join('\n')}`)
-    
-    window.location.href = '/'
-  }, 1000)
 }
 
 export const gameEventHandlers: Record<string, GameEventHandler> = {

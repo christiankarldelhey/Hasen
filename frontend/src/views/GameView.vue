@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, provide, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
 import { useGameStore } from '../stores/gameStore';
@@ -13,6 +13,7 @@ import GameLayout from '../layout/GameLayout.vue';
 import Trick from '@/features/Trick/Trick.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
+import GameEndedModal from '@/features/Modals/GameEndedModal.vue';
 import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.vue';
 import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/features/Animations';
 import type { GameEvent, CardPlayedEvent, TrickCompletedEvent, FirstCardDealtEvent } from '@domain/events/GameEvents';
@@ -20,6 +21,7 @@ import { useHasenStore } from '@/stores/hasenStore';
 import { usePlayerConnection, GamePausedOverlay } from '@/features/PlayerConnection';
 
 const route = useRoute();
+const router = useRouter();
 const gameId = route.params.gameId as string;
 const socketGame = useSocketGame();
 const gameStore = useGameStore();
@@ -130,6 +132,7 @@ async function triggerDealAnimation(expectedOpponents: number) {
 
 // Modal de Round Ended
 const showRoundEndedModal = ref(false);
+const showGameEndedModal = ref(false);
 const readyPlayers = ref<PlayerId[]>([]);
 const totalPlayers = ref(0);
 
@@ -176,6 +179,12 @@ const handleGameEvent = async (event: GameEvent) => {
       totalPlayers.value = gameStore.publicGameState?.activePlayers.length || 0;
     });
   }
+
+  if (event.type === 'GAME_ENDED') {
+    showRoundEndedModal.value = false;
+    showGameEndedModal.value = true;
+  }
+
   // Actualizar estado de ready players
   if (event.type === 'PLAYERS_READY_STATUS') {
     const payload = (event as any).payload;
@@ -211,6 +220,25 @@ const handleCloseRoundModal = () => {
 const handleContinueRound = () => {
   socketGame.readyForNextRound(gameId);
 };
+
+const handleCloseGameEndedModal = () => {
+  showGameEndedModal.value = false;
+};
+
+const handleStartNewGame = () => {
+  showGameEndedModal.value = false;
+  router.push('/');
+};
+
+watch(
+  () => gameStore.publicGameState?.gamePhase,
+  (phase) => {
+    if (phase === 'ended') {
+      showRoundEndedModal.value = false;
+      showGameEndedModal.value = true;
+    }
+  }
+);
 
 onMounted(() => {
   initialize();
@@ -285,6 +313,14 @@ onUnmounted(() => {
       :totalPlayers="totalPlayers"
       @close="handleCloseRoundModal"
       @continue="handleContinueRound"
+    />
+
+    <GameEndedModal
+      :isOpen="showGameEndedModal"
+      :playerScores="gameStore.publicGameState?.playerScores || []"
+      :winner="gameStore.publicGameState?.winner || null"
+      @close="handleCloseGameEndedModal"
+      @newGame="handleStartNewGame"
     />
   </GameLayout>
 </template>
