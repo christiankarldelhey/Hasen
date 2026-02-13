@@ -31,48 +31,30 @@ const isSelectable = computed(() =>
   specialCards?.isPlayerSelectable(props.playerId) ?? false
 )
 
+const opponentPublicInfo = computed(() => {
+  return gameStore.publicGameState?.opponentsPublicInfo.find(
+    info => info.playerId === props.playerId
+  )
+})
+
 const publicCard = computed(() => {
+  const roundPhase = gameStore.publicGameState?.round.roundPhase
+  if (roundPhase !== 'player_drawing') return null
   if (!props.publicCardId) return null
   const card = gameStore.publicGameState?.publicCards[props.publicCardId]
-  // Solo mostrar la carta si está en estado 'in_hand_visible'
   if (card && card.state === 'in_hand_visible') {
     return card
   }
   return null
 })
 
-const calculateCardCount = computed(() => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick
-  const trickNumber = currentTrick?.trick_number ?? 0
-  const roundPhase = gameStore.publicGameState?.round.roundPhase
-  
-  // Durante card replacement (trick 0)
-  if (roundPhase === 'player_drawing') {
-    // Si tiene public card visible: 4 cartas privadas + 1 pública
-    return publicCard.value ? 4 : 5
-  }
-  
-  // Durante los tricks (1-5)
-  // Empezamos con 5 cartas, restamos el número de tricks completados
-  let totalCards = 5 - (trickNumber - 1)
-  
-  // Verificar si el jugador ya jugó en el trick actual
-  const hasPlayedInCurrentTrick = currentTrick?.cards.some(cardId => {
-    const card = gameStore.publicGameState?.publicCards[cardId]
-    return card?.owner === props.playerId
-  })
-  
-  // Si ya jugó en el trick actual, restar 1 más
-  if (hasPlayedInCurrentTrick) {
-    totalCards -= 1
-  }
-  
-  return totalCards
+const totalHandCardsCount = computed(() => {
+  return opponentPublicInfo.value?.handCardsCount ?? 0
 })
 
 const privateHandsCount = computed(() => {
-  // Si tiene public card visible, restar 1 del total calculado
-  return publicCard.value ? calculateCardCount.value - 1 : calculateCardCount.value
+  const visiblePublicCardCount = publicCard.value ? 1 : 0
+  return Math.max(0, totalHandCardsCount.value - visiblePublicCardCount)
 })
 
 const positionClasses = computed(() => {

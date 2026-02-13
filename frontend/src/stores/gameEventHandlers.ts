@@ -159,6 +159,13 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
   
   // Agregar la carta al trick actual
   context.publicGameState.round.currentTrick.cards.push(payload.card.id)
+
+  const playedCardOwnerInfo = context.publicGameState.opponentsPublicInfo.find(
+    info => info.playerId === payload.playerId
+  )
+  if (playedCardOwnerInfo) {
+    playedCardOwnerInfo.handCardsCount = Math.max(0, playedCardOwnerInfo.handCardsCount - 1)
+  }
   
   // Determinar lead_suit si es la primera carta del trick
   if (context.publicGameState.round.currentTrick.cards.length === 1 && 
