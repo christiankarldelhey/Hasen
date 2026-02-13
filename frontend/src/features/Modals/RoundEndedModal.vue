@@ -4,6 +4,7 @@ import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
 import type { Round } from '@domain/interfaces/Round'
 import { useRoundScore } from '@/features/Score/composables/useRoundScore'
 import { useGameStore } from '@/stores/gameStore'
+import { useI18n } from '@/common/composables/useI18n'
 import BaseModal from '@/common/components/BaseModal.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 import PlayerNameLabel from '@/common/components/PlayerNameLabel.vue'
@@ -59,6 +60,7 @@ const isPlayerReady = (playerId: PlayerId) => {
 
 const { playersResults } = useRoundScore()
 const gameStore = useGameStore()
+const { t } = useI18n()
 
 // Determinar si debemos mostrar resultados o espera
 const shouldShowResults = computed(() => {
@@ -73,7 +75,7 @@ const shouldShowResults = computed(() => {
 </script>
 
 <template>
-  <BaseModal :isOpen="isOpen" :title="!shouldShowResults ? 'Waiting for Players' : 'Round Ended'" maxWidth="2xl" @close="handleClose">
+  <BaseModal :isOpen="isOpen" :title="!shouldShowResults ? t('game.waitingForPlayers') : t('game.roundEnded')" maxWidth="2xl" @close="handleClose">
     <!-- Estado: Mostrando resultados -->
     <div v-if="shouldShowResults" class="space-y-4">
       <!-- Player Results -->
@@ -87,14 +89,14 @@ const shouldShowResults = computed(() => {
             </h3>
             <div class="text-sm text-hasen-dark/70 flex flex-row justify-between items-center gap-2">
               <div>
-                Round Score: 
+                {{ t('game.roundScore') }}:
                 <span :class="playerInfo.roundScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
                   {{ playerInfo.roundScore }}
                 </span>
               </div>
               
               <div>
-                 Total Score: 
+                {{ t('common.totalScore') }}:
                 <span :class="playerInfo.totalScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
                   {{ playerInfo.totalScore }}
                 </span>
@@ -129,7 +131,7 @@ const shouldShowResults = computed(() => {
          <div v-else 
           class="flex items-center justify-between px-2 rounded-lg bg-hasen-base border border-hasen-dark/20 py-3">
           <div class="pl-2 text-md text-hasen-dark/70 italic">
-            Card Points (no bids)
+            {{ t('game.cardPointsNoBids') }}
           </div>
           <div class="font-bold px-2 rounded text-lg text-hasen-dark/70">
             {{ playerInfo.cardPoints > 0 ? '+' : '' }}{{ playerInfo.cardPoints }}
@@ -141,8 +143,8 @@ const shouldShowResults = computed(() => {
     <!-- Estado: Esperando jugadores -->
     <div v-else class="space-y-6 py-4">
       <div class="text-center">
-        <p class="text-lg text-hasen-dark/70 mb-2">Waiting for other players...</p>
-        <p class="text-sm font-bold text-hasen-dark">{{ readyPlayers.length }} / {{ totalPlayers }} players ready</p>
+        <p class="text-lg text-hasen-dark/70 mb-2">{{ t('game.waitingForOthers') }}</p>
+        <p class="text-sm font-bold text-hasen-dark">{{ t('game.playersReady', { count: readyPlayers.length, total: totalPlayers }) }}</p>
       </div>
 
       <!-- Lista de jugadores con estado ready -->
@@ -170,10 +172,10 @@ const shouldShowResults = computed(() => {
           @click="handleContinue"
           class="px-6 py-2 bg-hasen-green text-white rounded-lg font-semibold hover:bg-hasen-green/90 transition-colors"
         >
-          Continue
+          {{ t('game.continue') }}
         </button>
         <div v-else class="text-sm text-hasen-dark/50 italic">
-          Waiting for all players to continue...
+          {{ t('game.waitingAllPlayersToContinue') }}
         </div>
       </div>
     </template>
