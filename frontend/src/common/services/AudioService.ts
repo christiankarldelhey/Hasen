@@ -35,6 +35,8 @@ class AudioService {
   private musicAudio: HTMLAudioElement | null = null;
   private currentTrack: MusicTrack | null = null;
   private soundEffects: Map<SoundEffect, HTMLAudioElement> = new Map();
+  private gameplayNextTrackTimeout: ReturnType<typeof setTimeout> | null = null;
+  private lastGameplayTrackPath: string | null = null;
   
   private settings: AudioSettings = {
     masterVolume: 1.0,
@@ -49,6 +51,17 @@ class AudioService {
     gameplay: '/audio/music/gameplay.mp3',
     endgame: '/audio/music/endgame.mp3',
   };
+
+  private gameplayMusicPaths: string[] = [
+    '/audio/music/game_1.mp3',
+    '/audio/music/game_2.mp3',
+    '/audio/music/game_3.mp3',
+    '/audio/music/game_4.mp3',
+    '/audio/music/game_5.mp3',
+    '/audio/music/game_6.mp3',
+    '/audio/music/game_7.mp3',
+    '/audio/music/game_8.mp3',
+  ];
 
   private sfxPaths: Record<SoundEffect, string> = {
     cardPlay: '/audio/sfx/card-play.mp3',
@@ -111,6 +124,11 @@ class AudioService {
     // Temporary: keep lobby music disabled during local testing.
     if (track === 'lobby') return;
 
+    if (track === 'gameplay') {
+      this.startGameplayPlaylist();
+      return;
+    }
+
     if (this.currentTrack === track && this.musicAudio && !this.musicAudio.paused) {
       return;
     }
@@ -127,22 +145,95 @@ class AudioService {
     });
   }
 
-  stopMusic(): void {
+  private startGameplayPlaylist(): void {
+    const hasActiveTrack = this.currentTrack === 'gameplay' && this.musicAudio && !this.musicAudio.paused;
+    if (hasActiveTrack || this.gameplayNextTrackTimeout) {
+      return;
+    }
+
+    this.stopMusic();
+    this.currentTrack = 'gameplay';
+    this.playRandomGameplayTrack();
+  }
+
+  private getRandomGameplayTrackPath(): string {
+    if (this.gameplayMusicPaths.length === 1) {
+      return this.gameplayMusicPaths[0] || '';
+    }
+
+    const availablePaths = this.gameplayMusicPaths.filter(path => path !== this.lastGameplayTrackPath);
+    const source = availablePaths.length > 0 ? availablePaths : this.gameplayMusicPaths;
+    const randomIndex = Math.floor(Math.random() * source.length);
+    return source[randomIndex] || this.gameplayMusicPaths[0] || '';
+  }
+
+  private playRandomGameplayTrack(): void {
+    if (!this.settings.musicEnabled || this.currentTrack !== 'gameplay') {
+      return;
+    }
+
+    const nextTrackPath = this.getRandomGameplayTrackPath();
+    this.lastGameplayTrackPath = nextTrackPath;
+
     if (this.musicAudio) {
+      this.musicAudio.pause();
+      this.musicAudio.currentTime = 0;
+      this.musicAudio.onended = null;
+    }
+
+    this.musicAudio = new Audio(nextTrackPath);
+    this.musicAudio.loop = false;
+    this.musicAudio.volume = this.getEffectiveVolume('music');
+    this.musicAudio.onended = () => {
+      if (this.currentTrack !== 'gameplay') {
+        return;
+      }
+
+      this.gameplayNextTrackTimeout = setTimeout(() => {
+        this.gameplayNextTrackTimeout = null;
+        this.playRandomGameplayTrack();
+      }, 2000);
+    };
+
+    this.musicAudio.play().catch(error => {
+      console.warn('Audio playback blocked by browser. User interaction required:', error);
+    });
+  }
+
+  stopMusic(): void {
+    if (this.gameplayNextTrackTimeout) {
+      clearTimeout(this.gameplayNextTrackTimeout);
+      this.gameplayNextTrackTimeout = null;
+    }
+
+    if (this.musicAudio) {
+      this.musicAudio.onended = null;
       this.musicAudio.pause();
       this.musicAudio.currentTime = 0;
       this.musicAudio = null;
       this.currentTrack = null;
     }
+
+    this.lastGameplayTrackPath = null;
   }
 
   pauseMusic(): void {
+    if (this.gameplayNextTrackTimeout) {
+      clearTimeout(this.gameplayNextTrackTimeout);
+      this.gameplayNextTrackTimeout = null;
+    }
+
     if (this.musicAudio) {
       this.musicAudio.pause();
     }
   }
 
   resumeMusic(): void {
+    if (this.currentTrack === 'gameplay' && !this.musicAudio) {
+      this.playRandomGameplayTrack();
+      return;
+    }
+
     if (this.musicAudio && this.settings.musicEnabled) {
       this.musicAudio.play().catch(error => {
         console.error('Failed to resume music:', error);

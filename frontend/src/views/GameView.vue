@@ -19,6 +19,7 @@ import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/fe
 import type { GameEvent, CardPlayedEvent, TrickCompletedEvent, FirstCardDealtEvent } from '@domain/events/GameEvents';
 import { useHasenStore } from '@/stores/hasenStore';
 import { usePlayerConnection, GamePausedOverlay } from '@/features/PlayerConnection';
+import { useAudio } from '@/common/composables/useAudio';
 
 const route = useRoute();
 const router = useRouter();
@@ -26,6 +27,7 @@ const gameId = route.params.gameId as string;
 const socketGame = useSocketGame();
 const gameStore = useGameStore();
 const hasenStore = useHasenStore();
+const { playMusic, stopMusic } = useAudio();
 
 // Animation system
 const animCoords = provideAnimationCoords();
@@ -40,6 +42,7 @@ const allAnimatedCards = computed(() => [
 
 // Pending trick winner info for win-trick animation
 const pendingTrickWinner = ref<{ winnerId: PlayerId; cards: any[] } | null>(null);
+const hasStartedGameplayMusic = ref(false);
 
 const {
   playerHand,
@@ -214,6 +217,11 @@ const handleGameEvent = async (event: GameEvent) => {
     })
 
     await triggerDealAnimation(expectedOpponents);
+
+    if (payload.round === 1 && !hasStartedGameplayMusic.value) {
+      hasStartedGameplayMusic.value = true;
+      playMusic('gameplay');
+    }
   }
 };
 
@@ -258,6 +266,7 @@ onMounted(() => {
 onUnmounted(() => {
   socketGame.offGameEvent(handleGameEvent);
   cleanupConnectionListeners();
+  stopMusic();
 });
 
 </script>
