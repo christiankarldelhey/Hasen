@@ -9,6 +9,11 @@ export interface RoundBidResult {
   bidEntry: PlayerBidEntry
   isWinning: boolean | null
   score: number
+  setCollectionData?: {
+    winSuitCount: number
+    avoidSuitCount: number
+    penaltyPerCard: number
+  }
 }
 
 export interface RoundPlayerResult {
@@ -17,6 +22,7 @@ export interface RoundPlayerResult {
   playerColor: string
   roundScore: number          // Score final del round
   totalScore: number          // Score acumulado del juego
+  previousScore: number       // Score antes de este round
   bids: RoundBidResult[]     // Array vacío si no tiene bids
   hasBids: boolean           // Flag para fácil condicional
   cardPoints: number         // Points de cartas (fallback)
@@ -44,6 +50,7 @@ export function useRoundScore(): UseRoundScoreReturn {
   ): RoundBidResult | null => {
     const isWinning = isWinningBid(bid, playerRoundScore, true)
     let score = 0
+    let setCollectionData: RoundBidResult['setCollectionData'] = undefined
 
     if (isWinning === true) {
       if (bid.bid_type === 'set_collection') {
@@ -52,6 +59,7 @@ export function useRoundScore(): UseRoundScoreReturn {
         const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
         const penaltyPerCard = Math.abs(bidEntry.onLose)
         score = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
+        setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }
       } else {
         score = bid.bid_score
       }
@@ -62,6 +70,7 @@ export function useRoundScore(): UseRoundScoreReturn {
         const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
         const penaltyPerCard = Math.abs(bidEntry.onLose)
         const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
+        setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }
         
         if (netPoints >= -9 && netPoints <= 9) {
           score = -10
@@ -77,7 +86,8 @@ export function useRoundScore(): UseRoundScoreReturn {
       bid,
       bidEntry,
       isWinning,
-      score
+      score,
+      setCollectionData
     }
   }
 
@@ -108,6 +118,7 @@ export function useRoundScore(): UseRoundScoreReturn {
           playerColor: player.color,
           roundScore: 0,
           totalScore,
+          previousScore: totalScore,
           bids: [],
           hasBids: false,
           cardPoints: 0
@@ -143,6 +154,7 @@ export function useRoundScore(): UseRoundScoreReturn {
         playerColor: player.color,
         roundScore,
         totalScore,
+        previousScore: totalScore - roundScore,
         bids: bidResults,
         hasBids: bidResults.length > 0,
         cardPoints

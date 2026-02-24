@@ -8,6 +8,8 @@ import SuitSymbol from '@/common/components/SuitSymbol.vue'
 const props = defineProps<{
   type: BidType
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
+  winSuitCount?: number
+  avoidSuitCount?: number
 }>()
 
 const pointsCondition = computed(() => props.win_condition as PointsBidCondition)
@@ -50,12 +52,18 @@ const sortedTricks = computed(() => {
             <div class="flex flex-row justify-center">
                 <div class="flex flex-row pr-2">
                     <SuitSymbol :suit="setCondition.win_suit" />
-                    <span class="text-hasen-green text-md pt-1">10</span>
+                    <span class="text-hasen-green text-md pt-1">
+                      10
+                      <span v-if="winSuitCount !== undefined" class="text-md ml-1">× {{ winSuitCount }}</span>
+                    </span>
                 </div>
 
                 <div class="flex flex-row">
                     <SuitSymbol :suit="setCondition.avoid_suit" :avoid="true" />
-                    <span class="text-hasen-red text-md pt-1">-10</span>
+                    <span class="text-hasen-red text-md pt-1">
+                      -10
+                      <span v-if="avoidSuitCount !== undefined" class="text-md ml-1">× {{ avoidSuitCount }}</span>
+                    </span>
                 </div>
             </div> 
     </div>

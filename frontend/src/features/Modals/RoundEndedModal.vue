@@ -89,14 +89,17 @@ const shouldShowResults = computed(() => {
             </h3>
             <div class="text-sm text-hasen-dark/70 flex flex-row justify-between items-center gap-2">
               <div>
-                {{ t('game.roundScore') }}:
+                Previous Score:
+                <span class="text-lg font-semibold text-hasen-dark/90">
+                  {{ playerInfo.previousScore }}
+                </span>
                 <span :class="playerInfo.roundScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
-                  {{ playerInfo.roundScore }}
+                  {{ playerInfo.roundScore >= 0 ? ' + ' : ' - ' }}{{ Math.abs(playerInfo.roundScore) }}
                 </span>
               </div>
               
               <div>
-                {{ t('common.totalScore') }}:
+                Final Score:
                 <span :class="playerInfo.totalScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
                   {{ playerInfo.totalScore }}
                 </span>
@@ -117,6 +120,8 @@ const shouldShowResults = computed(() => {
               <BidWinCondition 
                 :type="bidInfo.bid.bid_type" 
                 :win_condition="bidInfo.bid.win_condition"
+                :winSuitCount="bidInfo.setCollectionData?.winSuitCount"
+                :avoidSuitCount="bidInfo.setCollectionData?.avoidSuitCount"
               />
             </div>
             <div class="flex items-center gap-2">

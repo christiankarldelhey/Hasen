@@ -80,7 +80,7 @@ const turnMessage = computed(() => {
       return {
         title: 'Your turn!',
         subtitle: canMakeBids 
-          ? '💡 Make Bids (optional) then play a card'
+          ? 'Make Bids (optional) then play a card'
           : 'Play a card'
       }
     }
