@@ -5,6 +5,7 @@ import { useI18n } from '@/common/composables/useI18n';
 interface Props {
   mode?: 'normal' | 'card_replacement';
   isTrickInResolve?: boolean;
+  isTrickWinner?: boolean;
   canFinishTrick?: boolean;
   selectedCardId?: string | null;
 }
@@ -12,6 +13,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   mode: 'normal',
   isTrickInResolve: false,
+  isTrickWinner: false,
   canFinishTrick: true,
   selectedCardId: null
 });
@@ -45,7 +47,7 @@ const handleConfirm = () => {
     </template>
 
     <ActionButton 
-      v-if="isTrickInResolve"
+      v-if="isTrickInResolve && isTrickWinner"
       :label="t('game.finishTrick')"
       :disabled="!canFinishTrick"
       @click="$emit('finishTrick')"

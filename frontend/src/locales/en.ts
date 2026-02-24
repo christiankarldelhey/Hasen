@@ -48,6 +48,12 @@ export default {
     playerDisconnectedFromMatch: '{player} disconnected from the match.',
     disconnected: 'Disconnected',
     reconnecting: 'Reconnecting...',
+    trickWon: 'You have won the trick!',
+    trickWonSubtitle: 'Click Finish Trick to continue',
+    trickLost: 'You lost the trick',
+    trickLostWait: 'Wait until the winner finishes it',
+    trickLostButPickNextLead: 'But you get to choose the next lead player',
+    trickLostButStoleCard: 'But you stole a card from the trick',
   },
   bids: {
     scorePoints: 'Score {min}+ points',

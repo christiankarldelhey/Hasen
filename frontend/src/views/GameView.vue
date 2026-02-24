@@ -51,6 +51,7 @@ const {
   winningCardId,
   trickState,
   isTrickInResolve,
+  isTrickWinner,
   canFinishTrick,
   loading,
   error,
@@ -306,6 +307,7 @@ onUnmounted(() => {
         :mode="handMode"
         :is-my-turn="isMyTurn"
         :is-trick-in-resolve="isTrickInResolve"
+        :is-trick-winner="isTrickWinner"
         :can-finish-trick="canFinishTrick"
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"

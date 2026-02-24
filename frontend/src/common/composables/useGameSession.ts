@@ -139,6 +139,31 @@ export function useGameSession(gameId: string) {
     return trickState.value === 'resolve'
   })
 
+  const isTrickWinner = computed(() => {
+    const currentTrick = gameStore.publicGameState?.round.currentTrick
+    if (!currentTrick || currentTrick.trick_state !== 'resolve') return false
+    
+    // Player is the trick winner
+    if (currentTrick.score.trick_winner === hasenStore.currentPlayerId) {
+      return true
+    }
+    
+    // Player lost but has a pending special action that's been completed
+    // (they need to be able to finish the trick after their special action)
+    if (currentTrick.pendingSpecialAction?.playerId === hasenStore.currentPlayerId) {
+      const action = currentTrick.pendingSpecialAction
+      // Check if the special action has been completed
+      if (action.type === 'PICK_NEXT_LEAD' && action.selectedNextLead) {
+        return true
+      }
+      if (action.type === 'STEAL_CARD' && action.selectedCardToSteal) {
+        return true
+      }
+    }
+    
+    return false
+  })
+
   const handleSkipReplacement = () => {
     socketGame.skipCardReplacement(gameId)
   }
@@ -236,6 +261,7 @@ export function useGameSession(gameId: string) {
     winningCardId,
     trickState,
     isTrickInResolve,
+    isTrickWinner,
     canFinishTrick,
     loading,
     error,

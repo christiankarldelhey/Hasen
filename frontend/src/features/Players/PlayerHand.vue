@@ -14,6 +14,7 @@ interface Props {
   mode?: 'normal' | 'card_replacement';
   isMyTurn?: boolean;
   isTrickInResolve?: boolean;
+  isTrickWinner?: boolean;
   canFinishTrick?: boolean;
 }
 
@@ -21,6 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
   mode: 'normal',
   isMyTurn: false,
   isTrickInResolve: false,
+  isTrickWinner: false,
   canFinishTrick: true
 });
 
@@ -83,6 +85,7 @@ const handleConfirm = () => {
         <PlayerControls 
           :mode="mode"
           :is-trick-in-resolve="isTrickInResolve"
+          :is-trick-winner="isTrickWinner"
           :can-finish-trick="canFinishTrick"
           :selected-card-id="selectedCardId"
           @skip-replacement="$emit('skipReplacement')"

@@ -3,8 +3,10 @@ import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayers } from './composables/usePlayers'
+import { useI18n } from '@/common/composables/useI18n'
 
 const { getPlayerNameById } = usePlayers()
+const { t } = useI18n()
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
@@ -21,6 +23,10 @@ const isPlayingPhase = computed(() =>
   currentPhase.value === 'playing'
 )
 
+const isTrickInResolve = computed(() => 
+  currentTrick.value?.trick_state === 'resolve'
+)
+
 const currentTrick = computed(() => 
   gameStore.publicGameState?.round.currentTrick
 )
@@ -33,8 +39,41 @@ const isAwaitingSpecialAction = computed(() =>
   currentTrick.value?.trick_state === 'awaiting_special_action'
 )
 
+const isTrickWinner = computed(() => {
+  if (!isTrickInResolve.value || !currentTrick.value) return false
+  return currentTrick.value.score.trick_winner === hasenStore.currentPlayerId
+})
+
+const playerCardInTrick = computed(() => {
+  if (!currentTrick.value || !hasenStore.currentPlayerId) return null
+  
+  const publicCards = gameStore.publicGameState?.publicCards || {}
+  const trickCardIds = currentTrick.value.cards
+  
+  for (const cardId of trickCardIds) {
+    const card = publicCards[cardId]
+    if (card && card.owner === hasenStore.currentPlayerId) {
+      return card
+    }
+  }
+  
+  return null
+})
+
+const playedSpecialCard = computed(() => {
+  const card = playerCardInTrick.value
+  if (!card || card.char !== 'S') return null
+  
+  // Determine which special card based on suit
+  if (card.suit === 'acorns') return 'PICK_NEXT_LEAD'
+  if (card.suit === 'leaves') return 'STEAL_CARD'
+  if (card.suit === 'berries') return 'RASPBERRY'
+  
+  return null
+})
+
 const shouldShowTurnInfo = computed(() => 
-  isPlayerDrawingPhase.value || isPlayingPhase.value || isAwaitingSpecialAction.value
+  isPlayerDrawingPhase.value || isPlayingPhase.value || isAwaitingSpecialAction.value || isTrickInResolve.value
 )
 
 const currentPlayerTurn = computed(() => 
@@ -65,6 +104,50 @@ const turnMessage = computed(() => {
       return {
         title: isMyAction ? '🍃 Select Card to Steal!' : `⏳ Waiting for ${actionPlayerName}`,
         subtitle: isMyAction ? 'Choose a card from the trick to steal' : 'Selecting a card to steal...'
+      }
+    }
+  }
+  
+  // Trick resolve state - show winner/loser notifications
+  if (isTrickInResolve.value) {
+    const trickWinnerId = currentTrick.value?.score.trick_winner
+    const isActualWinner = trickWinnerId === hasenStore.currentPlayerId
+    
+    // Check if player has completed a special action
+    const hasCompletedSpecialAction = currentTrick.value?.pendingSpecialAction?.playerId === hasenStore.currentPlayerId &&
+      ((currentTrick.value.pendingSpecialAction.type === 'PICK_NEXT_LEAD' && currentTrick.value.pendingSpecialAction.selectedNextLead) ||
+       (currentTrick.value.pendingSpecialAction.type === 'STEAL_CARD' && currentTrick.value.pendingSpecialAction.selectedCardToSteal))
+    
+    if (isActualWinner) {
+      return {
+        title: `🏆 ${t('game.trickWon')}`,
+        subtitle: t('game.trickWonSubtitle')
+      }
+    } else if (hasCompletedSpecialAction) {
+      // Player lost but completed their special action, they can finish the trick
+      return {
+        title: t('game.trickLost'),
+        subtitle: t('game.trickWonSubtitle') // Same as winner: "Click Finish Trick to continue"
+      }
+    } else {
+      // Player lost the trick
+      const specialCard = playedSpecialCard.value
+      
+      if (specialCard === 'PICK_NEXT_LEAD') {
+        return {
+          title: t('game.trickLost'),
+          subtitle: t('game.trickLostButPickNextLead')
+        }
+      } else if (specialCard === 'STEAL_CARD') {
+        return {
+          title: t('game.trickLost'),
+          subtitle: t('game.trickLostButStoleCard')
+        }
+      } else {
+        return {
+          title: t('game.trickLost'),
+          subtitle: t('game.trickLostWait')
+        }
       }
     }
   }
