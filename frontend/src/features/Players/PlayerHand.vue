@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import type { PlayingCard as Card } from '@domain/interfaces';
 import { useHasenStore } from '@/stores/hasenStore';
-import { useGameStore } from '@/stores/gameStore';
 import { useAnimationCoords } from '@/features/Animations';
 import PlayerBids from '../Bids/PlayerBids.vue';
 import PlayerInfo from '@/common/components/PlayerInfo.vue';
@@ -29,40 +28,16 @@ const emit = defineEmits<{
   skipReplacement: []
   confirmReplacement: [cardId: string, position: number]
   playCard: [cardId: string]
-  finishTurn: []
   finishTrick: []
 }>();
 
 const hasenStore = useHasenStore();
-const gameStore = useGameStore();
 const selectedCardId = ref<string | null>(null);
 
 const playerHandEl = ref<HTMLElement | null>(null);
 const coords = useAnimationCoords();
 onMounted(() => coords.register('player-hand', playerHandEl));
 onUnmounted(() => coords.unregister('player-hand'));
-// Derive initial hasPlayedCard from game state (handles refresh correctly)
-const getHasPlayedCardFromState = (): boolean => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick;
-  const publicCards = gameStore.publicGameState?.publicCards;
-  const myPlayerId = hasenStore.currentPlayerId;
-  if (!currentTrick || !publicCards || !myPlayerId) return false;
-  return currentTrick.cards.some(cardId => publicCards[cardId]?.owner === myPlayerId);
-};
-
-const hasPlayedCard = ref<boolean>(getHasPlayedCardFromState());
-
-// Reset hasPlayedCard when it becomes my turn
-watch(() => props.isMyTurn, (newVal) => {
-  if (newVal) {
-    hasPlayedCard.value = getHasPlayedCardFromState();
-  }
-});
-
-// Also reset hasPlayedCard when trick number changes (new trick started)
-watch(() => gameStore.publicGameState?.round.currentTrick?.trick_number, () => {
-  hasPlayedCard.value = false;
-});
 
 const isCardSelectable = (card: Card) => {
   return props.mode === 'card_replacement' && card.state === 'in_hand_hidden'
@@ -71,9 +46,8 @@ const isCardSelectable = (card: Card) => {
 const selectCard = (card: Card) => {
   if (props.mode === 'card_replacement' && isCardSelectable(card)) {
     selectedCardId.value = card.id
-  } else if (props.mode === 'normal' && !hasPlayedCard.value) {
+  } else if (props.mode === 'normal') {
     emit('playCard', card.id)
-    hasPlayedCard.value = true
   }
 };
 
@@ -83,11 +57,6 @@ const handleConfirm = () => {
     emit('confirmReplacement', selectedCardId.value, position)
     selectedCardId.value = null
   }
-};
-
-const handleFinishTurn = () => {
-  emit('finishTurn')
-  hasPlayedCard.value = false
 };
 </script>
 
@@ -113,14 +82,11 @@ const handleFinishTurn = () => {
         <PlayerNotifications />
         <PlayerControls 
           :mode="mode"
-          :is-my-turn="isMyTurn"
           :is-trick-in-resolve="isTrickInResolve"
           :can-finish-trick="canFinishTrick"
           :selected-card-id="selectedCardId"
-          :has-played-card="hasPlayedCard"
           @skip-replacement="$emit('skipReplacement')"
           @confirm="handleConfirm"
-          @finish-turn="handleFinishTurn"
           @finish-trick="$emit('finishTrick')"
         />
       </div>

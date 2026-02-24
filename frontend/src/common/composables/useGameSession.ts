@@ -151,10 +151,6 @@ export function useGameSession(gameId: string) {
     socketGame.playCard(gameId, cardId)
   }
 
-  const handleFinishTurn = () => {
-    socketGame.finishTurn(gameId)
-  }
-
   const handleFinishTrick = () => {
     socketGame.finishTrick(gameId)
   }
@@ -256,7 +252,6 @@ export function useGameSession(gameId: string) {
     handleSkipReplacement,
     handleConfirmReplacement,
     handlePlayCard,
-    handleFinishTurn,
     handleFinishTrick,
     handleSelectNextLeadPlayer,
     handleSelectCardToSteal,

@@ -76,9 +76,12 @@ const turnMessage = computed(() => {
         subtitle: 'Choose to skip or replace a card'
       }
     } else {
+      const canMakeBids = currentTrick.value && currentTrick.value.trick_number <= 3
       return {
         title: 'Your turn!',
-        subtitle: 'Play a card and optionally make a Bid'
+        subtitle: canMakeBids 
+          ? '💡 Make Bids (optional) then play a card'
+          : 'Play a card'
       }
     }
   } else {

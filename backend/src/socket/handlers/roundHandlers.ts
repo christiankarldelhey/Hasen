@@ -8,7 +8,6 @@ import { socketToPlayer } from './lobbyHandlers.js'
 import { emitPrivateCards, emitFullStateToGamePlayers } from './roundHandlers.helpers.js'
 import type { PlayerId } from '@domain/interfaces'
 import { 
-  createTurnFinishedEvent, 
   createTrickFinishedEvent, 
   createTrickStartedEvent,
   createNextLeadPlayerSelectedEvent,
@@ -187,38 +186,6 @@ socket.on('round:start', async ({ gameId }) => {
     }
   });
 
-  socket.on('player:finishTurn', async ({ gameId }: { gameId: string }) => {
-    try {
-      const playerData = socketToPlayer.get(socket.id);
-      if (!playerData) {
-        socket.emit('error', { message: 'Player not found in session' });
-        return;
-      }
-
-      const { game, nextPlayer } = await TrickService.finishTurn(
-        gameId,
-        playerData.playerId
-      );
-
-      if (!game.round.currentTrick) {
-        throw new Error('No active trick');
-      }
-
-      const turnFinishedEvent = createTurnFinishedEvent(
-        playerData.playerId,
-        nextPlayer,
-        game.round.currentTrick.trick_number
-      );
-      
-      io.to(gameId).emit('game:event', turnFinishedEvent);
-
-      console.log(`✅ Player ${playerData.playerId} finished turn, next player: ${nextPlayer}`);
-      
-    } catch (error: any) {
-      console.error('Error in finishTurn:', error);
-      socket.emit('error', { message: error.message });
-    }
-  });
 
   socket.on('player:finishTrick', async ({ gameId }: { gameId: string }) => {
     try {

@@ -26,13 +26,24 @@ const roundBids = computed(() => {
   }
 })
 
+const canMakeBids = computed(() => {
+  const currentTrick = gameStore.publicGameState?.round.currentTrick
+  const roundPhase = gameStore.publicGameState?.round.roundPhase
+  const isMyTurn = gameStore.publicGameState?.round.playerTurn === playerId.value
+  
+  return !!(isMyTurn && 
+         roundPhase === 'playing' && 
+         currentTrick && 
+         currentTrick.trick_number <= 3)
+})
+
 watch(roundBids, (newVal) => {
   console.log('🎯 BidsPanel - roundBids:', newVal)
 }, { immediate: true })
 </script>
 
 <template>
-  <GamePanel class="fixed top-0 right-0 z-10 m-4">
+  <GamePanel class="fixed top-0 right-0 z-10 m-4" :highlighted="canMakeBids">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <div class="flex flex-row">
         <span class="text-hasen-base text-sm">{{ t('game.availableBids') }}</span>

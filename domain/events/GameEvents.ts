@@ -315,29 +315,6 @@ export function createBidMadeEvent(
   }
 }
 
-// TURN FINISHED EVENT
-/**
- * Event emitted when a player finishes their turn
- */
-export interface TurnFinishedEvent {
-  type: 'TURN_FINISHED'
-  payload: {
-    playerId: PlayerId
-    nextPlayer: PlayerId
-    trickNumber: 1 | 2 | 3 | 4 | 5
-  }
-}
-export function createTurnFinishedEvent(
-  playerId: PlayerId,
-  nextPlayer: PlayerId,
-  trickNumber: 1 | 2 | 3 | 4 | 5
-): TurnFinishedEvent {
-  return {
-    type: 'TURN_FINISHED',
-    payload: { playerId, nextPlayer, trickNumber }
-  }
-}
-
 // TRICK FINISHED EVENT
 /**
  * Event emitted when a trick is finished and moved to history
@@ -635,7 +612,6 @@ export type GameEvent =
   | PlayerConfirmedRoundEndEvent
   | BidMadeEvent
   | BidPlacedEvent
-  | TurnFinishedEvent
   | TrickFinishedEvent
   | CardReplacementSkippedEvent
   | CardReplacementCompletedEvent

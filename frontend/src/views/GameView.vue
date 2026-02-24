@@ -63,7 +63,6 @@ const {
   handleSkipReplacement,
   handleConfirmReplacement,
   handlePlayCard,
-  handleFinishTurn,
   handleFinishTrick,
   initialize
 } = useGameSession(gameId);
@@ -311,7 +310,6 @@ onUnmounted(() => {
         @skip-replacement="handleSkipReplacement"
         @confirm-replacement="handleConfirmReplacement"
         @play-card="handlePlayCard"
-        @finish-turn="handleFinishTurn"
         @finish-trick="handleFinishTrick"
       />
     </div>

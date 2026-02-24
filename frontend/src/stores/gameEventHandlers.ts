@@ -19,7 +19,6 @@ import type {
   NextLeadPlayerSelectedEvent,
   PickCardFromTrickEvent,
   CardStolenFromTrickEvent,
-  TurnFinishedEvent,
   TrickFinishedEvent
 } from '@domain/events/GameEvents'
 import { audioService } from '../common/services/AudioService'
@@ -183,8 +182,10 @@ const handleCardPlayed: GameEventHandler = (event, context) => {
     }
   }
   
-  // NO actualizar playerTurn aquí - se actualizará cuando llegue TURN_FINISHED
-  // Esto permite que el jugador vea el botón "Finish Turn" y pueda hacer bids
+  // Actualizar playerTurn si hay nextPlayer (el turno avanza automáticamente)
+  if (payload.nextPlayer) {
+    context.publicGameState.round.playerTurn = payload.nextPlayer
+  }
   
   // Si es el jugador actual, remover la carta de su mano
   if (context.privateGameState && 
@@ -323,15 +324,6 @@ const handleBidMade: GameEventHandler = (event, context) => {
   console.log(`🎯 BID_MADE: ${payload.bidType} by ${payload.playerId}`)
 }
 
-const handleTurnFinished: GameEventHandler = (event, context) => {
-  if (event.type !== 'TURN_FINISHED') return
-  if (!context.publicGameState) return
-  
-  const payload = (event as TurnFinishedEvent).payload
-  context.publicGameState.round.playerTurn = payload.nextPlayer
-  
-  console.log(`🔄 TURN_FINISHED: ${payload.playerId} → ${payload.nextPlayer}`)
-}
 
 const handleTrickFinished: GameEventHandler = (event, context) => {
   if (event.type !== 'TRICK_FINISHED') return
@@ -479,7 +471,6 @@ export const gameEventHandlers: Record<string, GameEventHandler> = {
   'TRICK_COMPLETED': handleTrickCompleted,
   'ROUND_ENDED': handleRoundEnded,
   'BID_MADE': handleBidMade,
-  'TURN_FINISHED': handleTurnFinished,
   'TRICK_FINISHED': handleTrickFinished,
   'CARD_REPLACEMENT_SKIPPED': handleCardReplacementSkipped,
   'CARD_REPLACEMENT_COMPLETED': handleCardReplacementCompleted,
