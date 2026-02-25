@@ -39,11 +39,6 @@ const isAwaitingSpecialAction = computed(() =>
   currentTrick.value?.trick_state === 'awaiting_special_action'
 )
 
-const isTrickWinner = computed(() => {
-  if (!isTrickInResolve.value || !currentTrick.value) return false
-  return currentTrick.value.score.trick_winner === hasenStore.currentPlayerId
-})
-
 const playerCardInTrick = computed(() => {
   if (!currentTrick.value || !hasenStore.currentPlayerId) return null
   
