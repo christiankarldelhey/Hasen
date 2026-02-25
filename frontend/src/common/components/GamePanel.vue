@@ -40,14 +40,16 @@ const panelClasses = computed(() => {
 <style scoped>
 @keyframes bidPulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 223, 186, 0.3);
+    box-shadow: 0 0 18px rgba(255, 223, 186, 0.3);
+    background-color: rgba(0, 0, 0, 0.7);
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 223, 186, 0.6);
+    box-shadow: 0 0 40px rgba(255, 223, 186, 0.85);
+    background-color: rgba(0, 0, 0, 0.82);
   }
 }
 
 .bid-panel-highlight {
-  animation: bidPulse 2s ease-in-out infinite;
+  animation: bidPulse 1.6s ease-in-out infinite;
 }
 </style>

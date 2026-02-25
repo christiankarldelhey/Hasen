@@ -6,7 +6,7 @@ import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useGameStore } from '@/stores/gameStore'
 import PlayerAvatar from './PlayerAvatar.vue'
 import TrickCircle from './TrickCircle.vue'
-import ScoreBadge from './ScoreBadge.vue'
+import PlayerBidMarker from './PlayerBidMarker.vue'
 import PlayerConnectionBadge from '@/features/PlayerConnection/components/PlayerConnectionBadge.vue'
 
 interface Props {
@@ -39,8 +39,6 @@ const tricksWon = computed(() => {
   return playerRoundScore.value?.tricksWon || []
 })
 
-const points = computed(() => playerRoundScore.value?.points ?? 0)
-
 const trickStates = computed(() => {
   const states: Array<{ trickNumber: TrickNumber; state: 'win' | 'lose' }> = []
   
@@ -70,7 +68,7 @@ const playerColor = computed(() => player.value?.color || '#000000')
 const playerName = computed(() => player.value?.name || 'Player')
 
 const positionClasses = computed(() => {
-  return props.position === 'left' || props.position === 'right' ? 'flex-row gap-2' : 'flex-col gap-4'
+  return props.position === 'left' || props.position === 'right' ? 'flex-row gap-2' : 'flex-col gap-4 mb-2'
 })
 
 const playerClasses = computed(() => {
@@ -110,9 +108,9 @@ const handleClick = () => {
         />
  
       
-      <!-- Score badge with points - BOTTOM CENTERED -->
-      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2">
-        <ScoreBadge :points="points" variant="win-points" size="medium" />
+      <!-- Player bids marker - BOTTOM CENTERED -->
+      <div class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+        <PlayerBidMarker :player-id="playerId" size="medium" />
       </div>
 
       <!-- Tricks stack con TrickCircle - TOP RIGHT -->
@@ -154,9 +152,9 @@ const handleClick = () => {
     </div>
     
     <!-- Player name label with connection badge -->
-    <div class="flex flex-col items-center gap-1">
+    <div class="flex flex-col items-center gap-1 self-end">
       <div 
-        :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', props.isPlayer ? 'self-end' : '', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
+        :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
         :style="{ borderColor: playerColor }"
       >
         {{ playerName }} {{ isPlayer ? '(You)' : '' }}

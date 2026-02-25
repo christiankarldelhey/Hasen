@@ -47,8 +47,8 @@ const sortedPlayerScores = computed(() => {
 
   <div class="bg-transparent flex flex-col items-start gap-1.5">
     <!-- Ranking de jugadores ordenado por score -->
-      <div class="flex flex-row w-full justify-between">
-          <div class="flex items-center">
+      <div class="flex flex-row w-full justify-end">
+          <!-- <div class="flex items-center">
             <span class="text-sm pr-2 text-hasen-base">Lead:</span>
               <div v-if="leadSuitIcon" 
                 class="w-4 flex">
@@ -62,8 +62,8 @@ const sortedPlayerScores = computed(() => {
                 class="w-4 flex items-center text-hasen-base justify-center text-sm">
                 ?
               </div>
-          </div>
-        <div v-if="pointsToWin" class="flex items-center px-1 shadow-md">
+          </div> -->
+        <div v-if="pointsToWin" class="flex items-center align-right px-1 shadow-md">
           <IconStarFilled :size="14" class="text-hasen-base" />
           <span class="pl-1 text-hasen-base text-md">{{ pointsToWin }}</span>
         </div>
