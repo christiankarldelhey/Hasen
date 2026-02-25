@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { PublicGameState, PrivateGameState, PlayerScore } from '@domain/interfaces/Game'
+import type { PlayerId } from '@domain/interfaces/Player'
 import { processGameEvent } from './gameEventHandlers'
 
 export const useGameStore = defineStore('game', () => {
@@ -15,6 +16,28 @@ export const useGameStore = defineStore('game', () => {
   const playerHand = computed(() => privateGameState.value?.hand || null)
   
   const playerScores = computed(() => publicGameState.value?.playerScores || [])
+
+  const isBidWindowOpenForPlayer = computed(() => {
+    return (playerId: PlayerId | null | undefined): boolean => {
+      if (!playerId || !publicGameState.value) return false
+
+      const round = publicGameState.value.round
+      const currentTrick = round.currentTrick
+
+      if (!currentTrick) return false
+      if (round.roundPhase !== 'playing') return false
+      if (round.playerTurn !== playerId) return false
+      if (currentTrick.trick_state !== 'in_progress') return false
+      if (currentTrick.trick_number > 3) return false
+
+      const playerBids = round.roundBids.playerBids[playerId] || []
+      const hasBidInCurrentTrick = playerBids.some(
+        playerBid => playerBid.trickNumber === currentTrick.trick_number
+      )
+
+      return !hasBidInCurrentTrick
+    }
+  })
 
   // Actions
   function setPublicGameState(state: PublicGameState) {
@@ -56,6 +79,7 @@ export const useGameStore = defineStore('game', () => {
     currentPhase,
     playerHand,
     playerScores,
+    isBidWindowOpenForPlayer,
     
     // Actions
     setPublicGameState,

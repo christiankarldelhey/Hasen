@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { useBidValidation } from '@/features/Bids/composables/useBidValidation'
@@ -27,19 +27,8 @@ const roundBids = computed(() => {
 })
 
 const canMakeBids = computed(() => {
-  const currentTrick = gameStore.publicGameState?.round.currentTrick
-  const roundPhase = gameStore.publicGameState?.round.roundPhase
-  const isMyTurn = gameStore.publicGameState?.round.playerTurn === playerId.value
-  
-  return !!(isMyTurn && 
-         roundPhase === 'playing' && 
-         currentTrick && 
-         currentTrick.trick_number <= 3)
+  return gameStore.isBidWindowOpenForPlayer(playerId.value)
 })
-
-watch(roundBids, (newVal) => {
-  console.log('🎯 BidsPanel - roundBids:', newVal)
-}, { immediate: true })
 </script>
 
 <template>

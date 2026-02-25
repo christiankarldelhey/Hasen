@@ -141,7 +141,7 @@ export function canMakeBid(
   }
 
   const trickState = game.round.currentTrick?.trick_state
-  const isBidWindowOpen = trickState === 'in_progress' || trickState === 'resolve'
+  const isBidWindowOpen = trickState === 'in_progress'
 
   if (!game.round.currentTrick || !isBidWindowOpen) {
     return {

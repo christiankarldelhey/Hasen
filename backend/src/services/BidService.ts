@@ -10,13 +10,20 @@ export class BidService {
     gameId: string,
     playerId: PlayerId,
     bidType: BidType,
-    trickNumber: TrickNumber,
+    _trickNumber: TrickNumber,
     bidId?: string
   ) {
     const game = await GameModel.findOne({ gameId })
     if (!game) {
       throw new Error('Game not found')
     }
+
+    const currentTrick = game.round.currentTrick
+    if (!currentTrick) {
+      throw new Error('No active trick')
+    }
+
+    const trickNumber = currentTrick.trick_number
 
     if (trickNumber > 3) {
       throw new Error('Solo puedes hacer bids en los primeros 3 tricks')
