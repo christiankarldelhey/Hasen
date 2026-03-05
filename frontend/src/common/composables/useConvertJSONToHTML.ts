@@ -1,4 +1,102 @@
 import { h, type VNode } from 'vue'
+import PlayingCard from '@/common/components/PlayingCard.vue'
+import type { CardPoints, Character, NormalRank, PlayingCard as PlayingCardModel, Suit } from '@domain/interfaces'
+
+const suitRow: Record<Suit, number> = {
+  flowers: 0,
+  berries: 1,
+  leaves: 2,
+  acorns: 3
+}
+
+const flowersCharCol: Partial<Record<Character, number>> = {
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  Q: 6,
+  K: 7,
+  A: 8
+}
+
+const normalCharCol: Partial<Record<Character, number>> = {
+  '5': 0,
+  '6': 1,
+  '7': 2,
+  '8': 3,
+  '9': 4,
+  '10': 5,
+  S: 6,
+  U: 7,
+  O: 8
+}
+
+const cardTokenRegex = /\[\[card:([a-z]+)-([A-Z0-9]+)(?:\|([^\]]+))?\]\]/g
+
+function buildDisplayCard(suit: Suit, char: Character): PlayingCardModel | null {
+  const charCol = suit === 'flowers' ? flowersCharCol : normalCharCol
+  const col = charCol[char]
+
+  if (col === undefined) {
+    return null
+  }
+
+  return {
+    id: `rules-${suit}-${char}`,
+    suit,
+    char,
+    rank: { base: 0 as NormalRank, onSuit: null },
+    owner: null,
+    state: 'in_deck',
+    points: 0 as CardPoints,
+    spritePos: {
+      row: suitRow[suit],
+      col
+    }
+  }
+}
+
+function renderInlineText(text?: string): Array<string | VNode> {
+  if (!text) return []
+
+  const nodes: Array<string | VNode> = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(cardTokenRegex)) {
+    const [fullMatch, rawSuit, rawChar, label] = match
+    const matchIndex = match.index ?? 0
+
+    if (matchIndex > lastIndex) {
+      nodes.push(text.slice(lastIndex, matchIndex))
+    }
+
+    const suit = rawSuit as Suit
+    const char = rawChar as Character
+    const card = buildDisplayCard(suit, char)
+
+    if (!card) {
+      nodes.push(fullMatch)
+      lastIndex = matchIndex + fullMatch.length
+      continue
+    }
+
+    nodes.push(
+      h('span', { class: 'inline-flex items-center align-middle mx-1 gap-1' }, [
+        h(PlayingCard, { card, size: 'tiny' }),
+        label ? h('span', { class: 'text-[0.95em]' }, label) : null
+      ])
+    )
+
+    lastIndex = matchIndex + fullMatch.length
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex))
+  }
+
+  return nodes.length > 0 ? nodes : [text]
+}
 
 interface RulesContent {
   type: 'paragraph' | 'list' | 'subsection' | 'heading' | 'table'
@@ -31,7 +129,7 @@ export function useConvertJSONToHTML() {
   const convertContentToVNode = (content: RulesContent): VNode | VNode[] => {
     switch (content.type) {
       case 'paragraph':
-        return h('p', { class: 'mb-3 text-gray-800 leading-relaxed' }, content.text)
+        return h('p', { class: 'mb-3 text-gray-800 leading-relaxed' }, renderInlineText(content.text))
 
       case 'heading':
         const headingLevel = content.level || 3
@@ -40,7 +138,11 @@ export function useConvertJSONToHTML() {
           4: 'text-lg font-semibold mt-4 mb-2 text-gray-800',
           5: 'text-base font-semibold mt-3 mb-2 text-gray-700'
         }
-        return h(`h${headingLevel}`, { class: headingClasses[headingLevel as 3 | 4 | 5] }, content.text)
+        return h(
+          `h${headingLevel}`,
+          { class: headingClasses[headingLevel as 3 | 4 | 5] },
+          renderInlineText(content.text)
+        )
 
       case 'list':
         const listTag = content.ordered ? 'ol' : 'ul'
@@ -52,7 +154,7 @@ export function useConvertJSONToHTML() {
           listTag,
           { class: listClass },
           content.items?.map(item => 
-            h('li', { class: 'text-gray-800 leading-relaxed' }, item)
+            h('li', { class: 'text-gray-800 leading-relaxed' }, renderInlineText(item))
           )
         )
 
@@ -76,7 +178,7 @@ export function useConvertJSONToHTML() {
                   row.map(cell => 
                     h('td', { 
                       class: 'border border-hasen-green px-4 py-2 text-black'
-                    }, cell)
+                    }, renderInlineText(cell))
                   )
                 )
               )
@@ -86,7 +188,7 @@ export function useConvertJSONToHTML() {
 
       case 'subsection':
         return h('div', { class: 'mb-6' }, [
-          h('h4', { class: 'text-lg font-semibold mb-3 text-gray-900' }, content.title),
+          h('h4', { class: 'text-lg font-semibold mb-3 text-gray-900' }, renderInlineText(content.title)),
           ...(content.content?.flatMap(c => convertContentToVNode(c)) || [])
         ])
 

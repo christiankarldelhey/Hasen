@@ -58,9 +58,9 @@
             {
               "type": "list",
               "items": [
-                "Berries S — \"The Owl\" — 0 points",
-                "Leaves S — \"The Sparrow\" — 0 points",
-                "Acorns S — \"The Woodpecker\" — 0 points"
+                "[[card:berries-S|Berries S]] — \"The Owl\" — 0 points",
+                "[[card:leaves-S|Leaves S]] — \"The Sparrow\" — 0 points",
+                "[[card:acorns-S|Acorns S]] — \"The Woodpecker\" — 0 points"
               ]
             }
           ]
@@ -186,7 +186,7 @@
               "items": [
                 "The player who opens the 1st trick of the game is the player who most recently saw a rabbit",
                 "In subsequent rounds, the lead player rotates clockwise",
-                "The winner of each trick leads the next trick, unless someone played the Woodpecker (Acorns S)"
+                "The winner of each trick leads the next trick, unless someone played the Woodpecker ([[card:acorns-S|Acorns S]])"
               ]
             }
           ]
@@ -242,9 +242,9 @@
             {
               "type": "list",
               "items": [
-                "Ace of Flowers — 12 pts",
-                "King of Flowers — 11 pts",
-                "Queen of Flowers (Karnoffel) — 0 pts"
+                "[[card:flowers-A|Ace of Flowers]] — 12 pts",
+                "[[card:flowers-K|King of Flowers]] — 11 pts",
+                "[[card:flowers-Q|Queen of Flowers]] (Karnoffel) — 0 pts"
               ]
             },
             {
@@ -264,8 +264,8 @@
             {
               "type": "list",
               "items": [
-                "Obers of Leaves / Berries / Acorns — 6 pts",
-                "Unters of Leaves / Berries / Acorns — 5 pts"
+                "Obers: [[card:leaves-O]] [[card:berries-O]] [[card:acorns-O]] — 6 pts",
+                "Unters: [[card:leaves-U]] [[card:berries-U]] [[card:acorns-U]] — 5 pts"
               ]
             },
             {
@@ -285,11 +285,11 @@
             {
               "type": "list",
               "items": [
-                "5 of Flowers — 5 pts",
-                "4 of Flowers — 4 pts",
-                "3 of Flowers — 3 pts",
-                "2 of Flowers — 2 pts",
-                "1 of Flowers — 1 pt"
+                "[[card:flowers-5|5 of Flowers]] — 5 pts",
+                "[[card:flowers-4|4 of Flowers]] — 4 pts",
+                "[[card:flowers-3|3 of Flowers]] — 3 pts",
+                "[[card:flowers-2|2 of Flowers]] — 2 pts",
+                "[[card:flowers-1|1 of Flowers]] — 1 pt"
               ]
             },
             {
@@ -309,7 +309,9 @@
             {
               "type": "list",
               "items": [
-                "10, 9, 8, 7, 6, 5 of the led suit"
+                "If Leaves is led: [[card:leaves-10]] [[card:leaves-9]] [[card:leaves-8]] [[card:leaves-7]] [[card:leaves-6]] [[card:leaves-5]]",
+                "If Berries is led: [[card:berries-10]] [[card:berries-9]] [[card:berries-8]] [[card:berries-7]] [[card:berries-6]] [[card:berries-5]]",
+                "If Acorns is led: [[card:acorns-10]] [[card:acorns-9]] [[card:acorns-8]] [[card:acorns-7]] [[card:acorns-6]] [[card:acorns-5]]"
               ]
             },
             {
@@ -326,13 +328,13 @@
       "content": [
         {
           "type": "subsection",
-          "title": "🔴 Berries S — \"The Owl\"",
+          "title": "[[card:berries-S|Berries S]] — \"The Owl\"",
           "content": [
             {
               "type": "list",
               "items": [
                 "Cannot open the 1st trick of the round",
-                "If it leads → wins against everything except Karnoffel (Flowers Q)",
+                "If it leads → wins against everything except Karnoffel ([[card:flowers-Q|Flowers Q]])",
                 "If it doesn't lead → functions as a Minor Color"
               ]
             },
@@ -344,7 +346,7 @@
         },
         {
           "type": "subsection",
-          "title": "🔵 Acorns S — \"The Woodpecker\"",
+          "title": "[[card:acorns-S|Acorns S]] — \"The Woodpecker\"",
           "content": [
             {
               "type": "list",
@@ -361,7 +363,7 @@
         },
         {
           "type": "subsection",
-          "title": "🟤 Leaves S — \"The Sparrow\"",
+          "title": "[[card:leaves-S|Leaves S]] — \"The Sparrow\"",
           "content": [
             {
               "type": "list",
