@@ -25,6 +25,13 @@ const CardSchema = new Schema({
   }
 }, { _id: false });
 
+const ActivePlayerSchema = new Schema({
+  id: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
+  name: { type: String, required: true },
+  color: { type: String, required: true },
+  defaultAvatar: { type: String, required: true }
+}, { _id: false });
+
 // Schema para PlayerBidEntry
 const PlayerBidEntrySchema = new Schema({
   bidId: { type: String, required: true },
@@ -121,12 +128,11 @@ const GameSchema = new Schema<GameDocument>({
     required: true,
     default: 'player_1'
   },
-  activePlayers: [{
-    type: String,
-    enum: ['player_1', 'player_2', 'player_3', 'player_4'],
+  activePlayers: {
+    type: [ActivePlayerSchema],
     required: true,
     default: []
-  }],
+  },
   playerSessions: {
     type: Map,
     of: String,
@@ -207,6 +213,6 @@ const GameSchema = new Schema<GameDocument>({
 
 GameSchema.index({ gameId: 1 });
 GameSchema.index({ gamePhase: 1 });
-GameSchema.index({ 'activePlayers': 1 });
+GameSchema.index({ 'activePlayers.id': 1 });
 
 export const GameModel = mongoose.model<GameDocument>('Game', GameSchema);

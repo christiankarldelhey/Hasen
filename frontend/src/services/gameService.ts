@@ -2,11 +2,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 import { userIdService } from './userIdService';
 import type { LobbyGame } from '@domain/interfaces/Game';
+import type { ActivePlayer, PlayerId } from '@domain/interfaces/Player';
 
 export interface JoinGameResponse {
   gameId: string;
-  assignedPlayerId: string;
-  activePlayers: string[];
+  assignedPlayerId: PlayerId;
+  activePlayers: ActivePlayer[];
   currentPlayers: number;
   maxPlayers: number;
 }
@@ -14,13 +15,27 @@ export interface JoinGameResponse {
 export interface CreateGameResponse {
   gameId: string;
   gameName: string;
-  assignedPlayerId: string;
-  hostPlayer: string;
+  assignedPlayerId: PlayerId;
+  hostPlayer: PlayerId;
+  activePlayers: ActivePlayer[];
   currentPlayers: number;
   maxPlayers: number;
   minPlayers: number;
+  pointsToWin: number;
   hasSpace: boolean;
   createdAt: string;
+}
+
+export interface UpdatePlayerProfilePayload {
+  gameId: string;
+  playerId: PlayerId;
+  name?: string;
+  color?: string;
+}
+
+export interface UpdateGameSettingsPayload {
+  gameId: string;
+  pointsToWin: number;
 }
 
 export const gameService = {
@@ -147,6 +162,59 @@ async startGame(gameId: string, hostPlayerId: string): Promise<void> {
     return data.data;
   } catch (error) {
     console.error('Error starting game:', error);
+    throw error;
+  }
+},
+
+async updatePlayerProfile(payload: UpdatePlayerProfilePayload): Promise<{ activePlayers: ActivePlayer[] }> {
+  try {
+    const userId = userIdService.getUserId();
+    const response = await fetch(`${API_URL}/games/${payload.gameId}/players/${payload.playerId}/profile`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        name: payload.name,
+        color: payload.color,
+      })
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to update player profile');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error updating player profile:', error);
+    throw error;
+  }
+},
+
+async updateGameSettings(payload: UpdateGameSettingsPayload): Promise<{ pointsToWin: number }> {
+  try {
+    const userId = userIdService.getUserId();
+    const response = await fetch(`${API_URL}/games/${payload.gameId}/settings`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        pointsToWin: payload.pointsToWin,
+      })
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to update game settings');
+    }
+
+    return data.data;
+  } catch (error) {
+    console.error('Error updating game settings:', error);
     throw error;
   }
 }

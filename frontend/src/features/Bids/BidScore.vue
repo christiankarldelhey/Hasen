@@ -1,26 +1,32 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
-import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 
 const props = defineProps<{
   score: number
   bidders: PlayerId[]
 }>()
 
+const { getPlayerById } = usePlayers()
+
 const backgroundStyle = computed(() => {
   if (props.bidders.length === 0) {
     return { backgroundColor: '#e2d2a8' }
   }
+
+  const [firstBidder, secondBidder] = props.bidders
   
   if (props.bidders.length === 1) {
-    const player = AVAILABLE_PLAYERS.find(p => p.id === props.bidders[0])
+    if (!firstBidder) return { backgroundColor: '#e2d2a8' }
+    const player = getPlayerById.value(firstBidder)
     return { backgroundColor: player?.color || '#e2d2a8' }
   }
   
   if (props.bidders.length === 2) {
-    const player1 = AVAILABLE_PLAYERS.find(p => p.id === props.bidders[0])
-    const player2 = AVAILABLE_PLAYERS.find(p => p.id === props.bidders[1])
+    if (!firstBidder || !secondBidder) return { backgroundColor: '#e2d2a8' }
+    const player1 = getPlayerById.value(firstBidder)
+    const player2 = getPlayerById.value(secondBidder)
     return {
       background: `linear-gradient(135deg, ${player1?.color || '#e2d2a8'} 50%, ${player2?.color || '#e2d2a8'} 50%)`
     }

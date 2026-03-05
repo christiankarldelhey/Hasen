@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import type { ActivePlayer, PlayerId } from '@domain/interfaces/Player'
 import type { Round } from '@domain/interfaces/Round'
 import { useRoundScore } from '@/features/Score/composables/useRoundScore'
 import { useGameStore } from '@/stores/gameStore'
@@ -61,6 +61,11 @@ const isPlayerReady = (playerId: PlayerId) => {
 const { playersResults } = useRoundScore()
 const gameStore = useGameStore()
 const { t } = useI18n()
+
+const playersForReadyList = computed<ActivePlayer[]>(() => {
+  const fromState = gameStore.publicGameState?.activePlayers ?? []
+  return fromState.slice(0, props.totalPlayers)
+})
 
 // Determinar si debemos mostrar resultados o espera
 const shouldShowResults = computed(() => {
@@ -155,7 +160,7 @@ const shouldShowResults = computed(() => {
       <!-- Lista de jugadores con estado ready -->
       <div class="grid grid-cols-2 gap-4">
         <div 
-          v-for="player in AVAILABLE_PLAYERS.slice(0, totalPlayers)" 
+          v-for="player in playersForReadyList" 
           :key="player.id"
           class="flex items-center gap-3 p-3 rounded-lg bg-hasen-dark/5"
         >

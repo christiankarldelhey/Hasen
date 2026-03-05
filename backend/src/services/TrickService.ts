@@ -20,10 +20,11 @@ export class TrickService {
     const action = trick.pendingSpecialAction;
 
     if (action.type === 'PICK_NEXT_LEAD') {
+      const activePlayerIds = game.activePlayers.map((player: { id: PlayerId }) => player.id)
       return SpecialCardsService.createPickNextLeadEvent(
         action.playerId,
         trick.trick_number,
-        game.activePlayers
+        activePlayerIds
       );
     } else if (action.type === 'STEAL_CARD') {
       return SpecialCardsService.createPickCardFromTrickEvent(
@@ -158,7 +159,8 @@ export class TrickService {
     }
 
     // Verificar si el trick está completo (todos los jugadores jugaron)
-    const trickIsComplete = hasTrickEnded(currentTrick, game.activePlayers);
+    const activePlayerIds = game.activePlayers.map(player => player.id)
+    const trickIsComplete = hasTrickEnded(currentTrick, activePlayerIds);
     
     let nextPlayer: PlayerId | null = null;
     let trickCompletedEvent = null;
@@ -275,7 +277,8 @@ export class TrickService {
 
     // Guardar la selección según el tipo
     if (selection.nextLead && currentTrick.pendingSpecialAction.type === 'PICK_NEXT_LEAD') {
-      if (!game.activePlayers.includes(selection.nextLead)) {
+      const activePlayerIds = game.activePlayers.map(player => player.id)
+      if (!activePlayerIds.includes(selection.nextLead)) {
         throw new Error('Selected player is not in the game');
       }
       currentTrick.pendingSpecialAction.selectedNextLead = selection.nextLead;

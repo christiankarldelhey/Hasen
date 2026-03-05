@@ -31,9 +31,11 @@ export const useLobbyStore = defineStore('lobby', () => {
     currentRoom.value = room
     if (room) {
       currentRoomId.value = room.gameId
-      // Add to rooms list if not already there
+      // Keep rooms list in sync (upsert)
       const existingIndex = rooms.value.findIndex(r => r.gameId === room.gameId)
-      if (existingIndex === -1) {
+      if (existingIndex !== -1) {
+        rooms.value[existingIndex] = room
+      } else {
         rooms.value.unshift(room)
       }
     }

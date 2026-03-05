@@ -216,7 +216,7 @@ const handleStartGame = async () => {
       </div>
     </div>
     <!-- Background image that ignores padding -->
-    <div v-if="currentView !== 'rules'" class="pointer-events-none z-0">
+    <div v-if="!['rules', 'room', 'settings'].includes(currentView)" class="pointer-events-none z-0">
       <img 
         src="../../assets/backgrounds/lobby-menu-background.png" 
         alt="Lobby background"

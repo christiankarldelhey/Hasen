@@ -2,7 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import { useLobbyStore } from '../../stores/lobbyStore';
 import { useGameStore } from '../../stores/gameStore';
 import type { GameEvent } from '@domain/events/GameEvents';
-import type { PlayerId } from '@domain/interfaces/Player';
+import type { ActivePlayer, PlayerId } from '@domain/interfaces/Player';
 
 interface PlayerCountChangedPayload {
   gameId: string;
@@ -13,6 +13,7 @@ interface RoomCreatedPayload {
   gameId: string;
   gameName: string;
   hostPlayer: PlayerId;
+  activePlayers: ActivePlayer[];
   currentPlayers: 1 | 2 | 3 | 4;
   maxPlayers: 2 | 3 | 4;
   minPlayers: 2;
@@ -70,6 +71,12 @@ class SocketManager {
         const roomExists = lobbyStore.rooms.some(r => r.gameId === newRoom.gameId);
         if (!roomExists) {
           lobbyStore.setRooms([newRoom, ...lobbyStore.rooms]);
+        } else {
+          lobbyStore.setRooms(lobbyStore.rooms.map(room => room.gameId === newRoom.gameId ? newRoom : room));
+        }
+
+        if (lobbyStore.currentRoomId === newRoom.gameId) {
+          lobbyStore.setCurrentRoom(newRoom);
         }
       },
       

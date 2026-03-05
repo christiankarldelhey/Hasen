@@ -27,6 +27,40 @@ export function useGameAPI() {
     }
   }
 
+  async function updatePlayerProfile(gameId: string, playerId: PlayerId, updates: { name?: string; color?: string }) {
+    const result = await gameService.updatePlayerProfile({
+      gameId,
+      playerId,
+      ...updates
+    })
+
+    const currentRoom = lobbyStore.currentRoomData
+    if (currentRoom) {
+      lobbyStore.setCurrentRoom({
+        ...currentRoom,
+        activePlayers: result.activePlayers,
+        currentPlayers: result.activePlayers.length as 1 | 2 | 3 | 4,
+        hasSpace: result.activePlayers.length < currentRoom.maxPlayers
+      })
+    }
+
+    return result
+  }
+
+  async function updatePointsToWin(gameId: string, pointsToWin: number) {
+    const result = await gameService.updateGameSettings({ gameId, pointsToWin })
+
+    const currentRoom = lobbyStore.currentRoomData
+    if (currentRoom) {
+      lobbyStore.setCurrentRoom({
+        ...currentRoom,
+        pointsToWin: result.pointsToWin
+      })
+    }
+
+    return result
+  }
+
   async function createGame(gameName: string, hostPlayerId: PlayerId, maxPlayers: number, pointsToWin: number) {
     startLoading()
     lobbyStore.setLoading(true)
@@ -39,6 +73,7 @@ export function useGameAPI() {
         gameId: result.gameId,
         gameName: result.gameName,
         hostPlayer: result.assignedPlayerId as PlayerId,
+        activePlayers: result.activePlayers,
         currentPlayers: 1,
         maxPlayers: maxPlayers as 2 | 3 | 4,
         minPlayers: 2,
@@ -67,6 +102,16 @@ export function useGameAPI() {
     lobbyStore.setError(null)
     try {
       const result = await gameService.joinGame(gameId)
+
+      const existingRoom = lobbyStore.rooms.find(room => room.gameId === gameId)
+      if (existingRoom) {
+        lobbyStore.setCurrentRoom({
+          ...existingRoom,
+          activePlayers: result.activePlayers,
+          currentPlayers: result.currentPlayers as 1 | 2 | 3 | 4,
+          hasSpace: result.currentPlayers < existingRoom.maxPlayers
+        })
+      }
       
       lobbyStore.setCurrentRoomId(result.gameId)
       hasenStore.setCurrentPlayerId(result.assignedPlayerId as PlayerId)
@@ -151,6 +196,8 @@ export function useGameAPI() {
     joinGame,
     deleteGame,
     startGame,
-    fetchPlayerGameState
+    fetchPlayerGameState,
+    updatePlayerProfile,
+    updatePointsToWin
   }
 }

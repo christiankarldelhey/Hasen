@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import { type PlayerId } from '@domain/interfaces/Player'
 import type { PlayerScore } from '@domain/interfaces/Game'
 import { useI18n } from '@/common/composables/useI18n'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 import BaseModal from '@/common/components/BaseModal.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 
@@ -14,6 +15,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
+const { getPlayerById } = usePlayers()
 
 const emit = defineEmits<{
   close: []
@@ -33,7 +35,7 @@ const rankedPlayers = computed<PlayerRankInfo[]>(() => {
   const sortedScores = [...props.playerScores].sort((a, b) => b.score - a.score)
   
   return sortedScores.map((playerScore, index) => {
-    const player = AVAILABLE_PLAYERS.find(p => p.id === playerScore.playerId)
+    const player = getPlayerById.value(playerScore.playerId)
     
     return {
       playerId: playerScore.playerId,

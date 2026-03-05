@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import type { PlayerId } from '@domain/interfaces/Player'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 import Hare from './Hare.vue'
 
 interface Props {
@@ -22,8 +23,10 @@ const emit = defineEmits<{
   click: []
 }>()
 
+const { getPlayerById } = usePlayers()
+
 const player = computed(() => {
-  return AVAILABLE_PLAYERS.find(p => p.id === props.playerId)
+  return getPlayerById.value(props.playerId)
 })
 
 const playerColor = computed(() => player.value?.color || '#000000')

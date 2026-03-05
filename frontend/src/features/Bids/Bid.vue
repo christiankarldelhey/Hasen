@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import type { Bid, BidType } from '@domain/interfaces/Bid'
 import type { PlayerId } from '@domain/interfaces/Player'
-import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
 import WinCondition from './BidWinCondition.vue'
 import BidScore from './BidScore.vue'
 import { useSocketGame } from '@/common/composables/useSocketGame'
@@ -23,7 +22,7 @@ const { getTooltip } = useBidTooltips()
 const socketGame = useSocketGame()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
-const { isPlayerTurn } = usePlayers()
+const { isPlayerTurn, getPlayerById } = usePlayers()
 
 const bidders = computed<PlayerId[]>(() => {
   if (!props.bid) return []
@@ -46,7 +45,7 @@ const currentPlayerBidColor = computed(() => {
   const currentPlayerId = hasenStore.currentPlayerId
   if (!currentPlayerId || !bidders.value.includes(currentPlayerId)) return null
   
-  const player = AVAILABLE_PLAYERS.find(p => p.id === currentPlayerId)
+  const player = getPlayerById.value(currentPlayerId)
   return player?.color || null
 })
 

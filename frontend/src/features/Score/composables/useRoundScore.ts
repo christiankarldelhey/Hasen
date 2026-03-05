@@ -1,5 +1,5 @@
 import { computed, type ComputedRef } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId } from '@domain/interfaces/Player'
+import type { PlayerId } from '@domain/interfaces/Player'
 import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
 import { isWinningBid } from '@domain/rules/BidRules'
 import { useGameStore } from '@/stores/gameStore'
@@ -101,9 +101,8 @@ export function useRoundScore(): UseRoundScoreReturn {
     const playerScores = gameStore.publicGameState.playerScores || []
     const activePlayers = gameStore.publicGameState.activePlayers || []
 
-    return activePlayers.map(playerId => {
-      const player = AVAILABLE_PLAYERS.find(p => p.id === playerId)
-      if (!player) return null
+    return activePlayers.map(player => {
+      const playerId = player.id
       
       const playerBidEntries = round.roundBids.playerBids[playerId] || []
       const playerRoundScore = round.roundScore.find(s => s.playerId === playerId)

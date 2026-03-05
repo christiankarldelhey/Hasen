@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import { AVAILABLE_PLAYERS, type PlayerId, type TrickNumber } from '@domain/interfaces'
+import { type PlayerId, type TrickNumber } from '@domain/interfaces'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useGameStore } from '@/stores/gameStore'
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   position: 'bottom'
 })
 
-const { isPlayerTurn } = usePlayers()
+const { isPlayerTurn, getPlayerById } = usePlayers()
 const gameStore = useGameStore()
 
 const playerConnectionStatus = computed(() => {
@@ -60,7 +60,7 @@ const currentTrickState = computed(() => {
 
 
 const player = computed(() => {
-  return AVAILABLE_PLAYERS.find(p => p.id === props.playerId)
+  return getPlayerById.value(props.playerId)
 })
 
 const playerColor = computed(() => player.value?.color || '#000000')

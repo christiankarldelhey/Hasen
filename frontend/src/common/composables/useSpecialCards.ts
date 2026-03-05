@@ -81,7 +81,7 @@ export function useSpecialCards(gameId: string) {
       if (action.type === 'PICK_NEXT_LEAD' && !nextLeadSelection.value) {
         nextLeadSelection.value = {
           playerId: action.playerId,
-          availablePlayers: activePlayers.value
+          availablePlayers: activePlayers.value.map(player => player.id)
         };
       } else if (action.type === 'STEAL_CARD' && !cardStealSelection.value) {
         cardStealSelection.value = {

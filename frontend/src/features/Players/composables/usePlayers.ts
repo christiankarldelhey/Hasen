@@ -1,13 +1,21 @@
 import { computed } from 'vue'
-import type { PlayerId } from '@domain/interfaces/Player'
-import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
+import type { ActivePlayer, PlayerId } from '@domain/interfaces/Player'
+import { getDefaultPlayerProfile } from '@domain/interfaces/Player'
 import { useGameStore } from '@/stores/gameStore'
 
 export function usePlayers() {
   const gameStore = useGameStore()
 
+  const activePlayersFromState = computed(() => {
+    return gameStore.publicGameState?.activePlayers ?? []
+  })
+
   const getPlayerById = computed(() => {
-    return (id: PlayerId) => AVAILABLE_PLAYERS.find(p => p.id === id)
+    return (id: PlayerId): ActivePlayer | undefined => {
+      const fromState = activePlayersFromState.value.find(player => player.id === id)
+      if (fromState) return fromState
+      return getDefaultPlayerProfile(id)
+    }
   })
 
   const getPlayerNameById = computed(() => {

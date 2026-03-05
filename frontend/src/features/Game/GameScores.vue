@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
-import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
+import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { IconStar, IconStarFilled } from '@tabler/icons-vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 const gameStore = useGameStore()
+const { getPlayerById } = usePlayers()
 
 const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
@@ -13,7 +14,7 @@ const sortedPlayerScores = computed(() => {
   
   return [...scores]
     .map(ps => {
-      const player = AVAILABLE_PLAYERS.find(p => p.id === ps.playerId)
+      const player = getPlayerById.value(ps.playerId)
       return {
         ...ps,
         color: player?.color || '#000000',

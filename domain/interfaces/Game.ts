@@ -1,4 +1,4 @@
-import type { PlayerId, PlayerConnectionStatus } from './Player'
+import type { ActivePlayer, PlayerId, PlayerConnectionStatus } from './Player'
 import type { PlayingCard, PlayerHand } from './Card'
 import type { Round, PlayerRoundScore } from './Round'
 import type { Trick } from './Trick'
@@ -12,7 +12,7 @@ export interface Game {
   gameName: string
   hostPlayer: PlayerId
   hostUserId: string
-  activePlayers: PlayerId[]
+  activePlayers: ActivePlayer[]
   deck: PlayingCard[]
   discardPile: PlayingCard[]
   bidDecks: {
@@ -49,6 +49,7 @@ export interface LobbyGame {
   gameId: string;
   gameName: string;
   hostPlayer: PlayerId;
+  activePlayers: ActivePlayer[];
   currentPlayers: 1 | 2 | 3 | 4;
   maxPlayers: 2 | 3 | 4;
   minPlayers: 2;
@@ -74,7 +75,7 @@ export interface PublicGameState {
   gameId: string
   gameName: string
   hostPlayer: PlayerId
-  activePlayers: PlayerId[]
+  activePlayers: ActivePlayer[]
   gamePhase: GamePhase
   publicCards: Record<string, PlayingCard>
   opponentsPublicInfo: {

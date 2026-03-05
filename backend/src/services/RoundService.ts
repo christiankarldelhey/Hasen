@@ -14,6 +14,7 @@ export class RoundService {
   static async startNewRound(gameId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
+    const activePlayerIds = game.activePlayers.map(player => player.id)
     
     // 1. Incrementar ronda
     game.round.round += 1;
@@ -44,7 +45,7 @@ export class RoundService {
     // 4. Deal first card to each player (visible/público)
   const firstCards: { playerId: PlayerId; card: PlayingCard }[] = [];
   let cardIndex = 0;
-  for (const playerId of game.activePlayers) {
+  for (const playerId of activePlayerIds) {
     const card = game.deck[cardIndex];
     card.owner = playerId;
     card.state = 'in_hand_visible';
@@ -53,7 +54,7 @@ export class RoundService {
   }
   // 5. Deal remaining 4 cards to each player (privado)
   const privateCards = new Map<PlayerId, PlayingCard[]>();
-  for (const playerId of game.activePlayers) {
+  for (const playerId of activePlayerIds) {
     const cards: PlayingCard[] = [];
     for (let i = 0; i < 4; i++) {
       const card = game.deck[cardIndex];
@@ -73,14 +74,14 @@ export class RoundService {
     
     // Rotar el lead player basado en el número de round
     // Round 1 -> activePlayers[0], Round 2 -> activePlayers[1], etc.
-    const leadPlayerIndex = (game.round.round - 1) % game.activePlayers.length;
-    game.round.playerTurn = game.activePlayers[leadPlayerIndex];
+    const leadPlayerIndex = (game.round.round - 1) % activePlayerIds.length;
+    game.round.playerTurn = activePlayerIds[leadPlayerIndex];
     
     // Actualizar playerTurnOrder para que comience desde el lead player
     // Esto asegura que el orden de turnos dentro del round refleje la rotación
     const rotatedTurnOrder: PlayerId[] = [
-      ...game.activePlayers.slice(leadPlayerIndex),
-      ...game.activePlayers.slice(0, leadPlayerIndex)
+      ...activePlayerIds.slice(leadPlayerIndex),
+      ...activePlayerIds.slice(0, leadPlayerIndex)
     ];
     game.playerTurnOrder = rotatedTurnOrder;
     
@@ -124,10 +125,11 @@ export class RoundService {
   static async finishRound(gameId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
+    const activePlayerIds = game.activePlayers.map(player => player.id)
 
     const roundScores: Partial<Record<PlayerId, number>> = {};
 
-    for (const playerId of game.activePlayers) {
+    for (const playerId of activePlayerIds) {
       const scoreFromRound = getPlayerScoreFromRound(game, playerId);
       roundScores[playerId] = scoreFromRound;
 

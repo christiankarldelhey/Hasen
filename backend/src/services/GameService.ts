@@ -9,13 +9,27 @@ import {
   createCardReplacedPrivateEvent 
 } from '@domain/events/GameEvents.js'
 import { v4 as uuidv4 } from 'uuid'
-import type { PlayerId, Game, PlayingCard } from '@domain/interfaces'
+import { getAvailablePlayerColors, getDefaultPlayerProfile, PLAYER_IDS } from '@domain/interfaces'
+import type { ActivePlayer, PlayerId, Game, PlayingCard } from '@domain/interfaces'
 import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
 import { TrickService } from './TrickService.js'
 
 export class GameService {
   
   private static readonly SKIP_CARD_REPLACEMENT_POINTS = 3
+  private static readonly PLAYER_NAME_MAX_LENGTH = 15
+
+  private static getActivePlayerIds(game: Game): PlayerId[] {
+    return game.activePlayers.map(player => player.id)
+  }
+
+  private static isPlayerActive(game: Game, playerId: PlayerId): boolean {
+    return game.activePlayers.some(player => player.id === playerId)
+  }
+
+  private static getActivePlayer(game: Game, playerId: PlayerId): ActivePlayer | undefined {
+    return game.activePlayers.find(player => player.id === playerId)
+  }
 
   private static applySkipCardReplacementBonus(game: Game, playerId: PlayerId): { awardedPoints: number; playerGameScore: number } {
     const awardedPoints = this.SKIP_CARD_REPLACEMENT_POINTS
@@ -47,7 +61,7 @@ export class GameService {
       gameName: gameName || 'My Hasen Game',
       hostPlayer: hostPlayerId || 'player_1',
       hostUserId,
-      activePlayers: [hostPlayerId || 'player_1'],
+      activePlayers: [getDefaultPlayerProfile(hostPlayerId || 'player_1')],
       playerSessions,
       deck,
       discardPile: [],
@@ -120,14 +134,16 @@ export class GameService {
     pauseReason: game.pauseReason || null
   };
   
+  const activePlayerIds = this.getActivePlayerIds(game)
+
   // Agregar estado de conexión al publicState
   if (game.playerConnectionStatus) {
-    game.activePlayers.forEach((playerId: PlayerId) => {
+    activePlayerIds.forEach((playerId: PlayerId) => {
       publicState.playerConnectionStatus[playerId] = game.playerConnectionStatus!.get(playerId) || 'connected';
     });
   } else {
     // Si no existe, inicializar todos como conectados
-    game.activePlayers.forEach((playerId: PlayerId) => {
+    activePlayerIds.forEach((playerId: PlayerId) => {
       publicState.playerConnectionStatus[playerId] = 'connected';
     });
   }
@@ -142,7 +158,7 @@ export class GameService {
   });
 
   // Crear opponentsPublicInfo para todos los jugadores activos
-  publicState.opponentsPublicInfo = game.activePlayers.map((activePlayerId: PlayerId) => {
+  publicState.opponentsPublicInfo = activePlayerIds.map((activePlayerId: PlayerId) => {
     const visibleCard = visibleCards.find((card: any) => card.owner === activePlayerId);
     const handCardsCount = game.deck.filter((c: any) => 
       c.owner === activePlayerId && 
@@ -163,7 +179,7 @@ export class GameService {
   if (userId && game.playerSessions) {
     playerId = game.playerSessions.get(userId) || null;
     
-    if (playerId && game.activePlayers.includes(playerId)) {
+    if (playerId && this.isPlayerActive(game, playerId)) {
       playerHand = game.deck.filter(
         (card: any) => card.owner === playerId && 
         (card.state === 'in_hand_visible' || card.state === 'in_hand_hidden')
@@ -193,12 +209,12 @@ export class GameService {
     const existingPlayerId = game.playerSessions.get(userId);
     
     // Si el jugador ya está en activePlayers, solo devolver su playerId
-    if (game.activePlayers.includes(existingPlayerId!)) {
+    if (this.isPlayerActive(game, existingPlayerId!)) {
       return { game, assignedPlayerId: existingPlayerId };
     }
     
     // Si no está en activePlayers (se desconectó), volver a agregarlo
-    game.activePlayers.push(existingPlayerId!);
+    game.activePlayers.push(getDefaultPlayerProfile(existingPlayerId!));
     await game.save();
     return { game, assignedPlayerId: existingPlayerId };
   }
@@ -208,14 +224,14 @@ export class GameService {
     throw new Error('Game is full');
   }
   
-  const allPlayers: PlayerId[] = ['player_1', 'player_2', 'player_3', 'player_4'];
-  const availablePlayer = allPlayers.find(p => !game.activePlayers.includes(p));
+  const activePlayerIds = this.getActivePlayerIds(game)
+  const availablePlayer = PLAYER_IDS.find(p => !activePlayerIds.includes(p));
   
   if (!availablePlayer) {
     throw new Error('No available player slots');
   }
   
-  game.activePlayers.push(availablePlayer);
+  game.activePlayers.push(getDefaultPlayerProfile(availablePlayer));
   
   // Guardar el mapeo userId -> playerId
   if (!game.playerSessions) {
@@ -234,9 +250,10 @@ export class GameService {
     if (!game) throw new Error('Game not found');
 
     game.gamePhase = 'playing';
-    game.playerTurnOrder = [...game.activePlayers];
+    const activePlayerIds = this.getActivePlayerIds(game)
+    game.playerTurnOrder = [...activePlayerIds];
     // Inicializar playerScores con todos los jugadores activos
-    game.playerScores = game.activePlayers.map(playerId => ({
+    game.playerScores = activePlayerIds.map(playerId => ({
       playerId,
       score: 0
     }));
@@ -251,7 +268,7 @@ export class GameService {
     
     // Inicializar estado de conexión para todos los jugadores activos
     game.playerConnectionStatus = new Map();
-    game.activePlayers.forEach(playerId => {
+    activePlayerIds.forEach(playerId => {
       game.playerConnectionStatus!.set(playerId, 'connected');
     });
     game.isPaused = false;
@@ -272,7 +289,7 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     throw new Error('Cannot leave a game that has already started');
   }
   
-  if (!game.activePlayers.includes(playerId)) {
+  if (!this.isPlayerActive(game, playerId)) {
     console.error('❌ [leaveGame] Player not found in activePlayers!', {
       requestedPlayerId: playerId,
       activePlayers: game.activePlayers
@@ -281,7 +298,7 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
   }
   
   // Remover el jugador (ya no importa si es host o no)
-  game.activePlayers = game.activePlayers.filter(p => p !== playerId);
+  game.activePlayers = game.activePlayers.filter(p => p.id !== playerId);
   
   // Remover del mapeo de sesiones
   if (game.playerSessions) {
@@ -570,5 +587,77 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     }
     
     return { game, timedOutPlayers };
+  }
+
+  static async updatePlayerProfile(
+    gameId: string,
+    playerId: PlayerId,
+    updates: { name?: string; color?: string }
+  ) {
+    const game = await GameModel.findOne({ gameId })
+    if (!game) throw new Error('Game not found')
+
+    if (game.gamePhase !== 'setup') {
+      throw new Error('Player profile can only be updated in setup phase')
+    }
+
+    const activePlayer = this.getActivePlayer(game, playerId)
+    if (!activePlayer) {
+      throw new Error('Player is not in this game')
+    }
+
+    const defaultProfile = getDefaultPlayerProfile(playerId)
+
+    if (typeof updates.name === 'string') {
+      const trimmedName = updates.name.trim()
+      if (trimmedName.length > this.PLAYER_NAME_MAX_LENGTH) {
+        throw new Error(`Name must be at most ${this.PLAYER_NAME_MAX_LENGTH} characters`)
+      }
+      activePlayer.name = trimmedName.length > 0 ? trimmedName : defaultProfile.name
+    }
+
+    if (typeof updates.color === 'string') {
+      const nextColor = updates.color.trim()
+      const allowedColors = getAvailablePlayerColors()
+      if (!allowedColors.includes(nextColor)) {
+        throw new Error('Color is not allowed')
+      }
+
+      const colorTakenByOtherPlayer = game.activePlayers.some(
+        player => player.id !== playerId && player.color === nextColor
+      )
+
+      if (colorTakenByOtherPlayer) {
+        throw new Error('Color already taken by another player')
+      }
+
+      activePlayer.color = nextColor
+    }
+
+    await game.save()
+
+    return { game, updatedPlayer: activePlayer }
+  }
+
+  static async updatePointsToWin(gameId: string, hostPlayerId: PlayerId, pointsToWin: number) {
+    const game = await GameModel.findOne({ gameId })
+    if (!game) throw new Error('Game not found')
+
+    if (game.gamePhase !== 'setup') {
+      throw new Error('Game settings can only be updated in setup phase')
+    }
+
+    if (game.hostPlayer !== hostPlayerId) {
+      throw new Error('Only the host can update game settings')
+    }
+
+    if (!Number.isFinite(pointsToWin) || pointsToWin <= 0) {
+      throw new Error('pointsToWin must be a positive number')
+    }
+
+    game.gameSettings.pointsToWin = Math.floor(pointsToWin)
+    await game.save()
+
+    return game
   }
 }

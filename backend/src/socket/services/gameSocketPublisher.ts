@@ -1,11 +1,12 @@
 import type { Server } from 'socket.io'
-import type { PlayerId, PlayingCard } from '@domain/interfaces'
+import type { ActivePlayer, PlayerId, PlayingCard } from '@domain/interfaces'
 import { emitFullStateToGamePlayers, emitPrivateCards } from '../handlers/roundHandlers.helpers.js'
 
 interface LobbyRoomCreatedPayload {
   gameId: string
   gameName: string
   hostPlayer: PlayerId
+  activePlayers: ActivePlayer[]
   currentPlayers: number
   maxPlayers: number
   minPlayers: number
