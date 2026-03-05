@@ -29,6 +29,13 @@ export const AVAILABLE_PLAYERS: readonly Player[] = [
   { id: 'player_4', name: 'Magda', color: '#7C4A34', defaultAvatar: 'avatar4.png' }, // Marrón rojizo / lacre
 ] as const
 
+const EXTRA_PROFILE_COLORS: readonly string[] = [
+  '#3E6B8A', // Azul pizarra
+  '#8A6A3E', // Ámbar tostado
+  '#5C4F7D', // Violeta grisáceo
+  '#3F7A5F', // Verde bosque
+] as const
+
 export function getDefaultPlayerProfile(playerId: PlayerId): ActivePlayer {
   const profile = AVAILABLE_PLAYERS.find(player => player.id === playerId) ?? AVAILABLE_PLAYERS[0]
   if (!profile) throw new Error('No default player profiles configured')
@@ -36,5 +43,8 @@ export function getDefaultPlayerProfile(playerId: PlayerId): ActivePlayer {
 }
 
 export function getAvailablePlayerColors(): string[] {
-  return AVAILABLE_PLAYERS.map(player => player.color)
+  return Array.from(new Set([
+    ...AVAILABLE_PLAYERS.map(player => player.color),
+    ...EXTRA_PROFILE_COLORS,
+  ]))
 }

@@ -164,7 +164,7 @@ onUnmounted(() => {
   <div class="flex flex-col gap-4">
     <ActionButton 
       :label="t('lobby.backToMenu')" 
-      variant="primary"
+      variant="tertiary"
       @click="emit('back')"
     />
     
@@ -203,12 +203,12 @@ onUnmounted(() => {
             @keydown.enter.prevent="saveProfileName"
           />
 
-          <div class="grid grid-cols-4 gap-2">
+          <div class="grid grid-cols-8 gap-1">
             <button
               v-for="color in availableColors"
               :key="color"
               type="button"
-              class="h-8 rounded-md border-2 transition-opacity disabled:opacity-30"
+              class="h-7 w-full rounded-md border-2 transition-opacity disabled:opacity-30"
               :class="currentPlayerProfile.color === color ? 'border-hasen-dark' : 'border-transparent'"
               :style="{ backgroundColor: color }"
               :disabled="isColorTakenByOtherPlayer(color) || isSavingProfile"
