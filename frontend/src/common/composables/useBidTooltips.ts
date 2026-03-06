@@ -6,6 +6,7 @@ export type TooltipType = 'info' | 'error'
 export interface BidTooltip {
   text: string
   type: TooltipType
+  subtitle?: string
 }
 
 const suitNames: Record<Suit, string> = {
@@ -138,7 +139,16 @@ export function useBidTooltips() {
 
   const getTooltip = (bid: Bid, disabled: boolean, disabledReason?: string): BidTooltip => {
     if (disabled && disabledReason) {
-      return getErrorTooltip(disabledReason) || getInfoTooltip(bid)
+      const infoTooltip = getInfoTooltip(bid)
+      const errorTooltip = getErrorTooltip(disabledReason)
+
+      if (!errorTooltip) return infoTooltip
+
+      return {
+        text: errorTooltip.text,
+        subtitle: `(${infoTooltip.text})`,
+        type: 'error'
+      }
     }
     return getInfoTooltip(bid)
   }

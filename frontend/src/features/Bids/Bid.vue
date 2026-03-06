@@ -92,7 +92,7 @@ const tooltip = computed(() => {
 const tooltipClasses = computed(() => {
   if (!tooltip.value) return ''
   
-  const baseClasses = 'absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50'
+  const baseClasses = 'absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line text-center max-w-64 z-50'
   const colorClass = tooltip.value.type === 'error' ? 'bg-hasen-red' : 'bg-hasen-green'
   
   return `${baseClasses} ${colorClass}`
@@ -101,8 +101,8 @@ const tooltipClasses = computed(() => {
 const tooltipArrowClasses = computed(() => {
   if (!tooltip.value) return ''
   
-  const baseClasses = 'absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent'
-  const colorClass = tooltip.value.type === 'error' ? 'border-t-hasen-red' : 'border-t-hasen-green'
+  const baseClasses = 'absolute bottom-full left-1/2 transform -translate-x-1/2 -mb-1 border-4 border-transparent'
+  const colorClass = tooltip.value.type === 'error' ? 'border-b-hasen-red' : 'border-b-hasen-green'
   
   return `${baseClasses} ${colorClass}`
 })
@@ -146,7 +146,13 @@ const handleBidClick = () => {
       v-if="tooltip"
       :class="tooltipClasses"
     >
-      {{ tooltip.text }}
+      <div>{{ tooltip.text }}</div>
+      <div
+        v-if="tooltip.type === 'error' && tooltip.subtitle"
+        class="mt-1 italic opacity-90"
+      >
+        {{ tooltip.subtitle }}
+      </div>
       <div :class="tooltipArrowClasses"></div>
     </div>
   </div>

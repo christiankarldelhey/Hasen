@@ -176,7 +176,7 @@ onUnmounted(() => {
         </p>
 
         <div class="text-left rounded-lg bg-hasen-light/50 p-3 space-y-3">
-          <p class="text-sm font-semibold text-hasen-dark">Players</p>
+          <!-- <p class="text-sm font-semibold text-hasen-dark">Players</p> -->
           <div
             v-for="player in activePlayers"
             :key="player.id"
