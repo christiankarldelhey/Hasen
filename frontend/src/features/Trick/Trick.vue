@@ -76,7 +76,7 @@ const cardPositions = computed(() => {
 
 <template>
   <div ref="trickEl" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-    <div class="relative h-[260px] w-[800px]">
+    <div data-tutorial-id="trick-center" class="relative h-[260px] w-[800px]">
       <template v-if="props.cards.length > 0">
         <div
           v-for="pos in cardPositions"

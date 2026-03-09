@@ -16,6 +16,7 @@ export default {
     createGameTitle: 'Create Game',
     rulesTitle: 'Rules',
     settingsTitle: 'Settings',
+    tutorial: 'Tutorial',
     rules: 'Rules',
     settings: 'Settings',
     noGamesAvailable: 'There are no available games at the moment.',

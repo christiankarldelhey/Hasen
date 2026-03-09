@@ -61,6 +61,10 @@ const handleSettingsView = () => {
   handleViewChange('settings');
 };
 
+const handleTutorialView = () => {
+  router.push('/tutorial');
+};
+
 const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, pointsToWin: number) => {
   playMusic('lobby');
   try {
@@ -178,6 +182,7 @@ const handleStartGame = async () => {
           <LobbyOptions
             @create-game="handleCreateGameView"
             @join-game="handleJoinGameView"
+            @tutorial="handleTutorialView"
             @rules="handleRulesView"
             @settings="handleSettingsView"
           />

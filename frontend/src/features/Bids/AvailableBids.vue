@@ -32,7 +32,7 @@ const canMakeBids = computed(() => {
 </script>
 
 <template>
-  <GamePanel class="fixed top-0 right-0 z-10 m-4" :highlighted="canMakeBids">
+  <GamePanel data-tutorial-id="available-bids" class="fixed top-0 right-0 z-10 m-4" :highlighted="canMakeBids">
     <div v-if="roundBids" class="flex flex-col gap-2">
       <div class="flex flex-row">
         <span class="text-hasen-base text-sm">{{ t('game.availableBids') }}</span>

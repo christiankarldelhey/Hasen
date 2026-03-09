@@ -5,6 +5,7 @@ import { useI18n } from '@/common/composables/useI18n';
 const emit = defineEmits<{
   createGame: [];
   joinGame: [];
+  tutorial: [];
   rules: [];
   settings: [];
 }>();
@@ -24,6 +25,12 @@ const { t } = useI18n();
       :label="t('lobby.joinGame')"
       variant="primary"
       @click="emit('joinGame')"
+    />
+
+    <ActionButton
+      :label="t('lobby.tutorial')"
+      variant="primary"
+      @click="emit('tutorial')"
     />
     
     <ActionButton 

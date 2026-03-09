@@ -63,7 +63,7 @@ const handleConfirm = () => {
 </script>
 
 <template>
-  <div ref="playerHandEl" class="fixed bottom-0 left-0 right-0 pointer-events-none h-[300px]">
+  <div ref="playerHandEl" data-tutorial-id="player-hand" class="fixed bottom-0 left-0 right-0 pointer-events-none h-[300px]">
     <div class="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
       <PlayerCards 
         :cards="cards"
@@ -74,7 +74,9 @@ const handleConfirm = () => {
     </div>
     
     <div class="relative h-full flex justify-between items-end px-4 pb-4">
-      <PlayerBids />
+      <div data-tutorial-id="player-round-score">
+        <PlayerBids />
+      </div>
       
       <div class="flex flex-col gap-3 pointer-events-auto">
         <PlayerInfo 

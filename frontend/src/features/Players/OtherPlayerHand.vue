@@ -73,6 +73,7 @@ const positionClasses = computed(() => {
 <template>
   <div 
     ref="handEl"
+    data-tutorial-id="other-players-zone"
     :class="['fixed z-10 flex items-center gap-3', positionClasses]"
   >
     <div :class="position === 'top' ? 'flex flex-row gap-5 items-center' : 'flex flex-col gap-5'">

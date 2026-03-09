@@ -51,28 +51,32 @@ const handleConfirmLogout = () => {
 
 <template>
 <div class="fixed top-0 left-0 z-10 m-4 flex flex-row gap-1">
-  <GamePanel class="flex flex-col justify-around gap-2">
-    <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="handleLogoutClick">
-      <IconLogout2 :size="22" class="text-hasen-base" />
-    </button>
+  <div data-tutorial-id="game-controls">
+    <GamePanel class="flex flex-col justify-around gap-2">
+      <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="handleLogoutClick">
+        <IconLogout2 :size="22" class="text-hasen-base" />
+      </button>
 
-    <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="toggleMusic()">
-      <IconMusic v-if="musicEnabled" :size="22" class="text-hasen-base" />
-      <IconMusicOff v-else :size="22" class="text-hasen-base" />
-    </button>
+      <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="toggleMusic()">
+        <IconMusic v-if="musicEnabled" :size="22" class="text-hasen-base" />
+        <IconMusicOff v-else :size="22" class="text-hasen-base" />
+      </button>
 
-    <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="toggleSfx()">
-      <IconVolume v-if="sfxEnabled" :size="22" class="text-hasen-base" />
-      <IconVolumeOff v-else :size="22" class="text-hasen-base" />
-    </button>
-  </GamePanel>
+      <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="toggleSfx()">
+        <IconVolume v-if="sfxEnabled" :size="22" class="text-hasen-base" />
+        <IconVolumeOff v-else :size="22" class="text-hasen-base" />
+      </button>
+    </GamePanel>
+  </div>
   <GamePanel class="">
     <div class="flex flex-col gap-1">
       <div class="flex flex-row gap-2">
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1" data-tutorial-id="deck-zone">
           <Deck />
         </div>
-        <GameScores />
+        <div data-tutorial-id="game-scores">
+          <GameScores />
+        </div>
       </div>
     </div>
   </GamePanel>
