@@ -1,11 +1,11 @@
 import { Server, Socket } from 'socket.io'
-import { GameService } from '../../services/GameService.js'
 import { PlayerId } from '@domain/interfaces/Player.js'
+import type { CompositionRoot } from '@/app/composition-root.js'
 
 // Map compartido entre handlers
 export const socketToPlayer = new Map<string, { gameId: string; playerId: PlayerId; userId: string }>()
 
-export function setupLobbyHandlers(io: Server, socket: Socket) {
+export function setupLobbyHandlers(io: Server, socket: Socket, compositionRoot: CompositionRoot) {
   
   // Handler: Unirse al room global de lista de lobbies
   socket.on('lobby-list:join', () => {
@@ -32,12 +32,12 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
     
     socket.leave(gameId)
     
-    const result = await GameService.leaveGame(gameId, playerId, userId)
+    const result = await compositionRoot.lobby.leaveLobbyUseCase.execute({ gameId, playerId, userId })
     
     // Broadcast al lobby-list para actualizar contadores
     io.to('lobby-list').emit('lobby:player-count-changed', { 
       gameId, 
-      currentPlayers: result.game!.activePlayers.length 
+      currentPlayers: result.currentPlayers 
     })
     
     socketToPlayer.delete(socket.id)
@@ -55,7 +55,11 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
     
     // Marcar jugador como reconectado y despausar si todos están conectados
     try {
-      const result = await GameService.markPlayerReconnected(gameId, playerId)
+      const result = await compositionRoot.connectionLifecycle.registerPlayerUseCase.execute({
+        gameId,
+        playerId,
+        userId
+      })
       
       // Notificar a todos en el juego
       io.to(gameId).emit('player:reconnected', {
@@ -64,9 +68,8 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
       })
       
       // Enviar estado actualizado solo a los demás jugadores (el que hizo refresh ya tiene el estado del API)
-      const updatedState = await GameService.getPlayerGameState(gameId, userId)
       socket.to(gameId).emit('game:stateUpdate', {
-        publicGameState: updatedState.publicState
+        publicGameState: result.publicState
       })
     } catch (error) {
       console.error(`Error marking player as reconnected:`, error)
@@ -94,7 +97,11 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
     try {
       console.log(`🔄 Player ${playerId} reconnecting to game ${gameId}`)
       
-      const result = await GameService.markPlayerReconnected(gameId, playerId)
+      const result = await compositionRoot.connectionLifecycle.handlePlayerReconnectedUseCase.execute({
+        gameId,
+        playerId,
+        userId
+      })
       
       // Registrar el nuevo socket
       socket.join(gameId)
@@ -107,15 +114,14 @@ export function setupLobbyHandlers(io: Server, socket: Socket) {
       })
       
       // Actualizar estado del juego
-      const updatedState = await GameService.getPlayerGameState(gameId, userId)
       io.to(gameId).emit('game:stateUpdate', {
-        publicGameState: updatedState.publicState
+        publicGameState: result.publicState
       })
       
       // Enviar estado privado al jugador reconectado
-      if (updatedState.privateState) {
+      if (result.privateState) {
         socket.emit('game:privateStateUpdate', {
-          privateGameState: updatedState.privateState
+          privateGameState: result.privateState
         })
       }
       

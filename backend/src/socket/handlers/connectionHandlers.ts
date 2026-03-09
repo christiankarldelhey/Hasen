@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io'
-import { GameService } from '../../services/GameService.js'
 import { socketToPlayer } from './lobbyHandlers.js'
-import { GameModel } from '../../models/Game.js'
 import { PlayerId } from '@domain/interfaces/Player.js'
+import type { CompositionRoot } from '@/app/composition-root.js'
 
 const disconnectionTimers = new Map<string, NodeJS.Timeout>()
 
@@ -19,32 +18,20 @@ export function clearDisconnectionTimeout(gameId: string, playerId: PlayerId) {
   disconnectionTimers.delete(key)
 }
 
-function scheduleDisconnectionTimeout(io: Server, gameId: string, playerId: PlayerId, timeoutMs: number) {
+function scheduleDisconnectionTimeout(
+  gameId: string,
+  playerId: PlayerId,
+  timeoutMs: number,
+  compositionRoot: CompositionRoot
+) {
   clearDisconnectionTimeout(gameId, playerId)
 
   const key = getDisconnectionTimerKey(gameId, playerId)
   const timer = setTimeout(async () => {
     try {
-      const { timedOutPlayers } = await GameService.checkDisconnectionTimeouts(gameId)
-      if (!timedOutPlayers.includes(playerId)) {
-        disconnectionTimers.delete(key)
-        return
-      }
-
-      const result = await GameService.interruptGame(gameId, 'player_disconnect_timeout', playerId)
-      if (!result.interrupted) {
-        disconnectionTimers.delete(key)
-        return
-      }
-
-      io.to(gameId).emit('game:interrupted', {
-        reason: 'player_disconnect_timeout',
-        playerId,
-      })
-
-      const updatedState = await GameService.getPlayerGameState(gameId)
-      io.to(gameId).emit('game:stateUpdate', {
-        publicGameState: updatedState.publicState,
+      await compositionRoot.connectionLifecycle.handleDisconnectionTimeoutUseCase.execute({
+        gameId,
+        playerId
       })
     } catch (error) {
       console.error('Error in disconnection timeout handler:', error)
@@ -56,7 +43,7 @@ function scheduleDisconnectionTimeout(io: Server, gameId: string, playerId: Play
   disconnectionTimers.set(key, timer)
 }
 
-export function setupConnectionHandlers(io: Server, socket: Socket) {
+export function setupConnectionHandlers(io: Server, socket: Socket, compositionRoot: CompositionRoot) {
 
 socket.on('game:leave-match', async ({ gameId, playerId, userId }: { gameId: string; playerId: PlayerId; userId: string }) => {
   try {
@@ -66,20 +53,10 @@ socket.on('game:leave-match', async ({ gameId, playerId, userId }: { gameId: str
     socketToPlayer.delete(socket.id)
     clearDisconnectionTimeout(gameId, playerId)
 
-    const result = await GameService.interruptGame(gameId, 'player_left_game', playerId)
-    if (!result.interrupted) {
-      return
-    }
-
-    io.to(gameId).emit('game:interrupted', {
-      reason: 'player_left_game',
+    await compositionRoot.connectionLifecycle.leaveMatchUseCase.execute({
+      gameId,
       playerId,
       userId
-    })
-
-    const updatedState = await GameService.getPlayerGameState(gameId)
-    io.to(gameId).emit('game:stateUpdate', {
-      publicGameState: updatedState.publicState
     })
   } catch (error) {
     console.error('Error handling game:leave-match:', error)
@@ -94,42 +71,33 @@ socket.on('disconnect', async () => {
     const { gameId, playerId, userId } = playerInfo
     
     try {
-      const game = await GameModel.findOne({ gameId })
-      
-      if (!game) {
-        console.error('Game not found')
-        return
-      }
-      
-      // Si el juego está en setup, remover jugador
-      if (game.gamePhase === 'setup') {
+      const disconnectResult = await compositionRoot.connectionLifecycle.handleSocketDisconnectUseCase.execute({
+        gameId,
+        playerId,
+        userId
+      })
+
+      if (disconnectResult.kind === 'setup_left') {
         console.log(`🚪 Auto-leaving player ${playerId} from lobby ${gameId}`)
-        const result = await GameService.leaveGame(gameId, playerId, userId)
-        
-        io.to('lobby-list').emit('lobby:player-count-changed', { 
-          gameId, 
-          currentPlayers: result.game!.activePlayers.length 
+        io.to('lobby-list').emit('lobby:player-count-changed', {
+          gameId,
+          currentPlayers: disconnectResult.currentPlayers
         })
-      } 
-      // Si el juego está activo, marcar como desconectado
-      else if (game.gamePhase === 'playing') {
+      }
+
+      if (disconnectResult.kind === 'playing_disconnected') {
         console.log(`⏸️ Marking player ${playerId} as disconnected in game ${gameId}`)
-        const result = await GameService.markPlayerDisconnected(gameId, playerId)
-        
-        // Notificar a todos en el juego
+
         io.to(gameId).emit('player:disconnected', {
           playerId,
-          isPaused: result.shouldPause,
+          isPaused: disconnectResult.shouldPause,
           disconnectedAt: Date.now()
         })
 
-        const timeoutMs = game.gameSettings.reconnectionTimeoutMinutes * 60 * 1000
-        scheduleDisconnectionTimeout(io, gameId, playerId, timeoutMs)
-        
-        // Actualizar estado del juego
-        const updatedState = await GameService.getPlayerGameState(gameId)
+        scheduleDisconnectionTimeout(gameId, playerId, disconnectResult.timeoutMs, compositionRoot)
+
         io.to(gameId).emit('game:stateUpdate', {
-          publicGameState: updatedState.publicState
+          publicGameState: disconnectResult.publicState
         })
       }
       

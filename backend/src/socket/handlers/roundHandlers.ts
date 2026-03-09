@@ -7,6 +7,7 @@ import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
 import { emitPrivateCards, emitFullStateToGamePlayers } from './roundHandlers.helpers.js'
 import type { PlayerId } from '@domain/interfaces'
+import type { CompositionRoot } from '@/app/composition-root.js'
 import { 
   createTrickFinishedEvent, 
   createTrickStartedEvent,
@@ -14,28 +15,27 @@ import {
   createCardStolenFromTrickEvent
 } from '@domain/events/GameEvents.js'
 
-export function setupRoundHandlers(io: Server, socket: Socket) {
+export function setupRoundHandlers(io: Server, socket: Socket, compositionRoot: CompositionRoot) {
 
 socket.on('round:start', async ({ gameId }) => {
     try {
-      const { game, setupEvent, firstCardsEvent, privateCards } = 
-        await RoundService.startNewRound(gameId);
+      const result = await compositionRoot.roundSetup.startRoundUseCase.execute({ gameId })
       
       // 1. Emitir evento de setup (público - bids)
-      io.to(gameId).emit('game:event', setupEvent);
+      io.to(gameId).emit('game:event', result.setupEvent)
       
       // 2. Emitir evento de first cards (público - todos ven la primera carta)
-      io.to(gameId).emit('game:event', firstCardsEvent);
+      io.to(gameId).emit('game:event', result.firstCardsEvent)
       
       // 3. Emitir cartas privadas a cada jugador individualmente
-      emitPrivateCards(io, gameId, privateCards);
+      emitPrivateCards(io, gameId, result.privateCards as Map<PlayerId, import('@domain/interfaces').PlayingCard[]>)
       
-      console.log('✅ ROUND_STARTED');
+      console.log('✅ ROUND_STARTED')
       
     } catch (error: any) {
-      socket.emit('error', { message: error.message });
+      socket.emit('error', { message: error.message })
     }
-  });
+  })
 
   socket.on('round:next-phase', async ({ gameId }) => {
     const game = await GameModel.findOne({ gameId });
@@ -326,49 +326,38 @@ socket.on('round:start', async ({ gameId }) => {
         return;
       }
 
-      const game = await GameModel.findOne({ gameId });
-      if (!game) {
-        socket.emit('error', { message: 'Game not found' });
-        return;
-      }
+      const readiness = await compositionRoot.roundSetup.readyForNextRoundUseCase.execute({
+        gameId,
+        playerId: playerData.playerId
+      })
 
-      // Agregar jugador a la lista de ready si no está ya
-      if (!game.round.playersReadyForNextRound) {
-        game.round.playersReadyForNextRound = [];
-      }
-      
-      if (!game.round.playersReadyForNextRound.includes(playerData.playerId)) {
-        game.round.playersReadyForNextRound.push(playerData.playerId);
-        await game.save();
-      }
-
-      console.log(`✅ Player ${playerData.playerId} is ready for next round (${game.round.playersReadyForNextRound.length}/${game.activePlayers.length})`);
+      console.log(`✅ Player ${playerData.playerId} is ready for next round (${readiness.readyPlayers.length}/${readiness.totalPlayers})`)
 
       // Emitir evento de status actualizado a todos
       const { createPlayersReadyStatusEvent } = await import('@domain/events/GameEvents');
       const statusEvent = createPlayersReadyStatusEvent(
-        game.round.round,
-        game.round.playersReadyForNextRound,
-        game.activePlayers.length
+        readiness.roundNumber,
+        readiness.readyPlayers,
+        readiness.totalPlayers
       );
       io.to(gameId).emit('game:event', statusEvent);
 
       // Si todos están ready, iniciar nuevo round
-      if (game.round.playersReadyForNextRound.length === game.activePlayers.length) {
-        console.log(`🎯 All players ready! Starting round ${game.round.round + 1}...`);
+      if (readiness.allPlayersReady) {
+        console.log(`🎯 All players ready! Starting round ${readiness.roundNumber + 1}...`);
         
         setTimeout(async () => {
           try {
-            const result = await RoundService.startNewRound(gameId);
+            const result = await compositionRoot.roundSetup.startRoundUseCase.execute({ gameId })
             
             io.to(gameId).emit('game:event', result.setupEvent);
             io.to(gameId).emit('game:event', result.firstCardsEvent);
-            emitPrivateCards(io, gameId, result.privateCards);
+            emitPrivateCards(io, gameId, result.privateCards as Map<PlayerId, import('@domain/interfaces').PlayingCard[]>);
 
             // Enviar estado completo a cada jugador para garantizar sincronización
             await emitFullStateToGamePlayers(io, gameId);
             
-            console.log(`✅ Round ${result.game.round.round} started after all players ready`);
+            console.log(`✅ Round ${result.roundNumber} started after all players ready`);
           } catch (error: any) {
             console.error('Error starting next round:', error);
           }

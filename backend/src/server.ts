@@ -7,6 +7,7 @@ import { GameCleanupService } from './services/GameCleanupService.js'
 import cors from 'cors'
 import { connectDatabase } from './config/database.js'
 import { setupSocketHandlers } from './socket/index.js'
+import { createCompositionRoot } from './app/composition-root.js'
 
 dotenv.config()
 
@@ -22,7 +23,9 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST']
   }
 })
+const compositionRoot = createCompositionRoot(io)
 app.set('io', io)
+app.set('compositionRoot', compositionRoot)
 
 // Middleware
 app.use(cors())
@@ -35,7 +38,7 @@ app.get('/health', (req, res) => {
 })
 
 // Setup socket handlers (delegado a socket/index.ts)
-setupSocketHandlers(io)
+setupSocketHandlers(io, compositionRoot)
 
 // Start server
 async function startServer() {

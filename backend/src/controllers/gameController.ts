@@ -1,65 +1,30 @@
 import { Request, Response } from 'express'
-import { GameModel } from '../models/Game.js'
-import { GameService } from '../services/GameService.js'
-import { RoundService } from '../services/RoundService.js'
 import { PlayerId } from '../../../domain/interfaces/Player'
-import { GameSocketPublisher } from '../socket/services/gameSocketPublisher.js'
+import type { CompositionRoot } from '../app/composition-root.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
     const { gameName, hostPlayerId, userId, maxPlayers, pointsToWin, hostName, hostColor } = req.body
-    
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' })
-    }
-    
-    const resolvedHostPlayerId = (hostPlayerId || 'player_1') as PlayerId
-    const newGame = await GameService.createGame(gameName, resolvedHostPlayerId, userId, maxPlayers, pointsToWin)
 
-    if (hostName || hostColor) {
-      await GameService.updatePlayerProfile(newGame.gameId, resolvedHostPlayerId, {
-        name: hostName,
-        color: hostColor
-      })
-    }
-
-    const createdGame = await GameModel.findOne({ gameId: newGame.gameId })
-    if (!createdGame) throw new Error('Game not found')
-    
-    // Emitir evento de socket para que todos en lobby-list vean el nuevo room
-    const io = req.app.get('io')
-    GameSocketPublisher.publishLobbyRoomCreated(io, {
-      gameId: createdGame.gameId,
-      gameName: createdGame.gameName,
-      hostPlayer: createdGame.hostPlayer,
-      activePlayers: createdGame.activePlayers,
-      currentPlayers: createdGame.activePlayers.length,
-      maxPlayers: createdGame.gameSettings.maxPlayers,
-      minPlayers: createdGame.gameSettings.minPlayers,
-      hasSpace: createdGame.activePlayers.length < createdGame.gameSettings.maxPlayers,
-      pointsToWin: createdGame.gameSettings.pointsToWin,
-      createdAt: createdGame.createdAt
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.createGameUseCase.execute({
+      gameName,
+      hostPlayerId: hostPlayerId as PlayerId | undefined,
+      userId,
+      maxPlayers,
+      pointsToWin,
+      hostName,
+      hostColor
     })
-    
+
     res.status(201).json({
       success: true,
-      data: {
-        gameId: createdGame.gameId,
-        gameName: createdGame.gameName,
-        assignedPlayerId: createdGame.hostPlayer,
-        activePlayers: createdGame.activePlayers,
-        gamePhase: createdGame.gamePhase,
-        deckSize: createdGame.deck.length,
-        bidDecks: {
-          setCollection: createdGame.bidDecks.setCollectionBidDeck.length,
-          points: createdGame.bidDecks.pointsBidDeck.length,
-          tricks: createdGame.bidDecks.tricksBidDeck.length
-        }
-      }
+      data: responseData
     })
   } catch (error: any) {
     console.error('Error creating game:', error)
-    res.status(500).json({ success: false, error: error.message || 'Failed to create game' })
+    const status = error.message === 'userId is required' ? 400 : 500
+    res.status(status).json({ success: false, error: error.message || 'Failed to create game' })
   }
 }
 
@@ -67,10 +32,14 @@ export const getGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params
     const { userId } = req.query
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
     
-    const gameData = await GameService.getPlayerGameState(gameId, userId as string | undefined)
+    const { responseData } = await compositionRoot.connectionLifecycle.getPlayerGameStateUseCase.execute({
+      gameId,
+      userId: userId as string | undefined
+    })
     
-    res.status(200).json({ success: true, data: gameData })
+    res.status(200).json({ success: true, data: responseData })
   } catch (error: any) {
     console.error('Error fetching game:', error)
     const status = error.message === 'Game not found' ? 404 : 500
@@ -83,25 +52,10 @@ export const getGame = async (req: Request, res: Response) => {
 
 export const getGames = async (req: Request, res: Response) => {
   try {
-    const games = await GameModel.find({ gamePhase: 'setup' })
-      .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers gameSettings.pointsToWin')
-      .sort({ createdAt: -1 })
-      .lean()
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.getOpenGamesUseCase.execute()
     
-    const gamesInfo = games.map(game => ({
-      gameId: game.gameId,
-      gameName: game.gameName,
-      hostPlayer: game.hostPlayer,
-      activePlayers: game.activePlayers,
-      currentPlayers: game.activePlayers.length,
-      maxPlayers: game.gameSettings.maxPlayers,
-      minPlayers: game.gameSettings.minPlayers,
-      hasSpace: game.activePlayers.length < game.gameSettings.maxPlayers,
-      pointsToWin: game.gameSettings.pointsToWin,
-      createdAt: game.createdAt
-    }))
-    
-    res.status(200).json({ success: true, data: gamesInfo })
+    res.status(200).json({ success: true, data: responseData })
   } catch (error) {
     console.error('Error fetching games:', error)
     res.status(500).json({ success: false, error: 'Failed to fetch games' })
@@ -112,30 +66,16 @@ export const joinGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params
     const { userId } = req.body
-    
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' })
-    }
-    
-    const { game, assignedPlayerId } = await GameService.joinGame(gameId, userId)
-    
-    // Emitir evento de socket para actualizar contadores en tiempo real
-    const io = req.app.get('io')
-    GameSocketPublisher.publishLobbyPlayerCountChanged(io, game.gameId, game.activePlayers.length)
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.joinGameUseCase.execute({ gameId, userId })
     
     res.status(200).json({
       success: true,
-      data: {
-        gameId: game.gameId,
-        assignedPlayerId,
-        activePlayers: game.activePlayers,
-        currentPlayers: game.activePlayers.length,
-        maxPlayers: game.gameSettings.maxPlayers
-      }
+      data: responseData
     })
   } catch (error: any) {
     console.error('Error joining game:', error)
-    const status = error.message === 'Game not found' ? 404 : 400
+    const status = error.message === 'Game not found' ? 404 : error.message === 'userId is required' ? 400 : 400
     res.status(status).json({ success: false, error: error.message })
   }
 }
@@ -145,47 +85,27 @@ export const updatePlayerProfile = async (req: Request, res: Response) => {
     const { gameId, playerId } = req.params
     const { userId, name, color } = req.body
 
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' })
-    }
-
-    const game = await GameModel.findOne({ gameId })
-    if (!game) {
-      return res.status(404).json({ success: false, error: 'Game not found' })
-    }
-
-    const assignedPlayerId = game.playerSessions?.get(userId)
-    if (assignedPlayerId !== playerId) {
-      return res.status(403).json({ success: false, error: 'Cannot update another player profile' })
-    }
-
-    const result = await GameService.updatePlayerProfile(gameId, playerId as PlayerId, { name, color })
-
-    const io = req.app.get('io')
-    GameSocketPublisher.publishLobbyRoomCreated(io, {
-      gameId: result.game.gameId,
-      gameName: result.game.gameName,
-      hostPlayer: result.game.hostPlayer,
-      activePlayers: result.game.activePlayers,
-      currentPlayers: result.game.activePlayers.length,
-      maxPlayers: result.game.gameSettings.maxPlayers,
-      minPlayers: result.game.gameSettings.minPlayers,
-      hasSpace: result.game.activePlayers.length < result.game.gameSettings.maxPlayers,
-      pointsToWin: result.game.gameSettings.pointsToWin,
-      createdAt: result.game.createdAt
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.updatePlayerProfileUseCase.execute({
+      gameId,
+      playerId: playerId as PlayerId,
+      userId,
+      name,
+      color
     })
 
     res.status(200).json({
       success: true,
-      data: {
-        gameId,
-        updatedPlayer: result.updatedPlayer,
-        activePlayers: result.game.activePlayers
-      }
+      data: responseData
     })
   } catch (error: any) {
     console.error('Error updating player profile:', error)
-    const status = error.message === 'Game not found' ? 404 : 400
+    const status =
+      error.message === 'Game not found'
+        ? 404
+        : error.message === 'Cannot update another player profile'
+          ? 403
+          : 400
     res.status(status).json({ success: false, error: error.message })
   }
 }
@@ -195,50 +115,25 @@ export const updateGameSettings = async (req: Request, res: Response) => {
     const { gameId } = req.params
     const { userId, pointsToWin } = req.body
 
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' })
-    }
-
-    if (typeof pointsToWin !== 'number') {
-      return res.status(400).json({ success: false, error: 'pointsToWin must be a number' })
-    }
-
-    const game = await GameModel.findOne({ gameId })
-    if (!game) {
-      return res.status(404).json({ success: false, error: 'Game not found' })
-    }
-
-    const assignedPlayerId = game.playerSessions?.get(userId)
-    if (!assignedPlayerId) {
-      return res.status(403).json({ success: false, error: 'User is not assigned to this game' })
-    }
-
-    const updatedGame = await GameService.updatePointsToWin(gameId, assignedPlayerId, pointsToWin)
-
-    const io = req.app.get('io')
-    GameSocketPublisher.publishLobbyRoomCreated(io, {
-      gameId: updatedGame.gameId,
-      gameName: updatedGame.gameName,
-      hostPlayer: updatedGame.hostPlayer,
-      activePlayers: updatedGame.activePlayers,
-      currentPlayers: updatedGame.activePlayers.length,
-      maxPlayers: updatedGame.gameSettings.maxPlayers,
-      minPlayers: updatedGame.gameSettings.minPlayers,
-      hasSpace: updatedGame.activePlayers.length < updatedGame.gameSettings.maxPlayers,
-      pointsToWin: updatedGame.gameSettings.pointsToWin,
-      createdAt: updatedGame.createdAt
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.updateGameSettingsUseCase.execute({
+      gameId,
+      userId,
+      pointsToWin
     })
 
     res.status(200).json({
       success: true,
-      data: {
-        gameId: updatedGame.gameId,
-        pointsToWin: updatedGame.gameSettings.pointsToWin
-      }
+      data: responseData
     })
   } catch (error: any) {
     console.error('Error updating game settings:', error)
-    const status = error.message === 'Game not found' ? 404 : 400
+    const status =
+      error.message === 'Game not found'
+        ? 404
+        : error.message === 'User is not assigned to this game'
+          ? 403
+          : 400
     res.status(status).json({ success: false, error: error.message })
   }
 }
@@ -247,49 +142,26 @@ export const startGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params
     const { hostPlayerId } = req.body
-    
-    const game = await GameModel.findOne({ gameId })
-    if (!game) return res.status(404).json({ success: false, error: 'Game not found' })
-    if (game.hostPlayer !== hostPlayerId) return res.status(403).json({ success: false, error: 'Only the host can start the game' })
-    if (game.gamePhase !== 'setup') return res.status(400).json({ success: false, error: 'Game already started or ended' })
-    if (game.activePlayers.length < game.gameSettings.minPlayers) {
-      return res.status(400).json({ success: false, error: `Need at least ${game.gameSettings.minPlayers} players to start` })
-    }
-    
-    const { game: updatedGame, event } = await GameService.startGame(gameId)
 
-    const io = req.app.get('io')
-    GameSocketPublisher.publishGameStarted(io, {
-      gameId: updatedGame.gameId,
-      gamePhase: updatedGame.gamePhase,
-      activePlayers: updatedGame.activePlayers.map(player => player.id),
-      playerTurnOrder: updatedGame.playerTurnOrder
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const { responseData } = await compositionRoot.lobby.startGameUseCase.execute({
+      gameId,
+      hostPlayerId: hostPlayerId as PlayerId
     })
-    
-    if (event) {
-      GameSocketPublisher.publishGameEvent(io, gameId, event)
-    }
-
-    const { game: gameWithRound, setupEvent, firstCardsEvent, privateCards } = 
-      await RoundService.startNewRound(gameId)
-    
-    GameSocketPublisher.publishRoundSetup(io, gameId, setupEvent, firstCardsEvent, privateCards)
-
-    // Enviar estado actualizado del juego con playerTurn y fase player_drawing
-    await GameSocketPublisher.publishGameStateSync(io, gameId)
 
     res.status(200).json({
       success: true,
-      data: {
-        gameId: updatedGame.gameId,
-        gamePhase: updatedGame.gamePhase,
-        activePlayers: updatedGame.activePlayers,
-        playerTurnOrder: updatedGame.playerTurnOrder
-      }
+      data: responseData
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error starting game:', error)
-    res.status(500).json({ success: false, error: 'Failed to start game' })
+    const status =
+      error.message === 'Game not found'
+        ? 404
+        : error.message === 'Only the host can start the game'
+          ? 403
+          : 400
+    res.status(status).json({ success: false, error: error.message || 'Failed to start game' })
   }
 }
 
@@ -298,16 +170,22 @@ export const deleteGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params
     const { hostPlayerId } = req.body
-    
-    const game = await GameModel.findOne({ gameId })
-    if (!game) return res.status(404).json({ success: false, error: 'Game not found' })
-    if (game.hostPlayer !== hostPlayerId) return res.status(403).json({ success: false, error: 'Only the host can delete the game' })
-    
-    await GameService.deleteGame(gameId)
-    res.status(200).json({ success: true, message: 'Game deleted successfully' })
+
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
+    const result = await compositionRoot.lobby.deleteGameUseCase.execute({
+      gameId,
+      hostPlayerId: hostPlayerId as PlayerId
+    })
+
+    res.status(200).json({ success: true, message: result.message })
   } catch (error: any) {
     console.error('Error deleting game:', error)
-    const status = error.message === 'Game not found' ? 404 : 400
+    const status =
+      error.message === 'Game not found'
+        ? 404
+        : error.message === 'Only the host can delete the game'
+          ? 403
+          : 400
     res.status(status).json({ success: false, error: error.message })
   }
 }
@@ -316,26 +194,20 @@ export const endGame = async (req: Request, res: Response) => {
   try {
     const { gameId } = req.params
     const { winnerId } = req.body
+    const compositionRoot = req.app.get('compositionRoot') as CompositionRoot
     
-    const { game, winnerId: winner } = await GameService.endGame(gameId, winnerId)
+    const { responseData } = await compositionRoot.scoringGameEnd.endGameUseCase.execute({
+      gameId,
+      winnerId: winnerId as PlayerId | undefined
+    })
     
     res.status(200).json({
       success: true,
-      data: {
-        gameId: game.gameId,
-        gamePhase: game.gamePhase,
-        winnerId: winner,
-        finalScores: game.playerScores,
-        activePlayers: game.activePlayers.map(player => ({
-          id: player.id,
-          name: player.name,
-          color: player.color
-        }))
-      }
-    });
+      data: responseData
+    })
   } catch (error: any) {
-    console.error('Error ending game:', error);
-    const status = error.message === 'Game not found' ? 404 : 400;
-    res.status(status).json({ success: false, error: error.message });
+    console.error('Error ending game:', error)
+    const status = error.message === 'Game not found' ? 404 : 400
+    res.status(status).json({ success: false, error: error.message })
   }
 }
