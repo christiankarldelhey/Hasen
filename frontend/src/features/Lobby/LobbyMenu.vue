@@ -160,16 +160,20 @@ const handleStartGame = async () => {
 </script>
 
 <template>
-  <div class="card card-border bg-hasen-base w-full md:w-[40%] h-[85vh] shadow-lg flex flex-col relative overflow-hidden">
+  <div
+    class="card card-border bg-hasen-base w-full md:w-[40%] h-[85vh] shadow-lg flex flex-col relative overflow-hidden"
+    data-testid="lobby-menu"
+  >
     
     
     <div class="card-header z-10">
-      <h1 class="text-center text-2xl font-semibold text-black mt-4">{{ getTitle() }}</h1>
+      <h1 class="text-center text-2xl font-semibold text-black mt-4" data-testid="lobby-title">{{ getTitle() }}</h1>
     </div>
     <div class="card-body z-10 !p-0 flex flex-col overflow-hidden">
       <!-- Back to Menu button for all views except menu and room - FIXED -->
       <div v-if="currentView !== 'menu' && currentView !== 'room'" class="px-8 pt-8 pb-4 flex-shrink-0">
         <ActionButton 
+          data-testid="lobby-back-to-menu-btn"
           :label="t('lobby.backToMenu')" 
           variant="tertiary"
           @click="handleViewChange('menu')"
@@ -178,7 +182,7 @@ const handleStartGame = async () => {
       
       <!-- Scrollable content area -->
       <div class="flex-1 overflow-y-auto px-8 pb-8" :class="{ 'pt-8': currentView === 'menu' || currentView === 'room' }">
-        <div v-if="currentView === 'menu'" class="flex flex-col justify-center h-full">
+        <div v-if="currentView === 'menu'" class="flex flex-col justify-center h-full" data-testid="lobby-view-menu">
           <LobbyOptions
             @create-game="handleCreateGameView"
             @join-game="handleJoinGameView"
@@ -190,11 +194,13 @@ const handleStartGame = async () => {
         
         <CreateGameMenu
           v-if="currentView === 'create-game'"
+          data-testid="lobby-view-create-game"
           @create-game="handleCreateGame"
         />
         
         <JoinGameMenu
           v-if="currentView === 'join-game'"
+          data-testid="lobby-view-join-game"
           :games="lobbyStore.rooms"
           :loading="lobbyStore.loading"
           :error="lobbyStore.error"
@@ -204,14 +210,17 @@ const handleStartGame = async () => {
         
         <RulesMenu
           v-if="currentView === 'rules'"
+          data-testid="lobby-view-rules"
         />
         
         <SettingsMenu
           v-if="currentView === 'settings'"
+          data-testid="lobby-view-settings"
         />
         
         <Room
           v-if="currentView === 'room' && lobbyStore.currentRoomData"
+          data-testid="lobby-view-room"
           :current-game="lobbyStore.currentRoomData"
           :player-id="hasenStore.currentPlayerId"
           @back="handleBackToMenu"

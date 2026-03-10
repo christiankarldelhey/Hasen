@@ -14,35 +14,40 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="flex flex-col gap-5">
-    <ActionButton 
-      :label="t('lobby.createNewGame')"
-      variant="primary"
-      @click="emit('createGame')"
-    />
+  <div class="flex flex-col gap-5" data-testid="lobby-options">
+    <div data-testid="lobby-create-game-btn" @click="emit('createGame')">
+      <ActionButton 
+        :label="t('lobby.createNewGame')"
+        variant="primary"
+      />
+    </div>
     
-    <ActionButton 
-      :label="t('lobby.joinGame')"
-      variant="primary"
-      @click="emit('joinGame')"
-    />
+    <div data-testid="lobby-join-game-btn" @click="emit('joinGame')">
+      <ActionButton 
+        :label="t('lobby.joinGame')"
+        variant="primary"
+      />
+    </div>
 
-    <ActionButton
-      :label="t('lobby.tutorial')"
-      variant="primary"
-      @click="emit('tutorial')"
-    />
+    <div data-testid="lobby-tutorial-btn" @click="emit('tutorial')">
+      <ActionButton
+        :label="t('lobby.tutorial')"
+        variant="primary"
+      />
+    </div>
     
-    <ActionButton 
-      :label="t('lobby.rules')"
-      variant="primary"
-      @click="emit('rules')"
-    />
+    <div data-testid="lobby-rules-btn" @click="emit('rules')">
+      <ActionButton 
+        :label="t('lobby.rules')"
+        variant="primary"
+      />
+    </div>
     
-    <ActionButton 
-      :label="t('lobby.settings')"
-      variant="primary"
-      @click="emit('settings')"
-    />
+    <div data-testid="lobby-settings-btn" @click="emit('settings')">
+      <ActionButton 
+        :label="t('lobby.settings')"
+        variant="primary"
+      />
+    </div>
   </div>
 </template>

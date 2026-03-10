@@ -14,6 +14,8 @@ build/
 **/dist/
 **/build/
 coverage/
+playwright-report/
+test-results/
 
 # Logs
 *.log

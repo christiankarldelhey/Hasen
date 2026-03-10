@@ -273,16 +273,16 @@ onUnmounted(() => {
 
 <template>
   <GameLayout>
-    <div v-if="loading" class="py-12">
+    <div v-if="loading" class="py-12" data-testid="game-loading">
       <RabbitLoader size="xl" />
     </div>
     
-    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-8">
+    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-8" data-testid="game-error">
       <p class="font-bold">Error</p>
       <p>{{ error }}</p>
     </div>
 
-    <div v-else class="relative w-full h-screen">
+    <div v-else class="relative w-full h-screen" data-testid="game-board">
       <GameInfo />
       
       <AvailableBids />

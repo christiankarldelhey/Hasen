@@ -12,7 +12,7 @@ const tocVNode = generateTableOfContents(rulesData)
 </script>
 
 <template>
-  <div class="text-black">
+  <div class="text-black" data-testid="rules-menu">
     <component :is="tocVNode" v-if="showTableOfContents" />
     <component v-for="(vnode, index) in rulesVNodes" :key="index" :is="vnode" />
   </div>

@@ -161,8 +161,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4" data-testid="room-menu">
     <ActionButton 
+      data-testid="room-back-btn"
       :label="t('lobby.backToMenu')" 
       variant="tertiary"
       @click="emit('back')"
@@ -171,7 +172,7 @@ onUnmounted(() => {
     <div class="text-center">
       <p v-if="isHost" class="text-hasen-green font-semibold">{{ t('lobby.youAreHost') }}</p>
       <div class="mt-4 space-y-3">
-        <p class="text-black font-semibold">
+        <p class="text-black font-semibold" data-testid="room-players-count">
           {{ t('lobby.players') }}: {{ currentPlayers }} / {{ roomData.maxPlayers }}
         </p>
 
@@ -243,6 +244,7 @@ onUnmounted(() => {
 
     <ActionButton 
       v-if="isHost"
+      data-testid="room-start-game-btn"
       :label="t('lobby.startGame')"
       variant="primary"
       :disabled="currentPlayers < roomData.minPlayers"
@@ -250,6 +252,7 @@ onUnmounted(() => {
     />
 
     <ActionButton 
+      data-testid="room-leave-game-btn"
       :label="isHost ? t('lobby.deleteGame') : t('lobby.leaveGame')"
       variant="danger"
       @click="emit('leaveGame')"

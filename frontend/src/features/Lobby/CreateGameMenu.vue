@@ -21,12 +21,13 @@ const handleCreateGame = () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4" data-testid="create-game-menu">
     <div class="form-control">
       <label class="label">
         <span class="label-text text-black font-semibold">Game Name</span>
       </label>
       <input 
+        data-testid="create-game-name-input"
         v-model="gameName"
         type="text"
         placeholder="Enter game name"
@@ -40,6 +41,7 @@ const handleCreateGame = () => {
         <span class="label-text text-black font-semibold">Number of Players</span>
       </label>
       <select 
+        data-testid="create-game-max-players-select"
         v-model="maxPlayers"
         class="select select-bordered w-full bg-white text-black"
       >
@@ -54,6 +56,7 @@ const handleCreateGame = () => {
         <span class="label-text text-black font-semibold">Points to Win</span>
       </label>
       <select 
+        data-testid="create-game-points-to-win-select"
         v-model="pointsToWin"
         class="select select-bordered w-full bg-white text-black"
       >
@@ -64,6 +67,7 @@ const handleCreateGame = () => {
     </div>
 
     <ActionButton 
+      data-testid="create-game-submit-btn"
       :label="t('lobby.createGame')"
       variant="primary"
       @click="handleCreateGame"

@@ -50,10 +50,10 @@ const handleConfirmLogout = () => {
 </script>
 
 <template>
-<div class="fixed top-0 left-0 z-10 m-4 flex flex-row gap-1">
+<div class="fixed top-0 left-0 z-10 m-4 flex flex-row gap-1" data-testid="game-info-panel">
   <div data-tutorial-id="game-controls">
     <GamePanel class="flex flex-col justify-around gap-2">
-      <button class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="handleLogoutClick">
+      <button data-testid="game-logout-btn" class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="handleLogoutClick">
         <IconLogout2 :size="22" class="text-hasen-base" />
       </button>
 
@@ -86,9 +86,9 @@ const handleConfirmLogout = () => {
   <p class="text-sm text-hasen-dark/80">Are you sure you want to leave the game?</p>
 
   <template #footer>
-    <div class="flex gap-3">
-      <ActionButton label="Cancel" variant="secondary" @click="handleCancelLogout" />
-      <ActionButton label="Confirm" variant="danger" @click="handleConfirmLogout" />
+    <div class="flex gap-3" data-testid="game-logout-modal-actions">
+      <ActionButton data-testid="game-logout-cancel-btn" label="Cancel" variant="secondary" @click="handleCancelLogout" />
+      <ActionButton data-testid="game-logout-confirm-btn" label="Confirm" variant="danger" @click="handleConfirmLogout" />
     </div>
   </template>
 </BaseModal>
