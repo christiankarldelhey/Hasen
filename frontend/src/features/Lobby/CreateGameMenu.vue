@@ -24,13 +24,13 @@ const handleCreateGame = () => {
   <div class="flex flex-col gap-4" data-testid="create-game-menu">
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-black font-semibold">Game Name</span>
+        <span class="label-text text-black font-semibold">{{ t('lobby.gameName') }}</span>
       </label>
       <input 
         data-testid="create-game-name-input"
         v-model="gameName"
         type="text"
-        placeholder="Enter game name"
+        :placeholder="t('lobby.gameNamePlaceholder')"
         class="input input-bordered w-full bg-white text-black"
         required
       />
@@ -38,7 +38,7 @@ const handleCreateGame = () => {
 
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-black font-semibold">Number of Players</span>
+        <span class="label-text text-black font-semibold">{{ t('lobby.players') }}</span>
       </label>
       <select 
         data-testid="create-game-max-players-select"
@@ -46,14 +46,14 @@ const handleCreateGame = () => {
         class="select select-bordered w-full bg-white text-black"
       >
         <option v-for="option in playerOptions" :key="option" :value="option">
-          {{ option }} players
+          {{ t('lobby.playersOption', { count: option }) }}
         </option>
       </select>
     </div>
 
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-black font-semibold">Points to Win</span>
+        <span class="label-text text-black font-semibold">{{ t('lobby.pointsToWin') }}</span>
       </label>
       <select 
         data-testid="create-game-points-to-win-select"
@@ -61,7 +61,7 @@ const handleCreateGame = () => {
         class="select select-bordered w-full bg-white text-black"
       >
         <option v-for="option in pointsOptions" :key="option" :value="option">
-          {{ option }} points
+          {{ t('lobby.pointsToWinLabel', { points: option }) }}
         </option>
       </select>
     </div>

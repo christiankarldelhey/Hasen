@@ -123,7 +123,7 @@ const handleLeaveGame = async () => {
       const userId = userIdService.getUserId();
       
       if (lobbyStore.isHost(hasenStore.currentPlayerId)) {
-        const confirmed = confirm('Are you sure you want to delete this room?');
+        const confirmed = confirm(t('lobby.roomDeleteConfirm'));
         if (!confirmed) {
           return;
         }

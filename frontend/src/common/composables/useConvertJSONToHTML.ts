@@ -237,9 +237,9 @@ export function useConvertJSONToHTML() {
   /**
    * Generates a table of contents from rules data
    */
-  const generateTableOfContents = (rulesData: RulesData): VNode => {
+  const generateTableOfContents = (rulesData: RulesData, title = 'Table of Contents'): VNode => {
     return h('nav', { class: 'mb-8 p-4 bg-hasen-green rounded-lg border border-hasen-green' }, [
-      h('h2', { class: 'text-xl font-bold mb-3 text-white' }, 'Table of Contents'),
+      h('h2', { class: 'text-xl font-bold mb-3 text-white' }, title),
       h('ul', { class: 'space-y-2' },
         rulesData.sections.map(section => 
           h('li', [

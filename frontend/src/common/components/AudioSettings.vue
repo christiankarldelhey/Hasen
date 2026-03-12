@@ -3,19 +3,19 @@
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-3">
         <input type="checkbox" v-model="musicEnabled" class="checkbox border-hasen-green [--chkbg:theme(colors.hasen.green)] [--chkfg:white]" />
-        <span class="label-text text-black font-semibold">Music Enabled</span>
+        <span class="label-text text-black font-semibold">{{ t('audio.musicEnabled') }}</span>
       </label>
     </div>
 
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-3">
         <input type="checkbox" v-model="sfxEnabled" class="checkbox border-hasen-green [--chkbg:theme(colors.hasen.green)] [--chkfg:white]" />
-        <span class="label-text text-black font-semibold">Sound Effects Enabled</span>
+        <span class="label-text text-black font-semibold">{{ t('audio.soundEffectsEnabled') }}</span>
       </label>
     </div>
 
     <div class="form-control">
-      <span class="label-text text-black font-semibold block mb-2">Master Volume</span>
+      <span class="label-text text-black font-semibold block mb-2">{{ t('audio.masterVolume') }}</span>
       <input 
         type="range" 
         min="0" 
@@ -27,7 +27,7 @@
     </div>
 
     <div class="form-control">
-      <span class="label-text text-black font-semibold block mb-2">Music Volume</span>
+      <span class="label-text text-black font-semibold block mb-2">{{ t('audio.musicVolume') }}</span>
       <input 
         type="range" 
         min="0" 
@@ -40,7 +40,7 @@
     </div>
 
     <div class="form-control">
-      <span class="label-text text-black font-semibold block mb-2">FX Volume</span>
+      <span class="label-text text-black font-semibold block mb-2">{{ t('audio.fxVolume') }}</span>
       <input 
         type="range" 
         min="0" 
@@ -58,6 +58,9 @@
 
 <script setup lang="ts">
 import { useAudio } from '../composables/useAudio';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const {
   masterVolume,

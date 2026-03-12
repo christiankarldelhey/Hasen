@@ -7,6 +7,7 @@ import GamePanel from '@/common/components/GamePanel.vue'
 import BaseModal from '@/common/components/BaseModal.vue'
 import ActionButton from '@/common/components/ActionButton.vue'
 import { useAudio } from '@/common/composables/useAudio'
+import { useI18n } from '@/common/composables/useI18n'
 import { useSocket } from '@/common/composables/useSocket'
 import { useHasenStore } from '@/stores/hasenStore'
 import { userIdService } from '@/services/userIdService'
@@ -16,6 +17,7 @@ const route = useRoute()
 const router = useRouter()
 const socket = useSocket()
 const hasenStore = useHasenStore()
+const { t } = useI18n()
 
 const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx } = useAudio()
 
@@ -82,13 +84,13 @@ const handleConfirmLogout = () => {
   </GamePanel>
 </div>
 
-<BaseModal :isOpen="showLogoutModal" title="Leave game?" maxWidth="sm" @close="handleCancelLogout">
-  <p class="text-sm text-hasen-dark/80">Are you sure you want to leave the game?</p>
+<BaseModal :isOpen="showLogoutModal" :title="t('game.leaveGameTitle')" maxWidth="sm" @close="handleCancelLogout">
+  <p class="text-sm text-hasen-dark/80">{{ t('game.leaveGameConfirm') }}</p>
 
   <template #footer>
     <div class="flex gap-3" data-testid="game-logout-modal-actions">
-      <ActionButton data-testid="game-logout-cancel-btn" label="Cancel" variant="secondary" @click="handleCancelLogout" />
-      <ActionButton data-testid="game-logout-confirm-btn" label="Confirm" variant="danger" @click="handleConfirmLogout" />
+      <ActionButton data-testid="game-logout-cancel-btn" :label="t('common.cancel')" variant="secondary" @click="handleCancelLogout" />
+      <ActionButton data-testid="game-logout-confirm-btn" :label="t('common.confirm')" variant="danger" @click="handleConfirmLogout" />
     </div>
   </template>
 </BaseModal>

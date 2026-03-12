@@ -40,7 +40,7 @@ const { t } = useI18n();
     >
       <ActionButton 
         :data-testid="`join-game-action-${game.gameId}`"
-        :label="joiningGameId === game.gameId ? 'Joining...' : `${game.gameName} (${game.currentPlayers}/${game.maxPlayers} - ${game.pointsToWin || 300}pts)`"
+        :label="joiningGameId === game.gameId ? t('lobby.joining') : `${game.gameName} (${game.currentPlayers}/${game.maxPlayers} - ${t('lobby.pointsToWinLabel', { points: game.pointsToWin || 300 })})`"
         variant="primary"
         :disabled="!game.hasSpace || joiningGameId === game.gameId"
         @click="emit('joinGame', game.gameId)"

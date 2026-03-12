@@ -20,6 +20,7 @@ import type { GameEvent, CardPlayedEvent, TrickCompletedEvent, FirstCardDealtEve
 import { useHasenStore } from '@/stores/hasenStore';
 import { usePlayerConnection, GamePausedOverlay } from '@/features/PlayerConnection';
 import { useAudio } from '@/common/composables/useAudio';
+import { useI18n } from '@/common/composables/useI18n';
 
 const route = useRoute();
 const router = useRouter();
@@ -28,6 +29,7 @@ const socketGame = useSocketGame();
 const gameStore = useGameStore();
 const hasenStore = useHasenStore();
 const { playMusic, stopMusic } = useAudio();
+const { t } = useI18n();
 
 // Animation system
 const animCoords = provideAnimationCoords();
@@ -278,7 +280,7 @@ onUnmounted(() => {
     </div>
     
     <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-8" data-testid="game-error">
-      <p class="font-bold">Error</p>
+      <p class="font-bold">{{ t('common.error') }}</p>
       <p>{{ error }}</p>
     </div>
 

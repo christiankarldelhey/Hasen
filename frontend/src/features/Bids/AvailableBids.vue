@@ -75,7 +75,7 @@ const canMakeBids = computed(() => {
 
     </div>
     <div v-else class="bg-red-500 text-white p-2 rounded">
-      No round bids data
+      {{ t('game.noRoundBidsData') }}
     </div>
   </GamePanel>
 </template>

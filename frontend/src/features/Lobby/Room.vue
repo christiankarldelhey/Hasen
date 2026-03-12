@@ -81,7 +81,7 @@ const saveProfileName = async () => {
 
   const nextName = profileName.value.trim();
   if (nextName.length > 15) {
-    profileError.value = 'Name must be 15 characters or less';
+    profileError.value = t('lobby.profileNameTooLong');
     return;
   }
 
@@ -95,7 +95,7 @@ const saveProfileName = async () => {
     profileError.value = null;
     await gameAPI.updatePlayerProfile(roomData.value.gameId, normalizedPlayerId.value, { name: nextName });
   } catch (error) {
-    profileError.value = error instanceof Error ? error.message : 'Failed to update name';
+    profileError.value = error instanceof Error ? error.message : t('lobby.failedUpdateName');
   } finally {
     isSavingProfile.value = false;
   }
@@ -104,7 +104,7 @@ const saveProfileName = async () => {
 const saveProfileColor = async (color: string) => {
   if (!normalizedPlayerId.value || !currentPlayerProfile.value) return;
   if (isColorTakenByOtherPlayer(color)) {
-    profileError.value = 'Color already taken by another player';
+    profileError.value = t('lobby.colorAlreadyTaken');
     return;
   }
   if (color === currentPlayerProfile.value.color) {
@@ -117,7 +117,7 @@ const saveProfileColor = async (color: string) => {
     profileError.value = null;
     await gameAPI.updatePlayerProfile(roomData.value.gameId, normalizedPlayerId.value, { color });
   } catch (error) {
-    profileError.value = error instanceof Error ? error.message : 'Failed to update color';
+    profileError.value = error instanceof Error ? error.message : t('lobby.failedUpdateColor');
   } finally {
     isSavingProfile.value = false;
   }
@@ -132,7 +132,7 @@ const updatePointsToWin = async () => {
     pointsError.value = null;
     await gameAPI.updatePointsToWin(roomData.value.gameId, selectedPointsToWin.value);
   } catch (error) {
-    pointsError.value = error instanceof Error ? error.message : 'Failed to update points to win';
+    pointsError.value = error instanceof Error ? error.message : t('lobby.failedUpdatePointsToWin');
   } finally {
     isSavingPoints.value = false;
   }
@@ -192,13 +192,13 @@ onUnmounted(() => {
         </div>
 
         <div v-if="currentPlayerProfile" class="text-left rounded-lg bg-hasen-light/50 p-3 space-y-2">
-          <p class="text-sm font-semibold text-hasen-dark">Your profile</p>
+          <p class="text-sm font-semibold text-hasen-dark">{{ t('lobby.yourProfile') }}</p>
           <input
             v-model="profileName"
             type="text"
             maxlength="15"
             class="input input-bordered w-full bg-white text-black"
-            placeholder="Your name"
+            :placeholder="t('lobby.yourName')"
             :disabled="isSavingProfile"
             @blur="saveProfileName"
             @keydown.enter.prevent="saveProfileName"
@@ -221,7 +221,7 @@ onUnmounted(() => {
         </div>
 
         <div class="text-left rounded-lg bg-hasen-light/50 p-3 space-y-2">
-          <p class="text-sm font-semibold text-hasen-dark">Points to win</p>
+          <p class="text-sm font-semibold text-hasen-dark">{{ t('lobby.pointsToWin') }}</p>
           <select
             v-model="selectedPointsToWin"
             class="select select-bordered w-full bg-white text-black"
@@ -229,10 +229,10 @@ onUnmounted(() => {
             @change="updatePointsToWin"
           >
             <option v-for="option in pointsOptions" :key="option" :value="option">
-              {{ option }} points
+              {{ t('lobby.pointsToWinLabel', { points: option }) }}
             </option>
           </select>
-          <p v-if="!isHost" class="text-xs text-hasen-dark/70">Only host can change this setting.</p>
+          <p v-if="!isHost" class="text-xs text-hasen-dark/70">{{ t('lobby.onlyHostCanChangeSetting') }}</p>
           <p v-if="pointsError" class="text-xs text-hasen-red">{{ pointsError }}</p>
         </div>
       </div>

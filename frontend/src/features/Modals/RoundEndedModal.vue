@@ -94,7 +94,7 @@ const shouldShowResults = computed(() => {
             </h3>
             <div class="text-sm text-hasen-dark/70 flex flex-row justify-between items-center gap-2">
               <div>
-                Previous Score:
+                {{ t('game.previousScore') }}:
                 <span class="text-lg font-semibold text-hasen-dark/90">
                   {{ playerInfo.previousScore }}
                 </span>
@@ -104,7 +104,7 @@ const shouldShowResults = computed(() => {
               </div>
               
               <div>
-                Final Score:
+                {{ t('game.finalScore') }}:
                 <span :class="playerInfo.totalScore >= 0 ? 'text-lg text-hasen-green font-semibold' : 'text-lg text-hasen-red font-semibold'">
                   {{ playerInfo.totalScore }}
                 </span>

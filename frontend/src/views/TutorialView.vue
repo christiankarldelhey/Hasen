@@ -15,6 +15,7 @@ import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.
 import { provideAnimationCoords, useDealAnimation } from '@/features/Animations'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
+import { useI18n } from '@/common/composables/useI18n'
 import type { PlayerId, PrivateGameState, PublicGameState } from '@domain/interfaces'
 
 const {
@@ -30,6 +31,7 @@ const {
 
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
+const { t } = useI18n()
 
 const previousPublicGameState = ref<PublicGameState | null>(
   gameStore.publicGameState ? structuredClone(gameStore.publicGameState) : null
@@ -100,6 +102,16 @@ const winningCardId = computed(() => {
 
 const trickState = computed(() => {
   return gameStore.publicGameState?.round.currentTrick?.trick_state || null
+})
+
+const localizedStepTitle = computed(() => {
+  if (!currentStep.value) return ''
+  return t(currentStep.value.title)
+})
+
+const localizedStepDescription = computed(() => {
+  if (!currentStep.value) return ''
+  return t(currentStep.value.description)
 })
 
 function applyStepState() {
@@ -223,8 +235,8 @@ onUnmounted(() => {
 
       <TutorialOverlay
         v-if="currentStep"
-        :title="currentStep.title"
-        :description="currentStep.description"
+        :title="localizedStepTitle"
+        :description="localizedStepDescription"
         :step-index="stepIndex"
         :total-steps="totalSteps"
         :rect="highlightRect"

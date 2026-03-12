@@ -1,0 +1,667 @@
+{
+  "title": "HASEN — Reglas oficiales",
+  "subtitle": "Un juego de bazas y apuestas con triunfos fijos e interacciones asimétricas",
+  "sections": [
+    {
+      "id": "components",
+      "title": "1. Componentes del juego",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "1.1 Mazo de Hasen (33 cartas)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "El mazo consta de 33 cartas divididas en 4 palos:"
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Palo de triunfo fijo: Flores (8 cartas)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "As (A) — 12 puntos",
+                "Rey (K) — 11 puntos",
+                "Reina (Q) — Karnoffel — 0 puntos (triunfo especial)",
+                "5 — 5 puntos",
+                "4 — 4 puntos",
+                "3 — 3 puntos",
+                "2 — 2 puntos",
+                "1 — 1 punto"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Otros palos (Hojas, Bayas, Bellotas — 8 cartas cada uno)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "10 — 10 puntos",
+                "9 — 0 puntos",
+                "8 — 0 puntos",
+                "7 — 0 puntos",
+                "6 — 0 puntos",
+                "5 — 0 puntos",
+                "Ober (O) — 6 puntos",
+                "Unter (U) — 5 puntos"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Las aves (cartas S especiales) (1 en cada palo no triunfo)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "[[card:berries-S|Bayas S]] — \"El Búho\" — 0 puntos",
+                "[[card:leaves-S|Hojas S]] — \"El Gorrión\" — 0 puntos",
+                "[[card:acorns-S|Bellotas S]] — \"El Carpintero\" — 0 puntos"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "1.2 Cartas de apuesta",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Hay 3 tipos de apuestas disponibles en cada ronda:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "7 apuestas de puntos — Predice tu total de puntos al final de la ronda",
+                "6 apuestas de colección — Recolecta palos específicos evitando otros",
+                "5 apuestas de bazas — Gana bazas específicas o una cantidad de bazas"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "En cada ronda se seleccionan 9 apuestas al azar (3 de cada tipo) y se ponen a disposición de los jugadores."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "1.3 Otros componentes",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Fichas de conejo: 3 por jugador",
+                "Marcador de puntuación o app"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-setup",
+      "title": "2. Preparación de ronda",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "2.1 Conjunto de apuestas",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Al inicio de cada ronda se seleccionan al azar 9 cartas de apuesta de los mazos de apuestas:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "3 apuestas de puntos",
+                "3 apuestas de colección",
+                "3 apuestas de bazas"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Estas apuestas están disponibles para que los jugadores las tomen durante las ventanas de apuesta."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "2.2 Reparto inicial",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Cada jugador recibe 5 cartas:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "1 carta visible (boca arriba, visible para todos los jugadores, no se puede intercambiar, se une a la mano tras la fase de reemplazo)",
+                "4 cartas ocultas (boca abajo en tu mano)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "2.3 Fase de reemplazo de carta (opcional)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "En orden de turno, cada jugador puede:"
+            },
+            {
+              "type": "list",
+              "ordered": true,
+              "items": [
+                "Descartar 1 carta oculta de su mano, revelarla a todos los jugadores y robar una nueva carta del mazo o de la pila de descarte",
+                "Saltar el reemplazo y ganar inmediatamente +3 puntos"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Las cartas descartadas permanecen visibles. Los jugadores posteriores pueden tomar una carta descartada en lugar de robar del mazo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-play",
+      "title": "3. Juego de ronda (bazas)",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Una ronda consta de 5 bazas. En cada baza, todos los jugadores juegan 1 carta."
+        },
+        {
+          "type": "subsection",
+          "title": "3.1 Regla de salida",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "El jugador que abre la 1.ª baza de la partida es quien vio un conejo más recientemente",
+                "En rondas posteriores, el jugador inicial rota en sentido horario",
+                "El ganador de cada baza abre la siguiente, salvo que alguien haya jugado el Carpintero ([[card:acorns-S|Bellotas S]])"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.2 Palo de salida",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "La primera carta jugada en una baza establece el palo de salida. Ese palo se vuelve el más poderoso para esa baza (excepto triunfos)."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.3 No es obligatorio asistir al palo",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Los jugadores pueden jugar cualquier carta sin importar el palo de salida."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "3.4 Resolución de baza",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "La baza la gana la carta más fuerte según la jerarquía de cartas (sección 4)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card-hierarchy",
+      "title": "4. Jerarquía completa de cartas",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Las cartas se dividen en 4 niveles de poder, más 3 cartas S especiales con reglas únicas."
+        },
+        {
+          "type": "subsection",
+          "title": "Nivel 1 — Triunfos mayores (los más fuertes del juego)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Estas cartas siempre ganan salvo contra el Búho cuando abre baza."
+            },
+            {
+              "type": "list",
+              "items": [
+                "[[card:flowers-A|As de Flores]] — 12 pts",
+                "[[card:flowers-K|Rey de Flores]] — 11 pts",
+                "[[card:flowers-Q|Reina de Flores]] (Karnoffel) — 0 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Regla especial de Karnoffel: la única carta capaz de vencer al Búho cuando el Búho abre la baza."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Nivel 2 — Palos mayores (solo cuando coincide el palo de salida)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Estas cartas solo son fuertes cuando el palo de salida coincide con su palo."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Obers: [[card:leaves-O]] [[card:berries-O]] [[card:acorns-O]] — 6 pts",
+                "Unters: [[card:leaves-U]] [[card:berries-U]] [[card:acorns-U]] — 5 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Vencen a: todos los triunfos menores. Pierden contra: triunfos mayores."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Nivel 3 — Triunfos menores (Flores comunes)",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Funcionan como triunfos, pero no vencen a Ober/Unter del palo de salida."
+            },
+            {
+              "type": "list",
+              "items": [
+                "[[card:flowers-5|5 de Flores]] — 5 pts",
+                "[[card:flowers-4|4 de Flores]] — 4 pts",
+                "[[card:flowers-3|3 de Flores]] — 3 pts",
+                "[[card:flowers-2|2 de Flores]] — 2 pts",
+                "[[card:flowers-1|1 de Flores]] — 1 pt"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Vencen a: cualquier carta de otro palo que no sea un Palo Mayor. Pierden contra: Palos Mayores del palo de salida."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "Nivel 4 — Palos menores",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Solo participan si su palo es el palo de salida."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Si Hojas es el palo de salida: [[card:leaves-10]] [[card:leaves-9]] [[card:leaves-8]] [[card:leaves-7]] [[card:leaves-6]] [[card:leaves-5]]",
+                "Si Bayas es el palo de salida: [[card:berries-10]] [[card:berries-9]] [[card:berries-8]] [[card:berries-7]] [[card:berries-6]] [[card:berries-5]]",
+                "Si Bellotas es el palo de salida: [[card:acorns-10]] [[card:acorns-9]] [[card:acorns-8]] [[card:acorns-7]] [[card:acorns-6]] [[card:acorns-5]]"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Regla: si su palo no es de salida → siempre pierden contra cualquier triunfo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "special-cards",
+      "title": "5. Las aves (cartas especiales)",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "[[card:berries-S|Bayas S]] — \"El Búho\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "No puede abrir la 1.ª baza de la ronda",
+                "Si abre baza → gana contra todo excepto Karnoffel ([[card:flowers-Q|Flores Q]])",
+                "Si no abre baza → funciona como Palo Menor"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Uso típico: cerrar una ronda o forzar una victoria garantizada abriendo baza."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "[[card:acorns-S|Bellotas S]] — \"El Carpintero\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "No puede ganar la baza",
+                "Cuando se juega, su dueño elige quién abre la siguiente baza, ignorando por completo al ganador actual"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Uso típico: control táctico del orden de juego."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "[[card:leaves-S|Hojas S]] — \"El Gorrión\"",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "No puede ganar la baza",
+                "Al final de la baza en la que se jugó, el jugador toma una carta de la baza y la coloca en su reserva personal de puntuación"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Uso típico: obtener Ases, Reyes o triunfos mayores sin ganarlos por fuerza."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "betting-phase",
+      "title": "6. Fase de apuestas",
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Hay 3 ventanas de apuesta durante la ronda:"
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "Desde el inicio hasta el final de la 1.ª baza",
+            "Desde jugar la 1.ª carta de la 2.ª baza hasta su final",
+            "Desde jugar la 1.ª carta de la 3.ª baza hasta su final"
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.1 Reglas de apuesta",
+          "content": [
+            {
+              "type": "list",
+              "items": [
+                "Cada jugador puede hacer una apuesta por ventana (máx. 3 apuestas por ronda)",
+                "Coloca una ficha de conejo sobre la carta de apuesta elegida",
+                "Puedes apostar antes o después de jugar tu carta en la baza",
+                "Las apuestas son públicas",
+                "Puedes combinar apuestas solo si son de categorías diferentes",
+                "Máximo 2 jugadores por apuesta específica"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.2 Penalización por apuestas fallidas",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Apuestas de colección:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Ganador 1 → -10 pts",
+                "Ganador 2 → -15 pts",
+                "Ganador 3 → -20 pts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Apuestas de puntos y bazas:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Ganador 1 → -20 pts",
+                "Ganador 2 → -25 pts",
+                "Ganador 3 → -30 pts"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "6.3 Conflictos de apuestas",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Si dos o más jugadores eligen la misma apuesta en la misma ventana:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Si todos ganan o todos pierden → no hay efecto adicional",
+                "Si algunos ganan y otros pierden:",
+                "  • Ganadores: +5 pts",
+                "  • Perdedores: -5 pts (además de la penalización normal)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bid-types",
+      "title": "7. Tipos de apuesta",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "7.1 Apuestas de puntos",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objetivo: predecir cuántos puntos de cartas acumularás al final de la ronda."
+            },
+            {
+              "type": "table",
+              "headers": [
+                "Nombre de apuesta",
+                "Condición",
+                "Recompensa por acierto"
+              ],
+              "rows": [
+                [
+                  "Muy pequeña",
+                  "Anota 2-10 pts",
+                  "+40 pts"
+                ],
+                [
+                  "Pequeñita",
+                  "Anota 3-15 pts",
+                  "+40 pts"
+                ],
+                [
+                  "Pequeña",
+                  "Anota 5-20 pts",
+                  "+30 pts"
+                ],
+                [
+                  "Media",
+                  "Anota 11-30 pts",
+                  "+40 pts"
+                ],
+                [
+                  "Grande",
+                  "Anota 22-40 pts",
+                  "+35 pts"
+                ],
+                [
+                  "Muy grande",
+                  "Anota 35+ pts",
+                  "+45 pts"
+                ],
+                [
+                  "Máxima",
+                  "Anota 45+ pts",
+                  "+55 pts"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "7.2 Apuestas de colección",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objetivo: recolectar cartas de ciertos palos y evitar otros. Se evalúan todas las cartas ganadas en bazas más las obtenidas por efectos (como El Recolector)."
+            },
+            {
+              "type": "paragraph",
+              "text": "Combinaciones disponibles:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Recolecta Bellotas / Evita Hojas",
+                "Recolecta Bellotas / Evita Bayas",
+                "Recolecta Bayas / Evita Bellotas",
+                "Recolecta Bayas / Evita Hojas",
+                "Recolecta Hojas / Evita Bayas",
+                "Recolecta Hojas / Evita Bellotas"
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 4,
+              "text": "Cómo se puntúan las apuestas de colección"
+            },
+            {
+              "type": "paragraph",
+              "text": "Éxito: recibes +10 puntos por cada carta recolectada del palo objetivo."
+            },
+            {
+              "type": "paragraph",
+              "text": "Fallo: recibes una penalización por cada carta prohibida que obtuviste:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Ganador 1: -10 por carta prohibida",
+                "Ganador 2: -15 por carta prohibida",
+                "Ganador 3: -20 por carta prohibida"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Cálculo neto: (cartas recolectadas × 10) - (cartas prohibidas × penalización). Ganas la apuesta si el neto es ≥ 10 puntos."
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "7.3 Apuestas de bazas",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Objetivo: ganar bazas específicas o cantidades de bazas."
+            },
+            {
+              "type": "table",
+              "headers": [
+                "Nombre de apuesta",
+                "Condición",
+                "Recompensa por acierto",
+                "Notas"
+              ],
+              "rows": [
+                [
+                  "Doble final",
+                  "Gana las últimas 2 bazas",
+                  "+30 pts",
+                  "2 disponibles"
+                ],
+                [
+                  "Solo doble final",
+                  "Gana exactamente las últimas 2 bazas y ninguna otra",
+                  "+40 pts",
+                  "2 disponibles"
+                ],
+                [
+                  "Cuatro bazas",
+                  "Gana 4 bazas",
+                  "+45 pts",
+                  ""
+                ],
+                [
+                  "Baza única",
+                  "Gana exactamente 1 baza",
+                  "+45 pts",
+                  ""
+                ],
+                [
+                  "Perfecta",
+                  "Gana las 6 bazas",
+                  "+55 pts",
+                  ""
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-end",
+      "title": "8. Fin de ronda y fin de partida",
+      "content": [
+        {
+          "type": "subsection",
+          "title": "8.1 Fin de ronda",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Los puntos se totalizan a partir de:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Cartas ganadas (si no se hicieron apuestas)",
+                "Apuestas acertadas",
+                "Apuestas fallidas (penalizaciones)",
+                "Efectos de cartas especiales",
+                "Bonificación por reemplazo de carta (+3 si se salta)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": "8.2 Fin de partida",
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "La partida termina cuando un jugador alcanza la puntuación objetivo acordada (p. ej., 200 o 300 puntos). Gana el jugador con la puntuación total más alta."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

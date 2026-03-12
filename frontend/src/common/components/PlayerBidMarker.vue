@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { Bid, PlayerId, SetCollectionBidCondition, Suit } from '@domain/interfaces'
 import { useGameStore } from '@/stores/gameStore'
+import { useI18n } from '@/common/composables/useI18n'
 import WinPointsSymbol from '@/assets/symbols/win-symbol.png'
 import TrickWinSymbol from '@/assets/symbols/crown.svg'
 import AcornSymbol from '@/assets/symbols/acorn.png'
@@ -19,6 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const gameStore = useGameStore()
+const { t } = useI18n()
 
 const sizeClasses = {
   small: 'px-2 py-0.5',
@@ -106,7 +108,7 @@ const hasBids = computed(() => bidSymbols.value.length > 0)
       v-if="!hasBids"
       :class="['text-hasen-dark italic leading-none', emptyTextSizes[size]]"
     >
-      No Bids
+      {{ t('bids.noBids') }}
     </span>
 
     <div v-else class="inline-flex items-center gap-1">

@@ -1,5 +1,6 @@
 import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
 import type { Suit } from '@domain/interfaces/Card'
+import { useI18n } from './useI18n'
 
 export type TooltipType = 'info' | 'error'
 
@@ -10,97 +11,109 @@ export interface BidTooltip {
 }
 
 const suitNames: Record<Suit, string> = {
-  acorns: 'Acorns',
-  leaves: 'Leaves',
-  berries: 'Berries',
-  flowers: 'Flowers'
+  acorns: 'suits.acorns',
+  leaves: 'suits.leaves',
+  berries: 'suits.berries',
+  flowers: 'suits.flowers'
 }
 
 function formatTrickPositions(positions: number[]): string {
-  if (positions.length === 1) return `trick ${positions[0]}`
-  if (positions.length === 2) return `tricks ${positions[0]} and ${positions[1]}`
-  if (positions.length === 5) return 'all tricks'
+  if (positions.length === 1) return `${positions[0]}`
+  if (positions.length === 2) return `${positions[0]} and ${positions[1]}`
+  if (positions.length === 5) return 'all'
   
   const last = positions[positions.length - 1]
   const rest = positions.slice(0, -1).join(', ')
-  return `tricks ${rest}, and ${last}`
+  return `${rest}, and ${last}`
 }
 
-function getPointsBidDescription(condition: PointsBidCondition): string {
+function getPointsBidDescription(condition: PointsBidCondition, t: (key: string, params?: Record<string, string | number>) => string): string {
   const { min_points, max_points } = condition
   
   if (max_points >= 100) {
-    return `Score ${min_points}+ points`
+    return t('bids.scorePoints', { min: min_points })
   }
   
   if (min_points === max_points) {
-    return `Score exactly ${min_points} points`
+    return t('bids.scoreExactly', { points: min_points })
   }
   
-  return `Score ${min_points}-${max_points} points`
+  return t('bids.scoreRange', { min: min_points, max: max_points })
 }
 
-function getSetCollectionBidDescription(condition: SetCollectionBidCondition): string {
-  const winSuit = suitNames[condition.win_suit]
-  const avoidSuit = suitNames[condition.avoid_suit]
+function getSetCollectionBidDescription(
+  condition: SetCollectionBidCondition,
+  t: (key: string, params?: Record<string, string | number>) => string
+): string {
+  const winSuit = t(suitNames[condition.win_suit])
+  const avoidSuit = t(suitNames[condition.avoid_suit])
   
-  return `Collect ${winSuit}, avoid ${avoidSuit}`
+  return t('bids.collectAvoid', { win: winSuit, avoid: avoidSuit })
 }
 
-function getTrickBidDescription(condition: TrickBidCondition): string {
+function getTrickBidDescription(
+  condition: TrickBidCondition,
+  t: (key: string, params?: Record<string, string | number>) => string
+): string {
   if (condition.win_trick_position && condition.lose_trick_position) {
     const winPositions = formatTrickPositions(condition.win_trick_position)
     const losePositions = formatTrickPositions(condition.lose_trick_position)
-    return `Win ${winPositions}, lose ${losePositions}`
+    return t('bids.winAndLose', { win: winPositions === 'all' ? t('bids.allTricks') : winPositions, lose: losePositions === 'all' ? t('bids.allTricks') : losePositions })
   }
   
   if (condition.win_trick_position && condition.may_win_trick_position) {
     const winPositions = formatTrickPositions(condition.win_trick_position)
-    return `Win only ${winPositions}`
+    return t('bids.winOnly', { numbers: winPositions === 'all' ? t('bids.allTricks') : winPositions })
   }
   
   if (condition.win_trick_position) {
     const positions = formatTrickPositions(condition.win_trick_position)
-    return `Win ${positions}`
+    if (positions === 'all') return t('bids.winOnly', { numbers: t('bids.allTricks') })
+    if (condition.win_trick_position.length === 1) {
+      return t('bids.winTrick', { number: condition.win_trick_position[0] ?? 0 })
+    }
+    return t('bids.winTricks', { numbers: positions })
   }
   
   if (condition.win_min_tricks !== undefined && condition.win_max_tricks !== undefined) {
     const { win_min_tricks, win_max_tricks } = condition
     
     if (win_min_tricks === win_max_tricks) {
-      return win_min_tricks === 1 
-        ? 'Win exactly 1 trick' 
-        : `Win exactly ${win_min_tricks} tricks`
+      return win_min_tricks === 1
+        ? t('bids.winExactlyOne')
+        : t('bids.winExactly', { count: win_min_tricks })
     }
     
-    return `Win ${win_min_tricks}-${win_max_tricks} tricks`
+    return t('bids.winRange', { min: win_min_tricks, max: win_max_tricks })
   }
   
-  return 'Unknown trick condition'
+  return t('bids.unknownTrickCondition')
 }
 
 export function useBidTooltips() {
+  const { t } = useI18n()
+
   const getBidDescription = (bid: Bid): string => {
     switch (bid.bid_type) {
       case 'points':
-        return getPointsBidDescription(bid.win_condition as PointsBidCondition)
+        return getPointsBidDescription(bid.win_condition as PointsBidCondition, t)
       case 'set_collection':
-        return getSetCollectionBidDescription(bid.win_condition as SetCollectionBidCondition)
+        return getSetCollectionBidDescription(bid.win_condition as SetCollectionBidCondition, t)
       case 'trick':
-        return getTrickBidDescription(bid.win_condition as TrickBidCondition)
+        return getTrickBidDescription(bid.win_condition as TrickBidCondition, t)
       default:
-        return 'Unknown bid type'
+        return t('bids.unknownBidType')
     }
   }
 
   const errorMessages = {
-    alreadyMadeBid: 'Already made a bid this trick',
-    notYourTurn: 'Not your turn',
-    noCurrentTrick: 'No active trick',
-    gameNotFound: 'Game or player not found',
-    maxBidsReached: 'Maximum bids reached for this trick',
-    bidAlreadyTaken: 'This bid is already taken by another player',
-    cannotBidAfterPlaying: 'Cannot bid after playing a card'
+    alreadyMadeBid: t('errors.alreadyMadeBid'),
+    notYourTurn: t('errors.notYourTurn'),
+    noCurrentTrick: t('errors.noActiveTrick'),
+    gameNotFound: t('errors.gameNotFound'),
+    maxBidsReached: t('errors.maxBidsReached'),
+    bidAlreadyTaken: t('errors.bidAlreadyTaken'),
+    cannotBidAfterPlaying: t('errors.cannotBidAfterPlaying')
   }
 
   const getErrorTooltip = (reason?: string): BidTooltip | null => {

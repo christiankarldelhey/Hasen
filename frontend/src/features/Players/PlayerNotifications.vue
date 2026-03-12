@@ -92,13 +92,13 @@ const turnMessage = computed(() => {
     
     if (pendingSpecialAction.value.type === 'PICK_NEXT_LEAD') {
       return {
-        title: isMyAction ? '🫐 Select Next Lead Player!' : `⏳ Waiting for ${actionPlayerName}`,
-        subtitle: isMyAction ? 'Choose who will lead the next trick' : 'Selecting the next lead player...'
+        title: isMyAction ? `🫐 ${t('game.selectNextLeadPlayer')}` : `⏳ ${t('game.waitingForPlayer', { player: actionPlayerName || '' })}`,
+        subtitle: isMyAction ? t('game.chooseWhoLeadsNextTrick') : t('game.selectingNextLeadPlayer')
       }
     } else if (pendingSpecialAction.value.type === 'STEAL_CARD') {
       return {
-        title: isMyAction ? '🍃 Select Card to Steal!' : `⏳ Waiting for ${actionPlayerName}`,
-        subtitle: isMyAction ? 'Choose a card from the trick to steal' : 'Selecting a card to steal...'
+        title: isMyAction ? `🍃 ${t('game.selectCardToSteal')}` : `⏳ ${t('game.waitingForPlayer', { player: actionPlayerName || '' })}`,
+        subtitle: isMyAction ? t('game.chooseCardFromTrickToSteal') : t('game.selectingCardToSteal')
       }
     }
   }
@@ -150,22 +150,22 @@ const turnMessage = computed(() => {
   if (isMyTurn.value) {
     if (isPlayerDrawingPhase.value) {
       return {
-        title: 'Your turn!',
-        subtitle: 'Choose to skip or replace a card'
+        title: t('game.yourTurn'),
+        subtitle: t('game.chooseSkipOrReplace')
       }
     } else {
       const canMakeBids = currentTrick.value && currentTrick.value.trick_number <= 3
       return {
-        title: 'Your turn!',
+        title: t('game.yourTurn'),
         subtitle: canMakeBids 
-          ? 'Make Bids (optional) then play a card'
-          : 'Play a card'
+          ? t('game.makeBidsThenPlay')
+          : t('game.playCard')
       }
     }
   } else {
     return {
-      title: `Waiting for ${currentPlayerName.value}`,
-      subtitle: 'Player is deciding...'
+      title: t('game.waitingForPlayer', { player: currentPlayerName.value || '' }),
+      subtitle: t('game.playerDeciding')
     }
   }
 })
