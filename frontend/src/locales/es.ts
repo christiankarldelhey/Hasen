@@ -34,6 +34,7 @@ export default {
     profileNameTooLong: 'El nombre debe tener 15 caracteres o menos',
     gameNamePlaceholder: 'Ingresa el nombre de la sala',
     playersOption: '{count} jugadores',
+    onePlayerPlusBotsOption: '1 jugador + {count} bot(s)',
   },
   game: {
     finishTurn: 'Terminar turno',

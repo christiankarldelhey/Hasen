@@ -34,6 +34,7 @@ export default {
     profileNameTooLong: 'Name must be 15 characters or less',
     gameNamePlaceholder: 'Enter game name',
     playersOption: '{count} players',
+    onePlayerPlusBotsOption: '1 player + {count} bot(s)',
   },
   game: {
     finishTurn: 'Finish Turn',

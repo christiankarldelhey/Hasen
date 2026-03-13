@@ -18,6 +18,7 @@ export class GameService {
   
   private static readonly SKIP_CARD_REPLACEMENT_POINTS = 3
   private static readonly PLAYER_NAME_MAX_LENGTH = 15
+  private static readonly BOT_NAME_SUFFIX = ' Bot'
 
   private static getActivePlayerIds(game: Game): PlayerId[] {
     return game.activePlayers.map(player => player.id)
@@ -29,6 +30,49 @@ export class GameService {
 
   private static getActivePlayer(game: Game, playerId: PlayerId): ActivePlayer | undefined {
     return game.activePlayers.find(player => player.id === playerId)
+  }
+
+  private static buildBotProfile(playerId: PlayerId): ActivePlayer {
+    const profile = getDefaultPlayerProfile(playerId)
+    const botName = profile.name.endsWith(this.BOT_NAME_SUFFIX)
+      ? profile.name
+      : `${profile.name}${this.BOT_NAME_SUFFIX}`
+
+    return {
+      ...profile,
+      name: botName,
+      isBot: true
+    }
+  }
+
+  static addBotsUntilMinPlayers(game: Game): number {
+    const missingPlayers = game.gameSettings.minPlayers - game.activePlayers.length
+    if (missingPlayers <= 0) return 0
+
+    const activePlayerIds = this.getActivePlayerIds(game)
+    const availableSlots = PLAYER_IDS.filter(p => !activePlayerIds.includes(p))
+    const botsToAdd = availableSlots.slice(0, missingPlayers)
+
+    botsToAdd.forEach(playerId => {
+      game.activePlayers.push(this.buildBotProfile(playerId))
+    })
+
+    return botsToAdd.length
+  }
+
+  static addSpecificBots(game: Game, botCount: number): number {
+    const normalizedBotCount = Math.max(0, Math.floor(botCount))
+    if (normalizedBotCount === 0) return 0
+
+    const activePlayerIds = this.getActivePlayerIds(game)
+    const availableSlots = PLAYER_IDS.filter(p => !activePlayerIds.includes(p))
+    const botsToAdd = availableSlots.slice(0, normalizedBotCount)
+
+    botsToAdd.forEach(playerId => {
+      game.activePlayers.push(this.buildBotProfile(playerId))
+    })
+
+    return botsToAdd.length
   }
 
   private static applySkipCardReplacementBonus(game: Game, playerId: PlayerId): { awardedPoints: number; playerGameScore: number } {
@@ -248,6 +292,15 @@ export class GameService {
     console.log('🔵 [startGame] CALLED with:', { gameId });
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
+
+    const botsAdded = this.addBotsUntilMinPlayers(game)
+    if (botsAdded > 0) {
+      console.log(`🤖 Added ${botsAdded} bot player(s) to reach min players before start`)
+    }
+
+    if (game.activePlayers.length < game.gameSettings.minPlayers) {
+      throw new Error(`Need at least ${game.gameSettings.minPlayers} players to start`)
+    }
 
     game.gamePhase = 'playing';
     const activePlayerIds = this.getActivePlayerIds(game)

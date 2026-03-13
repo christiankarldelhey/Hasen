@@ -24,6 +24,8 @@ export interface CreateGameResponse {
   pointsToWin: number;
   hasSpace: boolean;
   createdAt: string;
+  gamePhase?: 'setup' | 'playing' | 'ended';
+  autoStarted?: boolean;
 }
 
 export interface UpdatePlayerProfilePayload {
@@ -76,7 +78,7 @@ async getPlayerGameState(gameId: string): Promise<any> {
   }
 },
 
-async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, pointsToWin: number): Promise<CreateGameResponse> {
+async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, pointsToWin: number, botCount: number): Promise<CreateGameResponse> {
   try {
     const userId = userIdService.getUserId(); // Cambiado de getSessionId
     
@@ -85,7 +87,7 @@ async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, 
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ gameName, hostPlayerId, userId, maxPlayers, pointsToWin })
+      body: JSON.stringify({ gameName, hostPlayerId, userId, maxPlayers, pointsToWin, botCount })
     });
     const data = await response.json();
     

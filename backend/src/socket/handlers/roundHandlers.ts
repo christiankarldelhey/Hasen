@@ -2,6 +2,7 @@ import { RoundService } from '@/services/RoundService';
 import { GameService } from '@/services/GameService';
 import { TrickService } from '@/services/TrickService';
 import { BidService } from '@/services/BidService';
+import { BotTurnCoordinator } from '@/ai/BotTurnCoordinator.js';
 import { Server, Socket } from 'socket.io'
 import { GameModel } from '@/models/Game.js'
 import { socketToPlayer } from './lobbyHandlers.js'
@@ -29,6 +30,8 @@ socket.on('round:start', async ({ gameId }) => {
       
       // 3. Emitir cartas privadas a cada jugador individualmente
       emitPrivateCards(io, gameId, privateCards);
+
+      await BotTurnCoordinator.run(io, gameId);
       
       console.log('✅ ROUND_STARTED');
       
@@ -62,6 +65,8 @@ socket.on('round:start', async ({ gameId }) => {
       if (result.trickEvent) {
         io.to(gameId).emit('game:event', result.trickEvent);
       }
+
+      await BotTurnCoordinator.run(io, gameId);
       
     } catch (error: any) {
       console.error('Error in skipCardReplacement:', error);
@@ -90,6 +95,8 @@ socket.on('round:start', async ({ gameId }) => {
       if (result.trickEvent) {
         io.to(gameId).emit('game:event', result.trickEvent);
       }
+
+      await BotTurnCoordinator.run(io, gameId);
       
     } catch (error: any) {
       console.error('Error in replaceCard:', error);
@@ -148,6 +155,8 @@ socket.on('round:start', async ({ gameId }) => {
             io.to(gameId).emit('game:event', result.setupEvent);
             io.to(gameId).emit('game:event', result.firstCardsEvent);
             emitPrivateCards(io, gameId, result.privateCards);
+
+            await BotTurnCoordinator.run(io, gameId);
             
             console.log(`✅ ROUND_AUTO_STARTED: ${result.game.round.round}`);
           } catch (error: any) {
@@ -155,6 +164,8 @@ socket.on('round:start', async ({ gameId }) => {
           }
         }, 2000);
       }
+
+      await BotTurnCoordinator.run(io, gameId);
       
     } catch (error: any) {
       console.error('Error in playCard:', error);
@@ -179,6 +190,8 @@ socket.on('round:start', async ({ gameId }) => {
       );
 
       io.to(gameId).emit('game:event', event);
+
+      await BotTurnCoordinator.run(io, gameId);
       
     } catch (error: any) {
       console.error('Error in makeBid:', error);
@@ -233,12 +246,16 @@ socket.on('round:start', async ({ gameId }) => {
 
             io.to(gameId).emit('game:event', roundEndedEvent);
             console.log(`📢 ROUND_ENDED event emitted, waiting for all players to be ready...`);
+
+            await BotTurnCoordinator.run(io, gameId);
             
           } catch (error: any) {
             console.error('Error calculating round scores:', error);
           }
         }, 500);
       }
+
+      await BotTurnCoordinator.run(io, gameId);
 
       console.log(`✅ Trick finished, moved to history and next trick started`);
       
@@ -275,6 +292,8 @@ socket.on('round:start', async ({ gameId }) => {
         io.to(gameId).emit('game:event', trickCompletedEvent);
       }
 
+      await BotTurnCoordinator.run(io, gameId);
+
       console.log(`✅ Player ${playerData.playerId} selected ${selectedLeadPlayer} as next lead`);
       
     } catch (error: any) {
@@ -310,6 +329,8 @@ socket.on('round:start', async ({ gameId }) => {
         io.to(gameId).emit('game:event', trickCompletedEvent);
       }
 
+      await BotTurnCoordinator.run(io, gameId);
+
       console.log(`✅ Player ${playerData.playerId} selected card ${selectedCardId} to steal`);
       
     } catch (error: any) {
@@ -326,54 +347,22 @@ socket.on('round:start', async ({ gameId }) => {
         return;
       }
 
-      const game = await GameModel.findOne({ gameId });
-      if (!game) {
-        socket.emit('error', { message: 'Game not found' });
-        return;
+      const result = await RoundService.markPlayerReadyForNextRound(gameId, playerData.playerId)
+
+      io.to(gameId).emit('game:event', result.statusEvent)
+
+      if (result.allReady && result.setupResult) {
+        console.log(`🎯 All players ready! Starting round ${result.setupResult.game.round.round}...`)
+
+        io.to(gameId).emit('game:event', result.setupResult.setupEvent)
+        io.to(gameId).emit('game:event', result.setupResult.firstCardsEvent)
+        emitPrivateCards(io, gameId, result.setupResult.privateCards)
+
+        // Enviar estado completo a cada jugador para garantizar sincronización
+        await emitFullStateToGamePlayers(io, gameId)
       }
 
-      // Agregar jugador a la lista de ready si no está ya
-      if (!game.round.playersReadyForNextRound) {
-        game.round.playersReadyForNextRound = [];
-      }
-      
-      if (!game.round.playersReadyForNextRound.includes(playerData.playerId)) {
-        game.round.playersReadyForNextRound.push(playerData.playerId);
-        await game.save();
-      }
-
-      console.log(`✅ Player ${playerData.playerId} is ready for next round (${game.round.playersReadyForNextRound.length}/${game.activePlayers.length})`);
-
-      // Emitir evento de status actualizado a todos
-      const { createPlayersReadyStatusEvent } = await import('@domain/events/GameEvents');
-      const statusEvent = createPlayersReadyStatusEvent(
-        game.round.round,
-        game.round.playersReadyForNextRound,
-        game.activePlayers.length
-      );
-      io.to(gameId).emit('game:event', statusEvent);
-
-      // Si todos están ready, iniciar nuevo round
-      if (game.round.playersReadyForNextRound.length === game.activePlayers.length) {
-        console.log(`🎯 All players ready! Starting round ${game.round.round + 1}...`);
-        
-        setTimeout(async () => {
-          try {
-            const result = await RoundService.startNewRound(gameId);
-            
-            io.to(gameId).emit('game:event', result.setupEvent);
-            io.to(gameId).emit('game:event', result.firstCardsEvent);
-            emitPrivateCards(io, gameId, result.privateCards);
-
-            // Enviar estado completo a cada jugador para garantizar sincronización
-            await emitFullStateToGamePlayers(io, gameId);
-            
-            console.log(`✅ Round ${result.game.round.round} started after all players ready`);
-          } catch (error: any) {
-            console.error('Error starting next round:', error);
-          }
-        }, 1000);
-      }
+      await BotTurnCoordinator.run(io, gameId)
       
     } catch (error: any) {
       console.error('Error in readyForNextRound:', error);

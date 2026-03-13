@@ -15,6 +15,7 @@ export interface Player {
   name: string
   color: string
   defaultAvatar: string
+  isBot?: boolean
 }
 
 export interface ActivePlayer extends Player {}

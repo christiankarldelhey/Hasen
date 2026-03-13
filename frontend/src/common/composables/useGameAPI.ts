@@ -61,12 +61,12 @@ export function useGameAPI() {
     return result
   }
 
-  async function createGame(gameName: string, hostPlayerId: PlayerId, maxPlayers: number, pointsToWin: number) {
+  async function createGame(gameName: string, hostPlayerId: PlayerId, maxPlayers: number, pointsToWin: number, botCount: number) {
     startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
-      const result = await gameService.createNewGame(gameName, hostPlayerId, maxPlayers, pointsToWin)
+      const result = await gameService.createNewGame(gameName, hostPlayerId, maxPlayers, pointsToWin, botCount)
       
       // Actualizar el store con el nuevo juego
       lobbyStore.setCurrentRoom({
@@ -74,12 +74,12 @@ export function useGameAPI() {
         gameName: result.gameName,
         hostPlayer: result.assignedPlayerId as PlayerId,
         activePlayers: result.activePlayers,
-        currentPlayers: 1,
-        maxPlayers: maxPlayers as 2 | 3 | 4,
-        minPlayers: 2,
-        hasSpace: true,
-        pointsToWin: pointsToWin,
-        createdAt: new Date().toISOString()
+        currentPlayers: result.currentPlayers as 1 | 2 | 3 | 4,
+        maxPlayers: result.maxPlayers as 2 | 3 | 4,
+        minPlayers: result.minPlayers as 2,
+        hasSpace: result.hasSpace,
+        pointsToWin: result.pointsToWin,
+        createdAt: result.createdAt || new Date().toISOString()
       })
       
       lobbyStore.setCurrentRoomId(result.gameId)

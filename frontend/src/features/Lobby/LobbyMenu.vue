@@ -65,10 +65,22 @@ const handleTutorialView = () => {
   router.push('/tutorial');
 };
 
-const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, pointsToWin: number) => {
+const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, pointsToWin: number, botCount: number) => {
   playMusic('lobby');
   try {
-    await gameAPI.createGame(gameName, playerId as import('@domain/interfaces/Player').PlayerId, maxPlayers, pointsToWin);
+    const result = await gameAPI.createGame(
+      gameName,
+      playerId as import('@domain/interfaces/Player').PlayerId,
+      maxPlayers,
+      pointsToWin,
+      botCount
+    );
+
+    if (result.autoStarted) {
+      router.push(`/game/${result.gameId}`);
+      return;
+    }
+
     handleViewChange('room');
   } catch (err) {
     console.error('Error creating game:', err);

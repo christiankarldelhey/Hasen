@@ -29,7 +29,8 @@ const ActivePlayerSchema = new Schema({
   id: { type: String, enum: ['player_1', 'player_2', 'player_3', 'player_4'], required: true },
   name: { type: String, required: true },
   color: { type: String, required: true },
-  defaultAvatar: { type: String, required: true }
+  defaultAvatar: { type: String, required: true },
+  isBot: { type: Boolean, required: false, default: false }
 }, { _id: false });
 
 // Schema para PlayerBidEntry

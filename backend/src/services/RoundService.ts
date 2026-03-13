@@ -5,6 +5,7 @@ import { createFirstCardDealtEvent } from '@domain/events/GameEvents.js'
 import { createRoundSetupCompletedEvent } from '@domain/events/GameEvents.js'
 import { createRoundEndedEvent } from '@domain/events/GameEvents.js'
 import { createGameEndedEvent } from '@domain/events/GameEvents.js'
+import { createPlayersReadyStatusEvent } from '@domain/events/GameEvents.js'
 import { getPlayerScoreFromRound } from '@domain/rules/BidRules.js'
 import { hasGameEnded, getWinnerName } from '@domain/rules/GameEndRules.js'
 import type { RoundPhase, Bid, PlayerId, PlayingCard } from '@domain/interfaces'
@@ -174,6 +175,44 @@ export class RoundService {
       game,
       roundEndedEvent,
       gameEndedEvent: null
+    };
+  }
+
+  static async markPlayerReadyForNextRound(gameId: string, playerId: PlayerId) {
+    const game = await GameModel.findOne({ gameId });
+    if (!game) throw new Error('Game not found');
+
+    if (!game.round.playersReadyForNextRound) {
+      game.round.playersReadyForNextRound = [];
+    }
+
+    if (!game.round.playersReadyForNextRound.includes(playerId)) {
+      game.round.playersReadyForNextRound.push(playerId);
+      await game.save();
+    }
+
+    const statusEvent = createPlayersReadyStatusEvent(
+      game.round.round,
+      game.round.playersReadyForNextRound,
+      game.activePlayers.length
+    );
+
+    const allReady = game.round.playersReadyForNextRound.length === game.activePlayers.length;
+    if (!allReady) {
+      return {
+        game,
+        statusEvent,
+        allReady: false,
+        setupResult: null
+      };
+    }
+
+    const setupResult = await RoundService.startNewRound(gameId);
+    return {
+      game: setupResult.game,
+      statusEvent,
+      allReady: true,
+      setupResult
     };
   }
 

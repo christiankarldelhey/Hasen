@@ -324,6 +324,19 @@ export class TrickService {
       console.log(`🫐 Trick ${currentTrick.trick_number} next lead selected. Winner: ${trickWinner}. Score will be calculated in finishTrick.`);
     }
     
+    const trickCards = currentTrick.cards
+      .map(cardId => game.deck.find(c => c.id === cardId))
+      .filter(c => c !== undefined) as PlayingCard[];
+
+    trickCompletedEvent = createTrickCompletedEvent(
+      currentTrick.trick_number,
+      trickWinner,
+      currentTrick.winning_card || '',
+      0,
+      trickCards,
+      null
+    );
+
     // Cambiar estado a 'resolve' para permitir finishTrick
     currentTrick.trick_state = 'resolve';
 

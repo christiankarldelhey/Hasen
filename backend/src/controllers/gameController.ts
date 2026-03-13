@@ -4,13 +4,23 @@ import { GameService } from '../services/GameService.js'
 import { RoundService } from '../services/RoundService.js'
 import { PlayerId } from '../../../domain/interfaces/Player'
 import { GameSocketPublisher } from '../socket/services/gameSocketPublisher.js'
+import { BotTurnCoordinator } from '@/ai/BotTurnCoordinator.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
-    const { gameName, hostPlayerId, userId, maxPlayers, pointsToWin, hostName, hostColor } = req.body
+    const { gameName, hostPlayerId, userId, maxPlayers, pointsToWin, hostName, hostColor, botCount } = req.body
     
     if (!userId) {
       return res.status(400).json({ success: false, error: 'userId is required' })
+    }
+
+    const normalizedBotCount = Math.max(0, Math.floor(Number(botCount ?? 0)))
+    const allowedBotSlots = Math.max(0, (maxPlayers || 4) - 1)
+    if (normalizedBotCount > allowedBotSlots) {
+      return res.status(400).json({
+        success: false,
+        error: `botCount cannot exceed ${allowedBotSlots} for maxPlayers=${maxPlayers || 4}`
+      })
     }
     
     const resolvedHostPlayerId = (hostPlayerId || 'player_1') as PlayerId
@@ -23,11 +33,65 @@ export const createGame = async (req: Request, res: Response) => {
       })
     }
 
-    const createdGame = await GameModel.findOne({ gameId: newGame.gameId })
+    const createdGameDoc = await GameModel.findOne({ gameId: newGame.gameId })
+    if (!createdGameDoc) throw new Error('Game not found')
+
+    const io = req.app.get('io')
+
+    if (normalizedBotCount > 0) {
+      const addedBots = GameService.addSpecificBots(createdGameDoc, normalizedBotCount)
+      if (addedBots !== normalizedBotCount) {
+        return res.status(400).json({
+          success: false,
+          error: `Only ${addedBots} bot slots available in this room configuration`
+        })
+      }
+      await createdGameDoc.save()
+
+      const { game: startedGame, event } = await GameService.startGame(newGame.gameId)
+
+      GameSocketPublisher.publishGameStarted(io, {
+        gameId: startedGame.gameId,
+        gamePhase: startedGame.gamePhase,
+        activePlayers: startedGame.activePlayers.map(player => player.id),
+        playerTurnOrder: startedGame.playerTurnOrder
+      })
+
+      if (event) {
+        GameSocketPublisher.publishGameEvent(io, startedGame.gameId, event)
+      }
+
+      const { game: gameWithRound, setupEvent, firstCardsEvent, privateCards } =
+        await RoundService.startNewRound(startedGame.gameId)
+
+      GameSocketPublisher.publishRoundSetup(io, gameWithRound.gameId, setupEvent, firstCardsEvent, privateCards)
+      await GameSocketPublisher.publishGameStateSync(io, gameWithRound.gameId)
+      await BotTurnCoordinator.run(io, gameWithRound.gameId)
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          gameId: gameWithRound.gameId,
+          gameName: gameWithRound.gameName,
+          assignedPlayerId: gameWithRound.hostPlayer,
+          hostPlayer: gameWithRound.hostPlayer,
+          activePlayers: gameWithRound.activePlayers,
+          currentPlayers: gameWithRound.activePlayers.length,
+          maxPlayers: gameWithRound.gameSettings.maxPlayers,
+          minPlayers: gameWithRound.gameSettings.minPlayers,
+          hasSpace: gameWithRound.activePlayers.length < gameWithRound.gameSettings.maxPlayers,
+          pointsToWin: gameWithRound.gameSettings.pointsToWin,
+          createdAt: gameWithRound.createdAt,
+          gamePhase: gameWithRound.gamePhase,
+          autoStarted: true
+        }
+      })
+    }
+
+    const createdGame = createdGameDoc
     if (!createdGame) throw new Error('Game not found')
     
     // Emitir evento de socket para que todos en lobby-list vean el nuevo room
-    const io = req.app.get('io')
     GameSocketPublisher.publishLobbyRoomCreated(io, {
       gameId: createdGame.gameId,
       gameName: createdGame.gameName,
@@ -48,13 +112,20 @@ export const createGame = async (req: Request, res: Response) => {
         gameName: createdGame.gameName,
         assignedPlayerId: createdGame.hostPlayer,
         activePlayers: createdGame.activePlayers,
+        currentPlayers: createdGame.activePlayers.length,
+        maxPlayers: createdGame.gameSettings.maxPlayers,
+        minPlayers: createdGame.gameSettings.minPlayers,
+        hasSpace: createdGame.activePlayers.length < createdGame.gameSettings.maxPlayers,
+        pointsToWin: createdGame.gameSettings.pointsToWin,
+        createdAt: createdGame.createdAt,
         gamePhase: createdGame.gamePhase,
         deckSize: createdGame.deck.length,
         bidDecks: {
           setCollection: createdGame.bidDecks.setCollectionBidDeck.length,
           points: createdGame.bidDecks.pointsBidDeck.length,
           tricks: createdGame.bidDecks.tricksBidDeck.length
-        }
+        },
+        autoStarted: false
       }
     })
   } catch (error: any) {
@@ -252,9 +323,6 @@ export const startGame = async (req: Request, res: Response) => {
     if (!game) return res.status(404).json({ success: false, error: 'Game not found' })
     if (game.hostPlayer !== hostPlayerId) return res.status(403).json({ success: false, error: 'Only the host can start the game' })
     if (game.gamePhase !== 'setup') return res.status(400).json({ success: false, error: 'Game already started or ended' })
-    if (game.activePlayers.length < game.gameSettings.minPlayers) {
-      return res.status(400).json({ success: false, error: `Need at least ${game.gameSettings.minPlayers} players to start` })
-    }
     
     const { game: updatedGame, event } = await GameService.startGame(gameId)
 
@@ -277,6 +345,8 @@ export const startGame = async (req: Request, res: Response) => {
 
     // Enviar estado actualizado del juego con playerTurn y fase player_drawing
     await GameSocketPublisher.publishGameStateSync(io, gameId)
+
+    await BotTurnCoordinator.run(io, gameId)
 
     res.status(200).json({
       success: true,
