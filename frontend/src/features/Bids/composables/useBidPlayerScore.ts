@@ -3,6 +3,8 @@ import type { TrickNumber } from '@domain/interfaces/Trick'
 import type { PlayerBidEntry, Bid, TrickBidCondition, SetCollectionBidCondition, PointsBidCondition } from '@domain/interfaces/Bid'
 import type { Suit } from '@domain/interfaces/Card'
 
+type SuitDisplayKey = Suit | 'avoidOtherSuits'
+
 export interface TrickDisplayInfo {
   trickNumber: TrickNumber
   state: 'win' | 'lose' | 'neutral' | 'blank'
@@ -11,7 +13,9 @@ export interface TrickDisplayInfo {
 
 export interface SetCollectionDisplay {
   winSuit: Suit
-  avoidSuit: Suit
+  avoidSuit: SuitDisplayKey
+  avoidSuits: Suit[]
+  avoidCount: number
   winScore: number
   avoidScore: number
 }
@@ -22,7 +26,7 @@ export interface PointsDisplay {
 }
 
 export interface SuitDisplay {
-  suit: Suit
+  suit: SuitDisplayKey
   count: number
   isWin: boolean
   isAvoid: boolean
@@ -94,13 +98,16 @@ export function usePlayerScore(
     
     const { bid, entry, condition } = setCollectionBid.value
     const winSuit = condition.win_suit
-    const avoidSuit = condition.avoid_suit
+    const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
+    const avoidSuit: SuitDisplayKey = avoidSuits.length > 1 ? 'avoidOtherSuits' : (avoidSuits[0] ?? 'acorns')
     const winCount = setCollection.value[winSuit] || 0
-    const avoidCount = setCollection.value[avoidSuit] || 0
+    const avoidCount = avoidSuits.reduce((total, suit) => total + (setCollection.value[suit] || 0), 0)
     
     return {
       winSuit,
       avoidSuit,
+      avoidSuits,
+      avoidCount,
       winScore: winCount * bid.bid_score,
       avoidScore: avoidCount * entry.onLose
     }
@@ -209,46 +216,36 @@ export function usePlayerScore(
 
   const suitDisplays = computed((): SuitDisplay[] => {
     if (!setCollection) return []
-    
-    const suitOrder: Suit[] = ['acorns', 'leaves', 'berries']
-    
-    const displays = suitOrder.map(suit => {
-      const count = setCollection.value[suit] || 0
-      
-      if (!setCollectionDisplay.value) {
-        return {
-          suit,
-          count,
-          isWin: false,
-          isAvoid: false,
-          score: null
-        }
-      }
-      
-      const isWin = setCollectionDisplay.value.winSuit === suit
-      const isAvoid = setCollectionDisplay.value.avoidSuit === suit
-      
-      return {
+
+    if (!setCollectionDisplay.value) {
+      const suitOrder: Suit[] = ['acorns', 'leaves', 'berries', 'flowers']
+      return suitOrder.map(suit => ({
         suit,
-        count,
-        isWin,
-        isAvoid,
-        score: isWin ? setCollectionDisplay.value.winScore : (isAvoid ? setCollectionDisplay.value.avoidScore : null)
-      }
-    })
-    
-    // When setCollectionDisplay is active, reorder: winSuit first, avoidSuit second, hide the third
-    if (setCollectionDisplay.value) {
-      return displays
-        .filter(d => d.isWin || d.isAvoid)
-        .sort((a, b) => {
-          if (a.isWin) return -1
-          if (b.isWin) return 1
-          return 0
-        })
+        count: setCollection.value[suit] || 0,
+        isWin: false,
+        isAvoid: false,
+        score: null
+      }))
     }
-    
-    return displays
+
+    const { winSuit, avoidSuit, avoidCount, winScore, avoidScore } = setCollectionDisplay.value
+
+    return [
+      {
+        suit: winSuit,
+        count: setCollection.value[winSuit] || 0,
+        isWin: true,
+        isAvoid: false,
+        score: winScore
+      },
+      {
+        suit: avoidSuit,
+        count: avoidCount,
+        isWin: false,
+        isAvoid: true,
+        score: avoidScore
+      }
+    ]
   })
 
   const trickBidScore = computed((): BidScoreInfo => {

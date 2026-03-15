@@ -159,6 +159,28 @@ describe('canMakeBid', () => {
     expect(result.canMakeBid).toBe(true)
     expect(result.reason).toBeUndefined()
   })
+
+  it('rejects trick bids when player already won outside may+required trick positions', () => {
+    const trickBidWithMayWin: Bid = {
+      bid_id: 'trick-may-window',
+      bid_type: 'trick',
+      bid_score: 30,
+      win_condition: {
+        may_win_trick_position: [2, 3],
+        win_trick_position: [4, 5]
+      }
+    }
+
+    const game = createGameFixture({
+      bids: [trickBidWithMayWin],
+      roundScoreTricksWon: [1]
+    })
+
+    const result = canMakeBid(game, 'player_1', 'trick', 2)
+
+    expect(result.canMakeBid).toBe(false)
+    expect(result.reason).toBe('No trick bids are possible given your current progress')
+  })
 })
 
 describe('calculateBidOnLose', () => {
@@ -276,5 +298,105 @@ describe('isWinningBid', () => {
     )
 
     expect(result).toBe(false)
+  })
+
+  it('returns true for set_collection bid with multiple avoid suits when net points are >= 10', () => {
+    const setBid: Bid = {
+      bid_id: 'set-flowers-avoid-others',
+      bid_type: 'set_collection',
+      bid_score: 10,
+      win_condition: {
+        win_suit: 'flowers',
+        avoid_suit: ['acorns', 'berries', 'leaves']
+      }
+    }
+
+    const result = isWinningBid(
+      setBid,
+      {
+        playerId: 'player_1',
+        points: 0,
+        tricksWon: [],
+        setCollection: { acorns: 0, leaves: 1, berries: 0, flowers: 2 }
+      },
+      true
+    )
+
+    expect(result).toBe(true)
+  })
+
+  it('returns false for set_collection bid with multiple avoid suits when net points are below 10', () => {
+    const setBid: Bid = {
+      bid_id: 'set-flowers-avoid-others',
+      bid_type: 'set_collection',
+      bid_score: 10,
+      win_condition: {
+        win_suit: 'flowers',
+        avoid_suit: ['acorns', 'berries', 'leaves']
+      }
+    }
+
+    const result = isWinningBid(
+      setBid,
+      {
+        playerId: 'player_1',
+        points: 0,
+        tricksWon: [],
+        setCollection: { acorns: 1, leaves: 1, berries: 0, flowers: 2 }
+      },
+      true
+    )
+
+    expect(result).toBe(false)
+  })
+
+  it('returns false for trick bid when winning outside may+required positions', () => {
+    const trickBid: Bid = {
+      bid_id: 'trick-may-window',
+      bid_type: 'trick',
+      bid_score: 30,
+      win_condition: {
+        may_win_trick_position: [2, 3],
+        win_trick_position: [4, 5]
+      }
+    }
+
+    const result = isWinningBid(
+      trickBid,
+      {
+        playerId: 'player_1',
+        points: 0,
+        tricksWon: [1],
+        setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+      },
+      false
+    )
+
+    expect(result).toBe(false)
+  })
+
+  it('returns true for trick bid when all required tricks are won and optional wins stay in may positions', () => {
+    const trickBid: Bid = {
+      bid_id: 'trick-may-window',
+      bid_type: 'trick',
+      bid_score: 30,
+      win_condition: {
+        may_win_trick_position: [1, 2, 3],
+        win_trick_position: [4, 5]
+      }
+    }
+
+    const result = isWinningBid(
+      trickBid,
+      {
+        playerId: 'player_1',
+        points: 0,
+        tricksWon: [1, 4, 5],
+        setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+      },
+      true
+    )
+
+    expect(result).toBe(true)
   })
 })

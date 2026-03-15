@@ -62,13 +62,13 @@ export function canPlayCard(
 export function getEffectiveRank(
   card: PlayingCard,
   leadSuit: LeadSuit | null,
-  _trickNumber: TrickNumber
+  _trickNumber: TrickNumber,
+  isLeadCard = leadSuit !== null && card.suit === leadSuit
 ): number {
-  // SPECIAL: Berries S (rank 40) has high rank when it leads ANY trick
+  // SPECIAL: Berries S (rank 40) has high rank only when it is the lead card of the trick
   // In all other cases, it uses its base rank (1)
   if (card.rank.onSuit === 40) {
-    // Use high rank whenever berries-S is the lead card (any trick)
-    if (leadSuit === 'berries') {
+    if (isLeadCard) {
       return card.rank.onSuit; // 40
     }
     return card.rank.base; // 1
@@ -94,7 +94,8 @@ export function compareCards(
     trick_number: TrickNumber,
     leadSuit: LeadSuit | null
   ): PlayingCard {
-    const currentCardRank = getEffectiveRank(current_card, leadSuit, trick_number);
+    // current_card is never the lead card because compareCards is only used after first play
+    const currentCardRank = getEffectiveRank(current_card, leadSuit, trick_number, false);
     const winningCardRank = getEffectiveRank(winning_card, leadSuit, trick_number);
 
     // EXCEPTION: Flowers Q (rank 31) beats Berries S (rank 40) when Berries S leads

@@ -11,7 +11,7 @@ export interface PointsBidCondition {
 
 export interface SetCollectionBidCondition {
   win_suit: Suit
-  avoid_suit: Suit
+  avoid_suit: Suit | Suit[]
 }
 
 export interface TrickBidCondition {

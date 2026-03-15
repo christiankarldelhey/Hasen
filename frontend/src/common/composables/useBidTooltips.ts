@@ -46,7 +46,10 @@ function getSetCollectionBidDescription(
   t: (key: string, params?: Record<string, string | number>) => string
 ): string {
   const winSuit = t(suitNames[condition.win_suit])
-  const avoidSuit = t(suitNames[condition.avoid_suit])
+  const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
+  const avoidSuit = avoidSuits
+    .map(suit => t(suitNames[suit]))
+    .join(', ')
   
   return t('bids.collectAvoid', { win: winSuit, avoid: avoidSuit })
 }

@@ -1,11 +1,19 @@
 import type { Game } from '../interfaces/Game'
 import type { PlayerId } from '../interfaces/Player'
-import type { BidType } from '../interfaces/Bid'
+import type { BidType, SetCollectionBidCondition } from '../interfaces/Bid'
 import type { TrickNumber } from '../interfaces/Trick'
 
 export interface CanMakeBidResult {
   canMakeBid: boolean
   reason?: string
+}
+
+function getAvoidSuitCount(
+  setCollection: import('../interfaces/Round').PlayerRoundScore['setCollection'],
+  avoidSuit: SetCollectionBidCondition['avoid_suit']
+): number {
+  const avoidSuits = Array.isArray(avoidSuit) ? avoidSuit : [avoidSuit]
+  return avoidSuits.reduce((total, suit) => total + (setCollection[suit] ?? 0), 0)
 }
 
 /**
@@ -52,6 +60,24 @@ export function canMakeSpecificBid(
       const tricksWonSoFar = new Set(playerRoundScore.tricksWon).size
       const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
       const maxPossibleTricks = tricksWonSoFar + tricksRemaining
+
+      const requiredTricks = condition.win_trick_position ?? []
+      const optionalTricks = condition.may_win_trick_position ?? []
+      const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
+      const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
+
+      // Verificar may_win_trick_position + win_trick_position: si ganamos un trick fuera de los permitidos
+      if (hasPositionConstraints) {
+        const wonUnexpectedTrick = playerRoundScore.tricksWon.some(
+          wonTrick => !allowedWonTricks.has(wonTrick)
+        )
+        if (wonUnexpectedTrick) {
+          return {
+            canMakeBid: false,
+            reason: 'You already won a trick outside the allowed positions for this bid'
+          }
+        }
+      }
       
       // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
       if (condition.win_trick_position) {
@@ -219,6 +245,19 @@ export function canMakeBid(
       // Verificar si existe al menos un bid que todavía sea posible
       const hasAnyPossibleBid = availableBids.some(bid => {
         const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
+
+        const requiredTricks = condition.win_trick_position ?? []
+        const optionalTricks = condition.may_win_trick_position ?? []
+        const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
+        const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
+
+        // Verificar may_win_trick_position + win_trick_position: si ya ganó un trick fuera de los permitidos
+        if (hasPositionConstraints) {
+          const wonUnexpectedTrick = playerRoundScore.tricksWon.some(
+            wonTrick => !allowedWonTricks.has(wonTrick)
+          )
+          if (wonUnexpectedTrick) return false
+        }
         
         // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
         if (condition.win_trick_position) {
@@ -327,6 +366,16 @@ export function isWinningBid(
     const tricksWon = playerRoundScore.tricksWon;
     const tricksWonCount = new Set(tricksWon).size;
 
+    const requiredTricks = condition.win_trick_position ?? [];
+    const optionalTricks = condition.may_win_trick_position ?? [];
+    const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0;
+    const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks]);
+
+    if (hasPositionConstraints) {
+      const wonUnexpectedTrick = tricksWon.some(t => !allowedWonTricks.has(t));
+      if (wonUnexpectedTrick) return false;
+    }
+
     // Verificar lose_trick_position: si ganó un trick que debía perder
     if (condition.lose_trick_position) {
       const wonForbiddenTrick = condition.lose_trick_position.some(
@@ -394,7 +443,7 @@ export function isWinningBid(
   if (bidType === 'set_collection') {
     const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
     const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-    const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+    const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
 
     // Calcular puntos netos: (winSuit * 10) - (avoidSuit * 10)
     const winPoints = winSuitCount * 10;
@@ -445,7 +494,7 @@ export function getPlayerScoreFromRound(
         // Calcular puntos netos: (winSuit * 10) - (avoidSuit * |onLose|)
         const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
         const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+        const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
         const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
         const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
         totalScore += netPoints;
@@ -457,7 +506,7 @@ export function getPlayerScoreFromRound(
         // Calcular puntos netos
         const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
         const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit];
+        const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
         const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
         const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
         

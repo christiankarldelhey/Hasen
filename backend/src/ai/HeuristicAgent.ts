@@ -59,7 +59,10 @@ function scoreBidAction(action: Extract<BotAction, { type: 'make_bid' }>, contex
 
   if (bid.bid_type === 'set_collection' && 'win_suit' in bid.win_condition && 'avoid_suit' in bid.win_condition) {
     const winSuitCount = suitCounts[bid.win_condition.win_suit] ?? 0
-    const avoidSuitCount = suitCounts[bid.win_condition.avoid_suit] ?? 0
+    const avoidSuits = Array.isArray(bid.win_condition.avoid_suit)
+      ? bid.win_condition.avoid_suit
+      : [bid.win_condition.avoid_suit]
+    const avoidSuitCount = avoidSuits.reduce((total, suit) => total + (suitCounts[suit] ?? 0), 0)
     return 55 + winSuitCount * 8 - avoidSuitCount * 10
   }
 
@@ -134,7 +137,7 @@ function scorePlayCardAction(action: Extract<BotAction, { type: 'play_card' }>, 
 
   const leadSuit = trick.lead_suit
   const trickNumber = trick.trick_number
-  const cardRank = getEffectiveRank(card, leadSuit, trickNumber)
+  const cardRank = getEffectiveRank(card, leadSuit, trickNumber, leadSuit === null)
   const cardPoints = card.points
 
   const currentWinningCard = trick.winning_card

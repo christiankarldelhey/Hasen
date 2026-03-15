@@ -107,10 +107,10 @@ describe('canPlayCard', () => {
 })
 
 describe('getEffectiveRank', () => {
-  it('uses berries S onSuit rank when berries is lead suit', () => {
+  it('uses berries S onSuit rank when it is the lead card', () => {
     const berriesS = createCard({ suit: 'berries', char: 'S', rank: { base: 1, onSuit: 40 } })
 
-    expect(getEffectiveRank(berriesS, 'berries', 1)).toBe(40)
+    expect(getEffectiveRank(berriesS, 'berries', 1, true)).toBe(40)
   })
 
   it('uses berries S base rank when lead suit is not berries', () => {
@@ -133,6 +133,27 @@ describe('getEffectiveRank', () => {
 })
 
 describe('compareCards', () => {
+  it('treats berries S as low rank when played after lead in a berries trick', () => {
+    const winningLeadCard = createCard({
+      id: 'berries-lead',
+      suit: 'berries',
+      char: '7',
+      rank: { base: 12, onSuit: 10 },
+      owner: 'player_1'
+    })
+    const berriesSPlayedLater = createCard({
+      id: 'berries-s-later',
+      suit: 'berries',
+      char: 'S',
+      rank: { base: 1, onSuit: 40 },
+      owner: 'player_2'
+    })
+
+    const winner = compareCards(winningLeadCard, berriesSPlayedLater, 2, 'berries')
+
+    expect(winner.id).toBe('berries-lead')
+  })
+
   it('applies Flowers Q special exception against Berries S lead', () => {
     const berriesS = createCard({
       id: 'berries-s',

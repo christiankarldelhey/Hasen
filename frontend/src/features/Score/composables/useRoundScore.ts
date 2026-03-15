@@ -56,7 +56,8 @@ export function useRoundScore(): UseRoundScoreReturn {
       if (bid.bid_type === 'set_collection') {
         const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
         const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
+        const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
+        const avoidSuitCount = avoidSuits.reduce((total, suit) => total + (playerRoundScore.setCollection[suit] || 0), 0)
         const penaltyPerCard = Math.abs(bidEntry.onLose)
         score = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
         setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }
@@ -67,7 +68,8 @@ export function useRoundScore(): UseRoundScoreReturn {
       if (bid.bid_type === 'set_collection') {
         const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
         const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-        const avoidSuitCount = playerRoundScore.setCollection[condition.avoid_suit]
+        const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
+        const avoidSuitCount = avoidSuits.reduce((total, suit) => total + (playerRoundScore.setCollection[suit] || 0), 0)
         const penaltyPerCard = Math.abs(bidEntry.onLose)
         const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
         setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }

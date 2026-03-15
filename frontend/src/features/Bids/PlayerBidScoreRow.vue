@@ -10,7 +10,7 @@ interface Props {
   onLose: number | null
   showLose?: boolean
   winSuit?: Suit | null
-  avoidSuit?: Suit | null
+  avoidSuit?: Suit | 'avoidOtherSuits' | null
   isLastRow?: boolean
 }
 

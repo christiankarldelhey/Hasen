@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { BidType, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
+import type { Suit } from '@domain/interfaces/Card'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
 import PointsToWin from '@/common/components/PointsToWin.vue'
 import SuitSymbol from '@/common/components/SuitSymbol.vue'
+
+type SuitDisplayKey = Suit | 'avoidOtherSuits'
 
 const props = defineProps<{
   type: BidType
@@ -15,6 +18,13 @@ const props = defineProps<{
 const pointsCondition = computed(() => props.win_condition as PointsBidCondition)
 const setCondition = computed(() => props.win_condition as SetCollectionBidCondition)
 const trickCondition = computed(() => props.win_condition as TrickBidCondition)
+const avoidSuitDisplay = computed<SuitDisplayKey>(() => {
+  const avoidSuits = Array.isArray(setCondition.value.avoid_suit)
+    ? setCondition.value.avoid_suit
+    : [setCondition.value.avoid_suit]
+
+  return avoidSuits.length > 1 ? 'avoidOtherSuits' : (avoidSuits[0] ?? 'acorns')
+})
 
 const sortedTricks = computed(() => {
   if (props.type !== 'trick') return []
@@ -59,7 +69,7 @@ const sortedTricks = computed(() => {
                 </div>
 
                 <div class="flex flex-row">
-                    <SuitSymbol :suit="setCondition.avoid_suit" :avoid="true" />
+                    <SuitSymbol :suit="avoidSuitDisplay" :avoid="true" />
                     <span class="text-hasen-red text-md pt-1">
                       -10
                       <span v-if="avoidSuitCount !== undefined" class="text-md ml-1">× {{ avoidSuitCount }}</span>

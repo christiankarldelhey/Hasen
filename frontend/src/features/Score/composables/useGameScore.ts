@@ -97,7 +97,8 @@ export function useGameScore(playerId: PlayerId): UseGameScoreReturn {
     const setCollection = playerRoundScore.value.setCollection
     
     const winCount = setCollection[condition.win_suit] || 0
-    const avoidCount = setCollection[condition.avoid_suit] || 0
+    const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
+    const avoidCount = avoidSuits.reduce((total, suit) => total + (setCollection[suit] || 0), 0)
     
     const winScore = winCount * bid.bid_score
     const avoidScore = avoidCount * setBidEntry.onLose
