@@ -2,9 +2,15 @@
 import { RouterView } from 'vue-router'
 import { onMounted, onUnmounted } from 'vue'
 import { initializeSocketListeners, cleanupSocketListeners } from './common/composables/useSocket'
+import { useImagePreload } from './common/composables/useImagePreload'
+import lobbyBackgroundUrl from './assets/backgrounds/lobby-menu-background.png'
 
-onMounted(() => {
+const { preloadImages } = useImagePreload()
+
+onMounted(async () => {
   initializeSocketListeners()
+  
+  await preloadImages([lobbyBackgroundUrl])
 })
 
 onUnmounted(() => {
