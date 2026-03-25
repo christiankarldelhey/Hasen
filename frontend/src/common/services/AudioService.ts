@@ -1,14 +1,4 @@
 export type SoundEffect = 
-  | 'cardPlay'
-  | 'cardDraw'
-  | 'bidPlace'
-  | 'turnStart'
-  | 'roundEnd'
-  | 'victory'
-  | 'defeat'
-  | 'click'
-  | 'hover'
-  | 'notification'
   | 'dealCards'
   | 'playCard'
   | 'makeBid'
@@ -64,16 +54,6 @@ class AudioService {
   ];
 
   private sfxPaths: Record<SoundEffect, string> = {
-    cardPlay: '/audio/sfx/card-play.mp3',
-    cardDraw: '/audio/sfx/card-draw.mp3',
-    bidPlace: '/audio/sfx/bid-place.mp3',
-    turnStart: '/audio/sfx/turn-start.mp3',
-    roundEnd: '/audio/sfx/round-end.mp3',
-    victory: '/audio/sfx/victory.mp3',
-    defeat: '/audio/sfx/defeat.mp3',
-    click: '/audio/sfx/click.mp3',
-    hover: '/audio/sfx/hover.mp3',
-    notification: '/audio/sfx/notification.mp3',
     dealCards: '/audio/sfx/deal_cards.mp3',
     playCard: '/audio/sfx/play_card.mp3',
     makeBid: '/audio/sfx/make_bid.mp3',

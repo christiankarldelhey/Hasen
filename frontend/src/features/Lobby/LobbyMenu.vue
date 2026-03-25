@@ -5,6 +5,7 @@ import { useHasenStore } from '../../stores/hasenStore';
 import { useGameAPI } from '../../common/composables/useGameAPI';
 import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { userIdService } from '../../services/userIdService';
+import { healthService } from '../../services/healthService';
 import { useRouter } from 'vue-router';
 import { useAudio } from '../../common/composables/useAudio';
 import LobbyOptions from './LobbyOptions.vue';
@@ -28,6 +29,8 @@ type ViewState = 'menu' | 'room' | 'create-game' | 'join-game' | 'rules' | 'sett
 const currentView = ref<ViewState>('menu');
 
 onMounted(async () => {
+  healthService.checkHealth();
+  
   socketLobby.joinLobbyList();
   await gameAPI.fetchGames();
   

@@ -35,6 +35,8 @@ export default {
     gameNamePlaceholder: 'Enter game name',
     playersOption: '{count} players',
     onePlayerPlusBotsOption: '1 player + {count} bot(s)',
+    creating: 'Creating...',
+    serverStarting: '⏳ Server is starting up, this may take up to 60 seconds on first load...',
   },
   game: {
     finishTurn: 'Finish Turn',

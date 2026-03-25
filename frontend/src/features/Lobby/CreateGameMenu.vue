@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onUnmounted } from 'vue';
 import ActionButton from '@/common/components/ActionButton.vue';
+import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import { useI18n } from '@/common/composables/useI18n';
 
 const emit = defineEmits<{
@@ -11,6 +12,15 @@ const { t } = useI18n();
 const gameName = ref('My Hasen Game');
 const pointsToWin = ref(300);
 const selectedMode = ref('humans_2');
+const isCreating = ref(false);
+const showSlowLoadingMessage = ref(false);
+let slowLoadingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+onUnmounted(() => {
+  if (slowLoadingTimeout) {
+    clearTimeout(slowLoadingTimeout);
+  }
+});
 
 const pointsOptions = [50, 150, 200, 250, 300, 350, 400];
 const modeOptions = [
@@ -35,7 +45,15 @@ const formatModeLabel = (maxPlayers: number, botCount: number) => {
 
 const handleCreateGame = () => {
   const config = selectedConfig.value;
-  if (!config) return;
+  if (!config || isCreating.value) return;
+  
+  isCreating.value = true;
+  showSlowLoadingMessage.value = false;
+  
+  slowLoadingTimeout = setTimeout(() => {
+    showSlowLoadingMessage.value = true;
+  }, 5000);
+  
   emit('createGame', gameName.value, 'player_1', config.maxPlayers, pointsToWin.value, config.botCount);
 };
 </script>
@@ -88,9 +106,17 @@ const handleCreateGame = () => {
 
     <ActionButton 
       data-testid="create-game-submit-btn"
-      :label="t('lobby.createGame')"
+      :label="isCreating ? t('lobby.creating') : t('lobby.createGame')"
       variant="primary"
+      :disabled="isCreating"
       @click="handleCreateGame"
     />
+    
+    <div v-if="isCreating" class="mt-6 flex flex-col items-center gap-4">
+      <RabbitLoader size="lg" />
+      <p v-if="showSlowLoadingMessage" class="text-sm text-hasen-dark text-center font-semibold">
+        {{ t('lobby.serverStarting') }}
+      </p>
+    </div>
   </div>
 </template>

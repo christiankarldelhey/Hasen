@@ -3,6 +3,7 @@ import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import gameRoutes from './routes/gameRoutes.js'
+import healthRoutes from './routes/healthRoutes.js'
 import { GameCleanupService } from './services/GameCleanupService.js'
 import cors from 'cors'
 import { connectDatabase } from './config/database.js'
@@ -28,8 +29,9 @@ app.set('io', io)
 app.use(cors())
 app.use(express.json())
 app.use('/api', gameRoutes)
+app.use('/api', healthRoutes)
 
-// Health check endpoint
+// Health check endpoint (legacy, keeping for backwards compatibility)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' })
 })

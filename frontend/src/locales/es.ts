@@ -32,9 +32,11 @@ export default {
     colorAlreadyTaken: 'El color ya está tomado por otro jugador',
     failedUpdatePointsToWin: 'No se pudieron actualizar los puntos para ganar',
     profileNameTooLong: 'El nombre debe tener 15 caracteres o menos',
-    gameNamePlaceholder: 'Ingresa el nombre de la sala',
+    gameNamePlaceholder: 'Ingresa el nombre del juego',
     playersOption: '{count} jugadores',
     onePlayerPlusBotsOption: '1 jugador + {count} bot(s)',
+    creating: 'Creando...',
+    serverStarting: '⏳ El servidor se está iniciando, esto puede tomar hasta 60 segundos en la primera carga...',
   },
   game: {
     finishTurn: 'Terminar turno',
