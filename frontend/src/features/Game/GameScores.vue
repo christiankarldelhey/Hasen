@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
-import { IconStar, IconStarFilled } from '@tabler/icons-vue'
+import { IconStar } from '@tabler/icons-vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 const gameStore = useGameStore()
 const { getPlayerById } = usePlayers()

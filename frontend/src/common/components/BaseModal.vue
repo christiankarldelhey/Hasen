@@ -27,13 +27,15 @@ const handleModalClick = (event: Event) => {
     <Transition name="modal">
       <div 
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
         @click="handleBackdropClick"
       >
         <div 
           :class="[
-            'bg-hasen-base rounded-2xl shadow-2xl p-6 m-4 w-full',
+            'bg-hasen-base rounded-2xl shadow-2xl w-full',
             'border-2 border-hasen-dark',
+            'max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-4rem)]',
+            'flex flex-col overflow-hidden',
             'transform transition-all duration-300',
             {
               'max-w-sm': maxWidth === 'sm',
@@ -46,7 +48,7 @@ const handleModalClick = (event: Event) => {
           @click="handleModalClick"
         >
           <!-- Header -->
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
             <h2 class="text-2xl font-bold text-hasen-dark">{{ title }}</h2>
             <button 
               @click="emit('close')"
@@ -59,12 +61,12 @@ const handleModalClick = (event: Event) => {
           </div>
 
           <!-- Content -->
-          <div class="text-hasen-dark">
+          <div class="text-hasen-dark flex-1 min-h-0 overflow-y-auto px-6 pb-6">
             <slot />
           </div>
 
           <!-- Footer (optional) -->
-          <div v-if="$slots.footer" class="mt-6 pt-4 border-t border-hasen-dark/20">
+          <div v-if="$slots.footer" class="px-6 pb-6 pt-4 border-t border-hasen-dark/20 shrink-0">
             <slot name="footer" />
           </div>
         </div>

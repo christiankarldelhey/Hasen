@@ -6,7 +6,7 @@ import Deck from './Deck.vue'
 import GamePanel from '@/common/components/GamePanel.vue'
 import BaseModal from '@/common/components/BaseModal.vue'
 import ActionButton from '@/common/components/ActionButton.vue'
-import { useGameStore } from '@/stores/gameStore'
+// import { useGameStore } from '@/stores/gameStore'
 import { useAudio } from '@/common/composables/useAudio'
 import { useI18n } from '@/common/composables/useI18n'
 import { useSocket } from '@/common/composables/useSocket'
@@ -14,14 +14,14 @@ import { useHasenStore } from '@/stores/hasenStore'
 import { userIdService } from '@/services/userIdService'
 import { IconLogout2, IconMusic, IconMusicOff, IconVolume, IconVolumeOff } from '@tabler/icons-vue'
 
-const gameStore = useGameStore()
+// const gameStore = useGameStore()
 const route = useRoute()
 const router = useRouter()
 const socket = useSocket()
 const hasenStore = useHasenStore()
 const { t } = useI18n()
 
-const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
+// const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
 const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx } = useAudio()
 
