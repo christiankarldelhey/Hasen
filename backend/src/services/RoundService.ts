@@ -22,7 +22,12 @@ export class RoundService {
     
     // 2. Reset discard pile y roundScore (tricksHistory NO se resetea, es el historial del juego completo)
     game.discardPile = [];
-    game.round.roundScore = [];
+    game.round.roundScore = activePlayerIds.map(playerId => ({
+      playerId,
+      points: 0,
+      tricksWon: [],
+      setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+    }));
     
     // 3. Shuffle deck de cartas
     game.deck = shuffleDeck(game.deck);

@@ -6,6 +6,7 @@ import Deck from './Deck.vue'
 import GamePanel from '@/common/components/GamePanel.vue'
 import BaseModal from '@/common/components/BaseModal.vue'
 import ActionButton from '@/common/components/ActionButton.vue'
+import { useGameStore } from '@/stores/gameStore'
 import { useAudio } from '@/common/composables/useAudio'
 import { useI18n } from '@/common/composables/useI18n'
 import { useSocket } from '@/common/composables/useSocket'
@@ -13,11 +14,14 @@ import { useHasenStore } from '@/stores/hasenStore'
 import { userIdService } from '@/services/userIdService'
 import { IconLogout2, IconMusic, IconMusicOff, IconVolume, IconVolumeOff } from '@tabler/icons-vue'
 
+const gameStore = useGameStore()
 const route = useRoute()
 const router = useRouter()
 const socket = useSocket()
 const hasenStore = useHasenStore()
 const { t } = useI18n()
+
+const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
 const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx } = useAudio()
 
@@ -54,7 +58,7 @@ const handleConfirmLogout = () => {
 <template>
 <div class="fixed top-0 left-0 z-10 m-4 flex flex-row gap-1" data-testid="game-info-panel">
   <div data-tutorial-id="game-controls">
-    <GamePanel class="flex flex-col justify-around gap-2">
+    <GamePanel class="flex flex-col justify-around gap-2 h-full">
       <button data-testid="game-logout-btn" class="cursor-pointer rounded-full p-1 transition-colors hover:bg-hasen-dark/10" @click="handleLogoutClick">
         <IconLogout2 :size="22" class="text-hasen-base" />
       </button>
@@ -74,6 +78,13 @@ const handleConfirmLogout = () => {
     <div class="flex flex-col gap-1">
       <div class="flex flex-row gap-2">
         <div class="flex flex-col gap-1" data-tutorial-id="deck-zone">
+          <!-- Ranking de jugadores ordenado por score -->
+          <!-- <div class="flex flex-row w-full justify-end">
+            <div v-if="pointsToWin" class="flex items-center align-right px-1 shadow-md">
+              <IconStarFilled :size="14" class="text-hasen-base" />
+              <span class="pl-1 text-hasen-base text-md">{{ pointsToWin }}</span>
+            </div>
+          </div> -->
           <Deck />
         </div>
         <div data-tutorial-id="game-scores">

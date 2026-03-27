@@ -475,8 +475,12 @@ export function getPlayerScoreFromRound(
   game: Game,
   playerId: PlayerId
 ): number {
-  const playerRoundScore = game.round.roundScore.find(s => s.playerId === playerId);
-  if (!playerRoundScore) return 0;
+  const playerRoundScore = game.round.roundScore.find(s => s.playerId === playerId) || {
+    playerId,
+    points: 0,
+    tricksWon: [],
+    setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+  };
 
   const playerBids = game.round.roundBids.playerBids[playerId] || [];
   // Si el jugador NO hizo apuestas, usar card points como fallback

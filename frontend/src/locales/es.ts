@@ -75,7 +75,7 @@ export default {
     trickLostButStoleCard: 'Pero robaste una carta de la baza',
     yourTurn: '¡Tu turno!',
     chooseSkipOrReplace: 'Elige saltar o reemplazar una carta',
-    makeBidsThenPlay: 'Haz apuestas (opcional) y luego juega una carta',
+    makeBidsThenPlay: 'Haz apuestas (opcional) y juega una carta',
     playCard: 'Jugar una carta',
     waitingForPlayer: 'Esperando a {player}',
     playerDeciding: 'El jugador está decidiendo...',

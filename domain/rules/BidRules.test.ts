@@ -4,7 +4,7 @@ import type { Game } from '../interfaces/Game'
 import type { PlayerId } from '../interfaces/Player'
 import type { RoundPhase } from '../interfaces/Round'
 import type { TrickNumber, TrickState } from '../interfaces/Trick'
-import { calculateBidOnLose, canMakeBid, isWinningBid } from './BidRules'
+import { calculateBidOnLose, canMakeBid, isWinningBid, getPlayerScoreFromRound } from './BidRules'
 
 function createGameFixture(options?: {
   playerTurn?: PlayerId
@@ -398,5 +398,81 @@ describe('isWinningBid', () => {
     )
 
     expect(result).toBe(true)
+  })
+})
+
+describe('getPlayerScoreFromRound', () => {
+  it('should penalize players with bids even when they won no tricks', () => {
+    const pointsBid: Bid = {
+      bid_id: 'points-bid-1',
+      bid_type: 'points',
+      bid_score: 65,
+      win_condition: {
+        min_points: 2,
+        max_points: 10
+      }
+    }
+    
+    const setCollectionBid: Bid = {
+      bid_id: 'set-bid-1',
+      bid_type: 'set_collection',
+      bid_score: 10,
+      win_condition: {
+        win_suit: 'acorns',
+        avoid_suit: 'berries'
+      }
+    }
+    
+    const game: any = {
+      round: {
+        roundScore: [],
+        roundBids: {
+          bids: [pointsBid, setCollectionBid],
+          playerBids: {
+            player_1: [
+              {
+                bidId: 'points-bid-1',
+                trickNumber: 1,
+                onLose: -20,
+                isPlayerWinning: null
+              },
+              {
+                bidId: 'set-bid-1',
+                trickNumber: 2,
+                onLose: -15,
+                isPlayerWinning: null
+              }
+            ]
+          }
+        }
+      }
+    }
+    
+    const score = getPlayerScoreFromRound(game, 'player_1')
+    
+    expect(score).toBe(-30)
+  })
+  
+  it('should return card points for players without bids', () => {
+    const game: any = {
+      round: {
+        roundScore: [
+          {
+            playerId: 'player_1',
+            points: 25,
+            tricksWon: [1, 2],
+            setCollection: { acorns: 2, leaves: 1, berries: 0, flowers: 1 }
+          }
+        ],
+        roundBids: {
+          bids: [],
+          playerBids: {}
+        }
+      }
+    }
+    
+    const score = getPlayerScoreFromRound(game, 'player_1')
+    
+    expect(score).toBe(25)
   })
 })

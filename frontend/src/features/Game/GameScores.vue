@@ -7,7 +7,6 @@ import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 const gameStore = useGameStore()
 const { getPlayerById } = usePlayers()
 
-const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
 
 const sortedPlayerScores = computed(() => {
   const scores = gameStore.publicGameState?.playerScores || []
@@ -29,13 +28,6 @@ const sortedPlayerScores = computed(() => {
 <template>
 
   <div class="bg-transparent flex flex-col items-start gap-1.5">
-    <!-- Ranking de jugadores ordenado por score -->
-      <div class="flex flex-row w-full justify-end">
-        <div v-if="pointsToWin" class="flex items-center align-right px-1 shadow-md">
-          <IconStarFilled :size="14" class="text-hasen-base" />
-          <span class="pl-1 text-hasen-base text-md">{{ pointsToWin }}</span>
-        </div>
-      </div>
     <div 
       v-for="ps in sortedPlayerScores" 
       :key="ps.playerId"
