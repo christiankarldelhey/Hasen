@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { onUnmounted, ref, watch } from 'vue';
 import type { LobbyGame } from '@domain/interfaces/Game';
 import ActionButton from '@/common/components/ActionButton.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import { useI18n } from '@/common/composables/useI18n';
 
-defineProps<{
+const props = defineProps<{
   games: LobbyGame[];
   loading: boolean;
   error: string | null;
@@ -16,6 +17,34 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const showSlowLoadingMessage = ref(false);
+let slowLoadingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+watch(
+  () => props.joiningGameId,
+  (joiningGameId) => {
+    if (slowLoadingTimeout) {
+      clearTimeout(slowLoadingTimeout);
+      slowLoadingTimeout = null;
+    }
+
+    if (joiningGameId) {
+      showSlowLoadingMessage.value = false;
+      slowLoadingTimeout = setTimeout(() => {
+        showSlowLoadingMessage.value = true;
+      }, 5000);
+      return;
+    }
+
+    showSlowLoadingMessage.value = false;
+  }
+);
+
+onUnmounted(() => {
+  if (slowLoadingTimeout) {
+    clearTimeout(slowLoadingTimeout);
+  }
+});
 </script>
 
 <template>
@@ -45,6 +74,13 @@ const { t } = useI18n();
         :disabled="!game.hasSpace || joiningGameId === game.gameId"
         @click="emit('joinGame', game.gameId)"
       />
+    </div>
+
+    <div v-if="joiningGameId" class="mt-6 flex flex-col items-center gap-4" data-testid="join-game-joining-loader">
+      <RabbitLoader size="lg" />
+      <p v-if="showSlowLoadingMessage" class="text-sm text-hasen-dark text-center font-semibold">
+        {{ t('lobby.serverStarting') }}
+      </p>
     </div>
   </div>
 </template>
