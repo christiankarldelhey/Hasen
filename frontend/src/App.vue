@@ -19,7 +19,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-hasen-base">
+  <div class="min-h-screen bg-hasen-bg">
     <main class="">
       <RouterView />
     </main>

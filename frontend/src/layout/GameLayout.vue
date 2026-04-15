@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import backgroundImage from '@/assets/backgrounds/game-background-7.png'
+import backgroundImageWebP from '@/assets/backgrounds/game-background-7.webp'
+// import backgroundImagePNG from '@/assets/backgrounds/game-background-7.png' // Fallback available if needed
+
+// Use WebP (95KB vs 716KB PNG)
+const backgroundImage = backgroundImageWebP
 </script>
 
 <template>
