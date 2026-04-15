@@ -26,7 +26,6 @@ class AudioService {
   private currentTrack: MusicTrack | null = null;
   private soundEffects: Map<SoundEffect, HTMLAudioElement> = new Map();
   private gameplayNextTrackTimeout: ReturnType<typeof setTimeout> | null = null;
-  private lastGameplayTrackPath: string | null = null;
   
   private settings: AudioSettings = {
     masterVolume: 1.0,
@@ -44,14 +43,11 @@ class AudioService {
 
   private gameplayMusicPaths: string[] = [
     '/audio/music/game_1.mp3',
-    '/audio/music/game_2.mp3',
+    '/audio/music/game-2.mp3',
     '/audio/music/game_3.mp3',
-    '/audio/music/game_4.mp3',
-    '/audio/music/game_5.mp3',
-    '/audio/music/game_6.mp3',
-    '/audio/music/game_7.mp3',
-    '/audio/music/game_8.mp3',
   ];
+
+  private currentGameplayTrackIndex: number = 0;
 
   private sfxPaths: Record<SoundEffect, string> = {
     dealCards: '/audio/sfx/deal_cards.mp3',
@@ -130,27 +126,22 @@ class AudioService {
 
     this.stopMusic();
     this.currentTrack = 'gameplay';
-    this.playRandomGameplayTrack();
+    this.currentGameplayTrackIndex = 0;
+    this.playNextGameplayTrack();
   }
 
-  private getRandomGameplayTrackPath(): string {
-    if (this.gameplayMusicPaths.length === 1) {
-      return this.gameplayMusicPaths[0] || '';
-    }
-
-    const availablePaths = this.gameplayMusicPaths.filter(path => path !== this.lastGameplayTrackPath);
-    const source = availablePaths.length > 0 ? availablePaths : this.gameplayMusicPaths;
-    const randomIndex = Math.floor(Math.random() * source.length);
-    return source[randomIndex] || this.gameplayMusicPaths[0] || '';
+  private getNextGameplayTrackPath(): string {
+    const trackPath = this.gameplayMusicPaths[this.currentGameplayTrackIndex] || this.gameplayMusicPaths[0] || '';
+    this.currentGameplayTrackIndex = (this.currentGameplayTrackIndex + 1) % this.gameplayMusicPaths.length;
+    return trackPath;
   }
 
-  private playRandomGameplayTrack(): void {
+  private playNextGameplayTrack(): void {
     if (!this.settings.musicEnabled || this.currentTrack !== 'gameplay') {
       return;
     }
 
-    const nextTrackPath = this.getRandomGameplayTrackPath();
-    this.lastGameplayTrackPath = nextTrackPath;
+    const nextTrackPath = this.getNextGameplayTrackPath();
 
     if (this.musicAudio) {
       this.musicAudio.pause();
@@ -168,7 +159,7 @@ class AudioService {
 
       this.gameplayNextTrackTimeout = setTimeout(() => {
         this.gameplayNextTrackTimeout = null;
-        this.playRandomGameplayTrack();
+        this.playNextGameplayTrack();
       }, 2000);
     };
 
@@ -191,7 +182,7 @@ class AudioService {
       this.currentTrack = null;
     }
 
-    this.lastGameplayTrackPath = null;
+    this.currentGameplayTrackIndex = 0;
   }
 
   pauseMusic(): void {
@@ -207,7 +198,7 @@ class AudioService {
 
   resumeMusic(): void {
     if (this.currentTrack === 'gameplay' && !this.musicAudio) {
-      this.playRandomGameplayTrack();
+      this.playNextGameplayTrack();
       return;
     }
 
