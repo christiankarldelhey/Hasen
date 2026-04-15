@@ -259,10 +259,16 @@ watch(
   }
 );
 
-onMounted(() => {
-  initialize();
+onMounted(async () => {
+  await initialize();
   socketGame.onGameEvent(handleGameEvent);
   setupConnectionListeners();
+  
+  // Iniciar música si el juego ya está en progreso (para jugadores que entran después de round 1)
+  if (gameStore.publicGameState?.gamePhase === 'playing' && !hasStartedGameplayMusic.value) {
+    hasStartedGameplayMusic.value = true;
+    playMusic('gameplay');
+  }
 });
 
 onUnmounted(() => {
