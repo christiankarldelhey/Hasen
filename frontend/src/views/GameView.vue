@@ -259,10 +259,21 @@ watch(
   }
 );
 
-onMounted(() => {
+onMounted(async () => {
   initialize();
   socketGame.onGameEvent(handleGameEvent);
   setupConnectionListeners();
+
+  // Si el componente se monta en round 1 y ya hay cartas (evento FIRST_CARD_DEALT ya procesado),
+  // disparar la animación de reparto inicial
+  await nextTick();
+  if (gameStore.publicGameState?.round.round === 1 && playerHand.value.length > 0 && !hasStartedGameplayMusic.value) {
+    const expectedOpponents = gameStore.publicGameState.activePlayers.length - 1;
+    console.log('[deal-debug] Component mounted in round 1 with cards, triggering deal animation');
+    await triggerDealAnimation(expectedOpponents);
+    hasStartedGameplayMusic.value = true;
+    playMusic('gameplay');
+  }
 });
 
 onUnmounted(() => {

@@ -1,0 +1,48 @@
+# Node modules
+node_modules
+**/node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# Development files
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend (not needed for backend deployment)
+frontend
+
+# Documentation
+README.md
+*.md
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+e2e
+
+# CI/CD
+.github
+render.yaml
+
+# Logs
+logs
+*.log

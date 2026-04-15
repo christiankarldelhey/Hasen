@@ -1,0 +1,11 @@
+{
+  "name": "@hasen/domain",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./interfaces": "./interfaces/index.ts",
+    "./events": "./events/index.ts",
+    "./rules/*": "./rules/*.ts"
+  }
+}
