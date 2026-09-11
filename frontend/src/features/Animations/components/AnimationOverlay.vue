@@ -6,6 +6,8 @@ import type { AnimatedCard } from '../composables/useDealAnimation'
 
 interface Props {
   cards: AnimatedCard[]
+  cardWidth?: number
+  cardHeight?: number
 }
 
 interface FlyingCard {
@@ -19,10 +21,13 @@ interface FlyingCard {
   spritePos?: { row: number; col: number }
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  cardWidth: 85,
+  cardHeight: 150,
+})
 
-const cardWidth = 85
-const cardHeight = 150
+const cardWidth = props.cardWidth
+const cardHeight = props.cardHeight
 const flyingCards = ref<FlyingCard[]>([])
 let styleEl: HTMLStyleElement | null = null
 

@@ -5,16 +5,13 @@ import { useGameSession } from '../common/composables/useGameSession';
 import { useSocketGame } from '../common/composables/useSocketGame';
 import { useGameStore } from '../stores/gameStore';
 import type { PlayerId } from '@domain/interfaces/Player';
-import PlayerHand from '@/features/Players/PlayerHand.vue';
-import GameInfo from '@/features/Game/GameInfo.vue';
-import AvailableBids from '@/features/Bids/AvailableBids.vue';
-import OtherPlayerHand from '@/features/Players/OtherPlayerHand.vue';
+import GameBoardDesktop from '@/features/Game/GameBoardDesktop.vue';
+import MobileGameBoard from '@/features/Mobile/MobileGameBoard.vue';
+import { useIsMobile } from '@/common/composables/useIsMobile';
 import GameLayout from '../layout/GameLayout.vue';
-import Trick from '@/features/Trick/Trick.vue';
 import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import RoundEndedModal from '@/features/Modals/RoundEndedModal.vue';
 import GameEndedModal from '@/features/Modals/GameEndedModal.vue';
-import AnimationOverlay from '@/features/Animations/components/AnimationOverlay.vue';
 import { provideAnimationCoords, useDealAnimation, useCardAnimation } from '@/features/Animations';
 import type { GameEvent, CardPlayedEvent, TrickCompletedEvent, FirstCardDealtEvent } from '@domain/events/GameEvents';
 import { useHasenStore } from '@/stores/hasenStore';
@@ -30,6 +27,7 @@ const gameStore = useGameStore();
 const hasenStore = useHasenStore();
 const { playMusic, stopMusic } = useAudio();
 const { t } = useI18n();
+const isMobile = useIsMobile();
 
 // Animation system
 const animCoords = provideAnimationCoords();
@@ -290,39 +288,27 @@ onUnmounted(() => {
       <p>{{ error }}</p>
     </div>
 
-    <div v-else class="relative w-full h-screen" data-testid="game-board">
-      <GameInfo />
-      
-      <AvailableBids />
-      <!-- Oponentes en diferentes posiciones -->
-      <OtherPlayerHand
-        v-for="opponent in opponentPositions"
-        :key="opponent.playerId"
-        :player-id="opponent.playerId"
-        :public-card-id="opponent.publicCardId"
-        :position="opponent.position"
-      />
-      
-      <!-- Trick en el centro exacto de la pantalla -->
-      <Trick :cards="trickCards" :winning-card-id="winningCardId" :trick-state="trickState" />
-      
-      <!-- Animation overlay -->
-      <AnimationOverlay :cards="allAnimatedCards" />
-      
-      <!-- Mano del jugador (fixed en el bottom) -->
-      <PlayerHand 
-        :cards="isDealing ? playerHand.slice(0, dealProgress['player-hand'] ?? 0) : playerHand" 
-        :mode="handMode"
-        :is-my-turn="isMyTurn"
-        :is-trick-in-resolve="isTrickInResolve"
-        :is-trick-winner="isTrickWinner"
-        :can-finish-trick="canFinishTrick"
-        @skip-replacement="handleSkipReplacement"
-        @confirm-replacement="handleConfirmReplacement"
-        @play-card="handlePlayCard"
-        @finish-trick="handleFinishTrick"
-      />
-    </div>
+    <component
+      v-else
+      :is="isMobile ? MobileGameBoard : GameBoardDesktop"
+      :opponent-positions="opponentPositions"
+      :trick-cards="trickCards"
+      :winning-card-id="winningCardId"
+      :trick-state="trickState"
+      :is-dealing="isDealing"
+      :deal-progress="dealProgress"
+      :player-hand="playerHand"
+      :hand-mode="handMode"
+      :is-my-turn="isMyTurn"
+      :is-trick-in-resolve="isTrickInResolve"
+      :is-trick-winner="isTrickWinner"
+      :can-finish-trick="canFinishTrick"
+      :animated-cards="allAnimatedCards"
+      @skip-replacement="handleSkipReplacement"
+      @confirm-replacement="handleConfirmReplacement"
+      @play-card="handlePlayCard"
+      @finish-trick="handleFinishTrick"
+    />
 
     <!-- Game Paused Overlay -->
     <GamePausedOverlay

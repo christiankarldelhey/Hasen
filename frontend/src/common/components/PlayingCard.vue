@@ -5,7 +5,7 @@ import deckSprite from '@/assets/sprites/deck-sprite_v3.jpg'
 
 interface Props {
   card: PlayingCard
-  size?: 'tiny' | 'small' | 'medium' | 'large'
+  size?: 'tiny' | 'small' | 'medium' | 'large' | 'mobile' | 'mobileTrick'
   selectable?: boolean
 }
 
@@ -22,6 +22,10 @@ const sizeClasses = computed(() => {
       return 'w-[85px] h-[150px]'
     case 'medium':
       return 'w-[127px] h-[225px]'
+    case 'mobile':
+      return 'w-(--m-card-hand-w) h-(--m-card-hand-h)'
+    case 'mobileTrick':
+      return 'w-(--m-card-trick-w) h-(--m-card-trick-h)'
     case 'large':
     default:
       return 'w-[158px] h-[280px]'

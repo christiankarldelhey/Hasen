@@ -12,3 +12,25 @@
   --color-hasen-dark: #0a0a0c;
   --color-hasen-bg: #2d1810;
 }
+
+/* Mobile layout tokens (single-column portrait board). Card AR ≈ 0.564. */
+:root {
+  --m-card-hand-w: 72px;
+  --m-card-hand-h: 128px;
+  --m-card-trick-w: 80px;
+  --m-card-trick-h: 142px;
+  --m-zone-topbar: 48px;
+  --m-zone-hud: 56px;
+  --m-zone-hand: 152px;
+}
+
+/* Short screens (small Android, rotated phone): shrink cards and hand zone */
+@media (max-height: 640px) {
+  :root {
+    --m-card-hand-w: 60px;
+    --m-card-hand-h: 107px;
+    --m-card-trick-w: 64px;
+    --m-card-trick-h: 114px;
+    --m-zone-hand: 128px;
+  }
+}

@@ -20,7 +20,13 @@ const router = createRouter({
       path: '/tutorial/:scenarioId?',
       name: 'tutorial',
       component: TutorialView
-    }
+    },
+    // Dev-only: preview del layout mobile con estado mock (no se registra en prod)
+    ...(import.meta.env.DEV ? [{
+      path: '/dev/mobile-board',
+      name: 'dev-mobile-board',
+      component: () => import('../views/MobileDevView.vue')
+    }] : [])
   ]
 })
 
