@@ -5,7 +5,7 @@ import type { SheetTab } from './composables/useMobileInteraction'
 import { useGameStore } from '@/stores/gameStore'
 import { useI18n } from '@/common/composables/useI18n'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
-import MobileBidsGrid from './MobileBidsGrid.vue'
+import MobileBidsList from './MobileBidsList.vue'
 import GameScores from '@/features/Game/GameScores.vue'
 import PlayerBids from '@/features/Bids/PlayerBids.vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
@@ -27,7 +27,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const gameStore = useGameStore()
-const { getPlayerNameById } = usePlayers()
+const { getPlayerDisplayName } = usePlayers()
 
 // --- Drag to close -----------------------------------------------------------
 const dragY = ref(0)
@@ -62,7 +62,7 @@ watch(
 // --- Puntaje tab --------------------------------------------------------------
 const targetPlayer = computed(() => props.playerId ?? null)
 const targetName = computed(() =>
-  targetPlayer.value ? getPlayerNameById.value(targetPlayer.value) : null
+  targetPlayer.value ? getPlayerDisplayName.value(targetPlayer.value) : null
 )
 
 const targetPublicCard = computed(() => {
@@ -129,7 +129,7 @@ const tabs: { key: SheetTab; label: string }[] = [
 
           <!-- Content -->
           <div class="flex-1 min-h-0 overflow-y-auto">
-            <MobileBidsGrid
+            <MobileBidsList
               v-if="props.tab === 'bids'"
               @toast="(msg) => emit('toast', msg)"
             />

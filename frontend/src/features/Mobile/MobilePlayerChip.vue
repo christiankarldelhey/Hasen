@@ -5,6 +5,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useGameScore } from '@/features/Score/composables/useGameScore'
+import { useI18n } from '@/common/composables/useI18n'
 import { useAnimationCoords } from '@/features/Animations'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 import PlayingCard from '@/common/components/PlayingCard.vue'
@@ -22,6 +23,7 @@ const emit = defineEmits<{ tap: [] }>()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
 const { getPlayerById, isPlayerTurn } = usePlayers()
+const { t } = useI18n()
 
 const chipEl = ref<HTMLElement | null>(null)
 const coords = useAnimationCoords()
@@ -76,11 +78,11 @@ const handleTap = () => emit('tap')
 </script>
 
 <template>
-  <div ref="chipEl" class="relative shrink-0">
+  <div ref="chipEl" class="relative min-w-0 flex-1 max-w-[110px]">
     <button
       type="button"
       :class="[
-        'relative flex items-center gap-1.5 h-11 px-1.5 rounded-lg border transition-colors min-w-0',
+        'relative flex items-center justify-center gap-1.5 h-12 px-1.5 rounded-lg border transition-colors w-full min-w-0',
         isSelectable
           ? 'border-yellow-400 bg-yellow-400/15 animate-pulse'
           : isCurrentTurn
@@ -92,10 +94,10 @@ const handleTap = () => emit('tap')
       <PlayerAvatar :player-id="playerId" size="tiny" :show-glow="isCurrentTurn" />
 
       <div class="flex flex-col items-start leading-none min-w-0">
-        <span class="text-[10px] text-hasen-base/90 font-semibold truncate max-w-[52px]">
-          {{ isMe ? `${player?.name ?? ''} (You)` : player?.name }}
+        <span class="text-[11px] text-hasen-base/90 font-semibold truncate max-w-[56px]">
+          {{ isMe ? `${player?.name ?? ''} ${t('common.you')}` : player?.name }}
         </span>
-        <span class="text-[10px] text-hasen-base/70 tabular-nums mt-0.5">
+        <span class="text-[11px] text-hasen-base/70 tabular-nums mt-0.5">
           {{ handCardsCount }} · ★{{ tricksWon }}
         </span>
       </div>
@@ -114,10 +116,10 @@ const handleTap = () => emit('tap')
       />
     </button>
 
-    <!-- Carta pública durante player_drawing -->
+    <!-- Carta pública durante player_drawing: sobresale apenas bajo el avatar -->
     <div
       v-if="publicCard"
-      class="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-20 pointer-events-none"
+      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none scale-[0.8] origin-top"
     >
       <PlayingCard :card="publicCard" size="tiny" />
     </div>

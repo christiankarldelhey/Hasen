@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ActionBarState, SheetTab } from './composables/useMobileInteraction'
 import { useI18n } from '@/common/composables/useI18n'
+import { useHasenStore } from '@/stores/hasenStore'
+import { usePlayerObjectiveStatus } from '@/features/Score/composables/usePlayerObjectiveStatus'
 
 interface Props {
   state: ActionBarState
@@ -23,6 +26,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const hasenStore = useHasenStore()
+const myId = computed(() => hasenStore.currentPlayerId || null)
+const { points, status } = usePlayerObjectiveStatus(myId)
+
+const scoreColor = computed(() => {
+  if (status.value === 'winning') return 'text-hasen-green'
+  if (status.value === 'losing') return 'text-hasen-red'
+  return 'text-hasen-base'
+})
 
 const secondaryBtn =
   'flex-1 h-11 rounded-lg bg-hasen-dark/70 border border-hasen-base/40 text-hasen-base text-sm font-semibold transition-colors active:bg-hasen-dark'
@@ -83,6 +96,7 @@ const primaryBtn =
     <template v-else>
       <button type="button" :class="secondaryBtn" @click="emit('openSheet', 'score')">
         {{ t('game.tabScore') }}
+        <span :class="['ml-1 tabular-nums font-bold', scoreColor]">{{ points }}</span>
       </button>
       <button
         type="button"

@@ -2,14 +2,17 @@
 // Dev-only preview of the mobile board using the tutorial mock state.
 // Route: /dev/mobile-board — lets you check the mobile layout without a backend.
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { PlayerId, PrivateGameState, PublicGameState } from '@domain/interfaces'
 import GameLayout from '@/layout/GameLayout.vue'
 import MobileGameBoard from '@/features/Mobile/MobileGameBoard.vue'
 import { provideAnimationCoords, useDealAnimation } from '@/features/Animations'
 import { createTutorialMockState } from '@/features/tutorial/core/tutorialMockState'
+import { buildTutorialState } from '@/features/tutorial/core/tutorialRuntime'
 import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 
+const route = useRoute()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
 
@@ -65,14 +68,24 @@ const isMyTurn = computed(
   () => gameStore.publicGameState?.round.playerTurn === hasenStore.currentPlayerId
 )
 
+const handMode = computed(() =>
+  gameStore.publicGameState?.round.roundPhase === 'player_drawing' && isMyTurn.value
+    ? 'card_replacement' as const
+    : 'normal' as const
+)
+
 const logAction = (name: string, ...args: unknown[]) =>
   console.log(`[mobile-dev] ${name}`, ...args)
 
 onMounted(() => {
-  const snapshot = createTutorialMockState()
+  // ?phase=player_drawing → estado con cartas públicas visibles bajo los chips
+  const snapshot =
+    route.query.phase === 'player_drawing'
+      ? buildTutorialState({ stepId: 'scripted-deal', dealCompleted: true })
+      : createTutorialMockState()
   gameStore.setPublicGameState(snapshot.publicGameState)
   gameStore.setPrivateGameState(snapshot.privateGameState)
-  hasenStore.setCurrentPlayerId(snapshot.currentPlayerId)
+  hasenStore.setCurrentPlayerId('player_1' as PlayerId)
 })
 
 onUnmounted(() => {
@@ -99,7 +112,7 @@ onUnmounted(() => {
       :is-dealing="isDealing"
       :deal-progress="dealProgress"
       :player-hand="playerHand"
-      hand-mode="normal"
+      :hand-mode="handMode"
       :is-my-turn="isMyTurn"
       :is-trick-in-resolve="false"
       :is-trick-winner="false"

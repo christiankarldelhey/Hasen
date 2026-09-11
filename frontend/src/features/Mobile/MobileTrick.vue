@@ -3,6 +3,7 @@ import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
 import type { PlayingCard as Card, TrickState } from '@domain/interfaces'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useTurnMessage } from '@/features/Players/composables/useTurnMessage'
+import { useI18n } from '@/common/composables/useI18n'
 import { useAnimationCoords } from '@/features/Animations'
 import { useLongPress } from '@/common/composables/useLongPress'
 import { useCssPxVar } from '@/common/composables/useCssPxVar'
@@ -22,13 +23,32 @@ const emit = defineEmits<{
   backgroundTap: []
 }>()
 
-const { getPlayerNameById } = usePlayers()
+const { getPlayerNameById, isCurrentPlayer } = usePlayers()
+const { t } = useI18n()
 const { shouldShow, turnMessage } = useTurnMessage()
 
 const trickEl = ref<HTMLElement | null>(null)
 const coords = useAnimationCoords()
-onMounted(() => coords.register('trick', trickEl))
-onUnmounted(() => coords.unregister('trick'))
+
+// Ancho disponible para separar las cartas de forma adaptativa
+const containerWidth = ref(360)
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  coords.register('trick', trickEl)
+  if (trickEl.value) {
+    containerWidth.value = trickEl.value.clientWidth
+    resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (entry) containerWidth.value = entry.contentRect.width
+    })
+    resizeObserver.observe(trickEl.value)
+  }
+})
+onUnmounted(() => {
+  coords.unregister('trick')
+  resizeObserver?.disconnect()
+})
 
 const specialCards = inject<any>('specialCards', null)
 
@@ -36,12 +56,20 @@ const isCardSelectable = (cardId: string) =>
   specialCards?.isCardSelectable(cardId) ?? false
 
 const ownerName = (card: Card): string => {
+  if (card.owner && isCurrentPlayer.value(card.owner)) return t('common.you')
   const name = card.owner ? getPlayerNameById.value(card.owner) : undefined
-  return (name || '—').slice(0, 8)
+  return (name || '—').slice(0, 10)
 }
 
-const cardW = useCssPxVar('--m-card-trick-w', 80)
-const PEEK = 52
+const cardW = useCssPxVar('--m-card-trick-w', 90)
+
+// Separación adaptativa: las cartas se alejan entre sí hasta ~78px si entran en cuadro
+const peek = computed(() => {
+  const n = props.cards.length
+  if (n <= 1) return 0
+  const available = containerWidth.value - 16
+  return Math.max(56, Math.min(78, (available - cardW.value) / (n - 1)))
+})
 
 // Timestamp del último long-press: compartido entre los press handlers para
 // suprimir taps espurios si las posiciones se recomputan a mitad del gesto.
@@ -61,7 +89,7 @@ const makePress = (card: Card) =>
 
 const cardPositions = computed(() => {
   const n = props.cards.length
-  const totalW = cardW.value + Math.max(0, n - 1) * PEEK
+  const totalW = cardW.value + Math.max(0, n - 1) * peek.value
 
   return props.cards.map((card, index) => {
     const isWinning =
@@ -73,7 +101,7 @@ const cardPositions = computed(() => {
 
     return {
       card,
-      left: index * PEEK - totalW / 2,
+      left: index * peek.value - totalW / 2,
       lift: isStealTarget ? -14 : isWinning ? -10 : 0,
       rotation: 0,
       zIndex: isStealTarget ? 30 : isWinning ? 20 : index,
@@ -93,7 +121,7 @@ const cardPositions = computed(() => {
     @click.self="emit('backgroundTap')"
   >
     <!-- Cards row -->
-    <div ref="trickEl" class="relative h-[150px] w-full" @click.self="emit('backgroundTap')">
+    <div ref="trickEl" class="relative h-[175px] w-full" @click.self="emit('backgroundTap')">
       <template v-if="cardPositions.length > 0">
         <div
           v-for="pos in cardPositions"
@@ -115,7 +143,7 @@ const cardPositions = computed(() => {
           >
             <PlayingCard :card="pos.card" size="mobileTrick" />
           </div>
-          <div class="text-center text-[11px] leading-4 text-hasen-base/90 truncate w-[52px] mx-auto mt-0.5">
+          <div class="text-center text-[11px] leading-4 text-hasen-base/90 truncate w-[72px] mx-auto mt-0.5">
             {{ pos.owner }}
           </div>
         </div>

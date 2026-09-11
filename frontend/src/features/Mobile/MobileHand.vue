@@ -69,8 +69,8 @@ const cardPositions = computed(() => {
   const n = props.cards.length
   if (n === 0) return []
 
-  const maxPeek = 46
-  const minPeek = 30
+  const maxPeek = 54
+  const minPeek = 34
   const available = containerWidth.value - 24 // horizontal padding
   const peek =
     n > 1
@@ -85,7 +85,7 @@ const cardPositions = computed(() => {
     return {
       card,
       left: index * peek + (containerWidth.value - totalW) / 2,
-      y: selected ? -28 : Math.abs(norm) * 6,
+      y: selected ? -20 : Math.abs(norm) * 6,
       rotation: selected ? 0 : norm * 10,
       zIndex: selected ? 50 : index,
       selected,

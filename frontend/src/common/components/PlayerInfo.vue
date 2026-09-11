@@ -8,6 +8,7 @@ import PlayerAvatar from './PlayerAvatar.vue'
 import TrickCircle from './TrickCircle.vue'
 import PlayerBidMarker from './PlayerBidMarker.vue'
 import PlayerConnectionBadge from '@/features/PlayerConnection/components/PlayerConnectionBadge.vue'
+import { useI18n } from '@/common/composables/useI18n'
 
 interface Props {
   playerId: PlayerId
@@ -21,6 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { isPlayerTurn, getPlayerById } = usePlayers()
+const { t } = useI18n()
 const gameStore = useGameStore()
 
 const playerConnectionStatus = computed(() => {
@@ -157,7 +159,7 @@ const handleClick = () => {
         :class="['bg-hasen-dark text-hasen-base px-3 py-1 flex flex-row items-center gap-1 rounded-full border font-semibold text-xs shadow-md', (props.position === 'right' || props.position === 'left') ? 'self-end' : '']"
         :style="{ borderColor: playerColor }"
       >
-        {{ playerName }} {{ isPlayer ? '(You)' : '' }}
+        {{ playerName }} {{ isPlayer ? t('common.you') : '' }}
       </div>
       <PlayerConnectionBadge :player-id="playerId" :status="playerConnectionStatus" />
     </div>

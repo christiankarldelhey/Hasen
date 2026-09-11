@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
+import { useI18n } from '@/common/composables/useI18n'
 
 interface Props {
   playerId: PlayerId
@@ -14,10 +15,12 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'medium'
 })
 
-const { getPlayerNameById, getPlayerColorById } = usePlayers()
+const { t } = useI18n()
+const { getPlayerNameById, getPlayerColorById, isCurrentPlayer } = usePlayers()
 
 const playerName = computed(() => getPlayerNameById.value(props.playerId))
 const playerColor = computed(() => getPlayerColorById.value(props.playerId))
+const showYouSuffix = computed(() => props.showYou && isCurrentPlayer.value(props.playerId))
 
 const sizeClasses = {
   small: 'text-xs',
@@ -32,6 +35,6 @@ const sizeClasses = {
     :style="{ color: playerColor }"
   >
     {{ playerName }}
-    <span v-if="showYou" class="text-hasen-base"> (You)</span>
+    <span v-if="showYouSuffix" class="opacity-70"> {{ t('common.you') }}</span>
   </span>
 </template>

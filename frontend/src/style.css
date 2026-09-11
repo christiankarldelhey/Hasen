@@ -15,22 +15,39 @@
 
 /* Mobile layout tokens (single-column portrait board). Card AR ≈ 0.564. */
 :root {
-  --m-card-hand-w: 72px;
-  --m-card-hand-h: 128px;
-  --m-card-trick-w: 80px;
-  --m-card-trick-h: 142px;
-  --m-zone-topbar: 48px;
+  --m-card-hand-w: 82px;
+  --m-card-hand-h: 145px;
+  --m-card-trick-w: 90px;
+  --m-card-trick-h: 160px;
+  --m-zone-topbar: 52px;
   --m-zone-hud: 56px;
-  --m-zone-hand: 152px;
+  --m-zone-hand: 184px;
 }
 
 /* Short screens (small Android, rotated phone): shrink cards and hand zone */
 @media (max-height: 640px) {
   :root {
-    --m-card-hand-w: 60px;
-    --m-card-hand-h: 107px;
-    --m-card-trick-w: 64px;
-    --m-card-trick-h: 114px;
-    --m-zone-hand: 128px;
+    --m-card-hand-w: 66px;
+    --m-card-hand-h: 117px;
+    --m-card-trick-w: 72px;
+    --m-card-trick-h: 128px;
+    --m-zone-topbar: 48px;
+    --m-zone-hand: 152px;
+  }
+}
+
+/* Modals go full-screen on the mobile layout breakpoint */
+@media (max-width: 899px) {
+  .m-modal-panel {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border-width: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

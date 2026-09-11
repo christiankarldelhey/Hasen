@@ -10,12 +10,16 @@ import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useBidTooltips } from '@/common/composables/useBidTooltips'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   bid: Bid | null
   type: BidType
   disabled?: boolean
   disabledReason?: string
-}>()
+  /** Estira la card al ancho del contenedor (mobile sheet) */
+  block?: boolean
+}>(), {
+  block: false
+})
 
 const { getTooltip } = useBidTooltips()
 
@@ -55,7 +59,7 @@ const isCurrentPlayerTurn = computed(() => {
 })
 
 const bidCardClasses = computed(() => {
-  const baseClasses = 'rounded-xl p-2 shadow-lg max-h-16 min-w-55 transition-all duration-150 relative'
+  const baseClasses = `rounded-xl p-2 shadow-lg max-h-16 min-w-55 transition-all duration-150 relative ${props.block ? 'w-full' : ''}`
   const stateClasses = props.disabled 
     ? 'bg-hasen-base cursor-not-allowed' 
     : 'cursor-pointer bg-hasen-light hover:shadow-xl hover:scale-[1.02] active:scale-100 bid-clickable'
@@ -126,7 +130,7 @@ const handleBidClick = () => {
 </script>
 
 <template>
-  <div v-if="bid" class="flex flex-row items-center gap-2 relative group">    
+  <div v-if="bid" :class="['flex flex-row items-center gap-2 relative group', block ? 'w-full' : '']">    
     <!-- Bid card -->
     <div 
       :class="bidCardClasses"

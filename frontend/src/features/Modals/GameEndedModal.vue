@@ -15,7 +15,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
-const { getPlayerById } = usePlayers()
+const { getPlayerById, getPlayerDisplayName } = usePlayers()
 
 const emit = defineEmits<{
   close: []
@@ -39,7 +39,7 @@ const rankedPlayers = computed<PlayerRankInfo[]>(() => {
     
     return {
       playerId: playerScore.playerId,
-      playerName: player?.name || t('common.player'),
+      playerName: getPlayerDisplayName.value(playerScore.playerId) || t('common.player'),
       playerColor: player?.color || '#000000',
       score: playerScore.score,
       rank: index + 1,

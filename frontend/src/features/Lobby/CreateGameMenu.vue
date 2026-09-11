@@ -11,7 +11,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const gameName = ref('My Hasen Game');
 const pointsToWin = ref(300);
-const selectedMode = ref('humans_2');
+const selectedMode = ref('one_plus_3bots');
 const isCreating = ref(false);
 const showSlowLoadingMessage = ref(false);
 let slowLoadingTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -24,12 +24,12 @@ onUnmounted(() => {
 
 const pointsOptions = [50, 150, 200, 250, 300, 350, 400];
 const modeOptions = [
+  { id: 'one_plus_3bots', maxPlayers: 4, botCount: 3 },
   { id: 'humans_2', maxPlayers: 2, botCount: 0 },
   { id: 'humans_3', maxPlayers: 3, botCount: 0 },
   { id: 'humans_4', maxPlayers: 4, botCount: 0 },
   { id: 'one_plus_1bot', maxPlayers: 2, botCount: 1 },
-  { id: 'one_plus_2bots', maxPlayers: 3, botCount: 2 },
-  { id: 'one_plus_3bots', maxPlayers: 4, botCount: 3 }
+  { id: 'one_plus_2bots', maxPlayers: 3, botCount: 2 }
 ];
 
 const selectedConfig = computed(() => {

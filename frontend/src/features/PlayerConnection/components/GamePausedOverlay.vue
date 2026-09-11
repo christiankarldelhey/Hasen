@@ -21,11 +21,11 @@ const emit = defineEmits<{
   confirmInterruption: []
 }>()
 
-const { getPlayerNameById } = usePlayers()
+const { getPlayerDisplayName } = usePlayers()
 const { t } = useI18n()
 
 const getPlayerName = (playerId: PlayerId) => {
-  return getPlayerNameById.value(playerId) || playerId
+  return getPlayerDisplayName.value(playerId) || playerId
 }
 
 const disconnectedPlayerNames = computed(() => {

@@ -84,7 +84,7 @@ const handleConfirmLogout = () => {
       <IconMenu2 :size="22" />
     </button>
 
-    <div class="flex-1 flex items-center justify-center gap-2 overflow-x-auto min-w-0">
+    <div class="flex-1 flex items-center justify-center gap-2 overflow-visible min-w-0">
       <MobilePlayerChip
         v-for="opponent in props.opponentPositions"
         :key="opponent.playerId"
@@ -101,7 +101,7 @@ const handleConfirmLogout = () => {
     </div>
 
     <!-- Mini deck (deal animation origin) -->
-    <div ref="deckEl" class="relative w-8 h-11 shrink-0 mr-1">
+    <div ref="deckEl" class="relative w-9 h-12 shrink-0 mr-1">
       <div
         v-for="i in 3"
         :key="i"

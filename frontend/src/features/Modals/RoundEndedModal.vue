@@ -90,7 +90,7 @@ const shouldShowResults = computed(() => {
           <PlayerAvatar :playerId="playerInfo.playerId" size="small" />
           <div class="flex-1">
             <h3 class="font-bold text-lg">
-              <PlayerNameLabel :playerId="playerInfo.playerId" :showYou="false" size="large" />
+              <PlayerNameLabel :playerId="playerInfo.playerId" size="large" />
             </h3>
             <div class="text-sm text-hasen-dark/70 flex flex-row justify-between items-center gap-2">
               <div>
@@ -166,7 +166,7 @@ const shouldShowResults = computed(() => {
         >
           <PlayerAvatar :playerId="player.id" size="small" />
           <div class="flex-1">
-            <p class="font-semibold text-sm">{{ player.name }}</p>
+            <PlayerNameLabel :playerId="player.id" size="medium" class="text-hasen-dark" />
           </div>
           <div class="text-2xl">
             {{ isPlayerReady(player.id) ? '✓' : '⏳' }}

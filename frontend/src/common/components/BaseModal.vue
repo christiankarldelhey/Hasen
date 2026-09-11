@@ -32,7 +32,7 @@ const handleModalClick = (event: Event) => {
       >
         <div 
           :class="[
-            'bg-hasen-base rounded-2xl shadow-2xl w-full',
+            'bg-hasen-base rounded-2xl shadow-2xl w-full m-modal-panel',
             'border-2 border-hasen-dark',
             'max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-4rem)]',
             'flex flex-col overflow-hidden',

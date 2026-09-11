@@ -183,7 +183,7 @@ onUnmounted(() => {
             :key="player.id"
             class="flex items-center justify-between gap-3"
           >
-            <span class="text-sm text-hasen-dark">{{ player.name }}</span>
+            <span class="text-sm text-hasen-dark">{{ player.name }} {{ player.id === normalizedPlayerId ? t('common.you') : '' }}</span>
             <span
               class="h-4 w-4 rounded-full border border-hasen-dark/40"
               :style="{ backgroundColor: player.color }"
