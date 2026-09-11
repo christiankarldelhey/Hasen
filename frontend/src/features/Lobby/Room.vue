@@ -27,11 +27,8 @@ const gameAPI = useGameAPI();
 const { t } = useI18n();
 
 const profileName = ref('');
-const selectedPointsToWin = ref(300);
 const profileError = ref<string | null>(null);
-const pointsError = ref<string | null>(null);
 const isSavingProfile = ref(false);
-const isSavingPoints = ref(false);
 
 const roomData = computed(() => lobbyStore.currentRoomData || props.currentGame);
 
@@ -70,10 +67,6 @@ const isColorTakenByOtherPlayer = (color: string) => takenColorsByOthers.value.h
 watch(currentPlayerProfile, (profile) => {
   if (!profile) return;
   profileName.value = profile.name;
-}, { immediate: true });
-
-watch(() => roomData.value.pointsToWin, (pointsToWin) => {
-  selectedPointsToWin.value = pointsToWin || 300;
 }, { immediate: true });
 
 const saveProfileName = async () => {
@@ -122,23 +115,6 @@ const saveProfileColor = async (color: string) => {
     isSavingProfile.value = false;
   }
 };
-
-const updatePointsToWin = async () => {
-  if (!isHost.value) return;
-  if (selectedPointsToWin.value === roomData.value.pointsToWin) return;
-
-  try {
-    isSavingPoints.value = true;
-    pointsError.value = null;
-    await gameAPI.updatePointsToWin(roomData.value.gameId, selectedPointsToWin.value);
-  } catch (error) {
-    pointsError.value = error instanceof Error ? error.message : t('lobby.failedUpdatePointsToWin');
-  } finally {
-    isSavingPoints.value = false;
-  }
-};
-
-const pointsOptions = [50, 150, 200, 250, 300, 350, 400];
 
 onMounted(() => {
   const userId = userIdService.getUserId();
@@ -220,21 +196,6 @@ onUnmounted(() => {
           <p v-if="profileError" class="text-xs text-hasen-red">{{ profileError }}</p>
         </div>
 
-        <div class="text-left rounded-lg bg-hasen-light/50 p-3 space-y-2">
-          <p class="text-sm font-semibold text-hasen-dark">{{ t('lobby.pointsToWin') }}</p>
-          <select
-            v-model="selectedPointsToWin"
-            class="select select-bordered w-full bg-white text-black"
-            :disabled="!isHost || isSavingPoints"
-            @change="updatePointsToWin"
-          >
-            <option v-for="option in pointsOptions" :key="option" :value="option">
-              {{ t('lobby.pointsToWinLabel', { points: option }) }}
-            </option>
-          </select>
-          <p v-if="!isHost" class="text-xs text-hasen-dark/70">{{ t('lobby.onlyHostCanChangeSetting') }}</p>
-          <p v-if="pointsError" class="text-xs text-hasen-red">{{ pointsError }}</p>
-        </div>
       </div>
     </div>
     

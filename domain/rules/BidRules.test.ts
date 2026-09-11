@@ -97,7 +97,7 @@ function createGameFixture(options?: {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 300,
+      pointsToWin: 100,
       reconnectionTimeoutMinutes: 3
     }
   }

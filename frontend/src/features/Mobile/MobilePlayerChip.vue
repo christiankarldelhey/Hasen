@@ -119,9 +119,9 @@ const handleTap = () => emit('tap')
     <!-- Carta pública durante player_drawing: sobresale apenas bajo el avatar -->
     <div
       v-if="publicCard"
-      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none scale-[0.8] origin-top"
+      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none origin-top"
     >
-      <PlayingCard :card="publicCard" size="tiny" />
+      <PlayingCard :card="publicCard" size="small" />
     </div>
   </div>
 </template>

@@ -4,13 +4,13 @@
     "module": "ESNext",
     "lib": ["ES2020"],
     "outDir": "./dist",
+    "rootDir": "..",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
       "@domain/*": ["../domain/*"],
       "@/*": ["./src/*"]

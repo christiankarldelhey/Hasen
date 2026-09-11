@@ -145,7 +145,7 @@ const tabs: { key: SheetTab; label: string }[] = [
                 <PlayingCard
                   v-if="targetPublicCard"
                   :card="targetPublicCard"
-                  size="tiny"
+                  size="small"
                   class="ml-auto"
                 />
               </div>

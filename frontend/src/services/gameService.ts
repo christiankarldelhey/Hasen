@@ -35,11 +35,6 @@ export interface UpdatePlayerProfilePayload {
   color?: string;
 }
 
-export interface UpdateGameSettingsPayload {
-  gameId: string;
-  pointsToWin: number;
-}
-
 export const gameService = {
   async getAvailableGames(): Promise<LobbyGame[]> {
     try {
@@ -78,7 +73,7 @@ async getPlayerGameState(gameId: string): Promise<any> {
   }
 },
 
-async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, pointsToWin: number, botCount: number): Promise<CreateGameResponse> {
+async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, botCount: number): Promise<CreateGameResponse> {
   try {
     const userId = userIdService.getUserId(); // Cambiado de getSessionId
     
@@ -87,7 +82,7 @@ async createNewGame(gameName: string, hostPlayerId: string, maxPlayers: number, 
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ gameName, hostPlayerId, userId, maxPlayers, pointsToWin, botCount })
+      body: JSON.stringify({ gameName, hostPlayerId, userId, maxPlayers, botCount })
     });
     const data = await response.json();
     
@@ -194,30 +189,4 @@ async updatePlayerProfile(payload: UpdatePlayerProfilePayload): Promise<{ active
     throw error;
   }
 },
-
-async updateGameSettings(payload: UpdateGameSettingsPayload): Promise<{ pointsToWin: number }> {
-  try {
-    const userId = userIdService.getUserId();
-    const response = await fetch(`${API_URL}/games/${payload.gameId}/settings`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        pointsToWin: payload.pointsToWin,
-      })
-    });
-
-    const data = await response.json();
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to update game settings');
-    }
-
-    return data.data;
-  } catch (error) {
-    console.error('Error updating game settings:', error);
-    throw error;
-  }
-}
 };

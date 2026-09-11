@@ -29,11 +29,11 @@ const stackedCardsWidth = computed(() => {
 
 <template>
   <div 
-    class="relative flex h-[150px]"
+    class="relative flex items-center min-h-[150px]"
     :style="{ width: `${stackedCardsWidth}px` }"
   >
     <div v-if="publicCard" class="flex justify-center z-10">
-      <PlayingCard :card="publicCard" size="small" />
+      <PlayingCard :card="publicCard" size="medium" />
     </div>
 
     <div 

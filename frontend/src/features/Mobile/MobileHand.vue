@@ -47,7 +47,7 @@ onUnmounted(() => {
   resizeObserver?.disconnect()
 })
 
-const cardW = useCssPxVar('--m-card-hand-w', 72)
+const cardW = useCssPxVar('--m-card-hand-w', 96)
 
 // Timestamp del último long-press: compartido entre los press handlers para
 // suprimir taps espurios si las posiciones se recomputan a mitad del gesto.
@@ -69,7 +69,7 @@ const cardPositions = computed(() => {
   const n = props.cards.length
   if (n === 0) return []
 
-  const maxPeek = 54
+  const maxPeek = 60
   const minPeek = 34
   const available = containerWidth.value - 24 // horizontal padding
   const peek =

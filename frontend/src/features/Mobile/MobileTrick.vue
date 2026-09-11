@@ -61,7 +61,7 @@ const ownerName = (card: Card): string => {
   return (name || '—').slice(0, 10)
 }
 
-const cardW = useCssPxVar('--m-card-trick-w', 90)
+const cardW = useCssPxVar('--m-card-trick-w', 104)
 
 // Separación adaptativa: las cartas se alejan entre sí hasta ~78px si entran en cuadro
 const peek = computed(() => {
@@ -121,7 +121,7 @@ const cardPositions = computed(() => {
     @click.self="emit('backgroundTap')"
   >
     <!-- Cards row -->
-    <div ref="trickEl" class="relative h-[175px] w-full" @click.self="emit('backgroundTap')">
+    <div ref="trickEl" class="relative h-[calc(var(--m-card-trick-h)+22px)] w-full" @click.self="emit('backgroundTap')">
       <template v-if="cardPositions.length > 0">
         <div
           v-for="pos in cardPositions"
@@ -143,7 +143,7 @@ const cardPositions = computed(() => {
           >
             <PlayingCard :card="pos.card" size="mobileTrick" />
           </div>
-          <div class="text-center text-[11px] leading-4 text-hasen-base/90 truncate w-[72px] mx-auto mt-0.5">
+          <div class="text-center text-[11px] leading-4 text-hasen-base/90 truncate w-[104px] mx-auto mt-0.5">
             {{ pos.owner }}
           </div>
         </div>

@@ -5,12 +5,11 @@ import RabbitLoader from '@/common/components/RabbitLoader.vue';
 import { useI18n } from '@/common/composables/useI18n';
 
 const emit = defineEmits<{
-  createGame: [gameName: string, playerId: string, maxPlayers: number, pointsToWin: number, botCount: number];
+  createGame: [gameName: string, playerId: string, maxPlayers: number, botCount: number];
 }>();
 
 const { t } = useI18n();
 const gameName = ref('My Hasen Game');
-const pointsToWin = ref(300);
 const selectedMode = ref('one_plus_3bots');
 const isCreating = ref(false);
 const showSlowLoadingMessage = ref(false);
@@ -22,7 +21,6 @@ onUnmounted(() => {
   }
 });
 
-const pointsOptions = [50, 150, 200, 250, 300, 350, 400];
 const modeOptions = [
   { id: 'one_plus_3bots', maxPlayers: 4, botCount: 3 },
   { id: 'humans_2', maxPlayers: 2, botCount: 0 },
@@ -54,7 +52,7 @@ const handleCreateGame = () => {
     showSlowLoadingMessage.value = true;
   }, 5000);
   
-  emit('createGame', gameName.value, 'player_1', config.maxPlayers, pointsToWin.value, config.botCount);
+  emit('createGame', gameName.value, 'player_1', config.maxPlayers, config.botCount);
 };
 </script>
 
@@ -85,21 +83,6 @@ const handleCreateGame = () => {
       >
         <option v-for="option in modeOptions" :key="option.id" :value="option.id">
           {{ formatModeLabel(option.maxPlayers, option.botCount) }}
-        </option>
-      </select>
-    </div>
-
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-black font-semibold">{{ t('lobby.pointsToWin') }}</span>
-      </label>
-      <select 
-        data-testid="create-game-points-to-win-select"
-        v-model="pointsToWin"
-        class="select select-bordered w-full bg-white text-black"
-      >
-        <option v-for="option in pointsOptions" :key="option" :value="option">
-          {{ t('lobby.pointsToWinLabel', { points: option }) }}
         </option>
       </select>
     </div>

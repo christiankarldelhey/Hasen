@@ -69,7 +69,7 @@ onUnmounted(() => {
     >
       <ActionButton 
         :data-testid="`join-game-action-${game.gameId}`"
-        :label="joiningGameId === game.gameId ? t('lobby.joining') : `${game.gameName} (${game.currentPlayers}/${game.maxPlayers} - ${t('lobby.pointsToWinLabel', { points: game.pointsToWin || 300 })})`"
+        :label="joiningGameId === game.gameId ? t('lobby.joining') : `${game.gameName} (${game.currentPlayers}/${game.maxPlayers} - ${t('lobby.pointsToWinLabel', { points: game.pointsToWin || 100 })})`"
         variant="primary"
         :disabled="!game.hasSpace || joiningGameId === game.gameId"
         @click="emit('joinGame', game.gameId)"

@@ -47,26 +47,12 @@ export function useGameAPI() {
     return result
   }
 
-  async function updatePointsToWin(gameId: string, pointsToWin: number) {
-    const result = await gameService.updateGameSettings({ gameId, pointsToWin })
-
-    const currentRoom = lobbyStore.currentRoomData
-    if (currentRoom) {
-      lobbyStore.setCurrentRoom({
-        ...currentRoom,
-        pointsToWin: result.pointsToWin
-      })
-    }
-
-    return result
-  }
-
-  async function createGame(gameName: string, hostPlayerId: PlayerId, maxPlayers: number, pointsToWin: number, botCount: number) {
+  async function createGame(gameName: string, hostPlayerId: PlayerId, maxPlayers: number, botCount: number) {
     startLoading()
     lobbyStore.setLoading(true)
     lobbyStore.setError(null)
     try {
-      const result = await gameService.createNewGame(gameName, hostPlayerId, maxPlayers, pointsToWin, botCount)
+      const result = await gameService.createNewGame(gameName, hostPlayerId, maxPlayers, botCount)
       
       // Actualizar el store con el nuevo juego
       lobbyStore.setCurrentRoom({
@@ -197,7 +183,6 @@ export function useGameAPI() {
     deleteGame,
     startGame,
     fetchPlayerGameState,
-    updatePlayerProfile,
-    updatePointsToWin
+    updatePlayerProfile
   }
 }

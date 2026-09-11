@@ -657,7 +657,7 @@
           "content": [
             {
               "type": "paragraph",
-              "text": "La partida termina cuando un jugador alcanza la puntuación objetivo acordada (p. ej., 200 o 300 puntos). Gana el jugador con la puntuación total más alta."
+              "text": "La partida termina cuando un jugador alcanza 100 o -85 puntos. Gana el jugador con la puntuación total más alta; en caso de empate, gana el mano (o el jugador empatado más cercano al mano en el orden de turnos)."
             }
           ]
         }

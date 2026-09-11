@@ -83,7 +83,7 @@ test.describe('Game view smoke', () => {
         gameSettings: {
           minPlayers: 2,
           maxPlayers: 2,
-          pointsToWin: 300,
+          pointsToWin: 100,
           reconnectionTimeoutMinutes: 2
         }
       },

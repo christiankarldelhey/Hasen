@@ -68,14 +68,13 @@ const handleTutorialView = () => {
   router.push('/tutorial');
 };
 
-const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, pointsToWin: number, botCount: number) => {
+const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, botCount: number) => {
   playMusic('lobby');
   try {
     const result = await gameAPI.createGame(
       gameName,
       playerId as import('@domain/interfaces/Player').PlayerId,
       maxPlayers,
-      pointsToWin,
       botCount
     );
 

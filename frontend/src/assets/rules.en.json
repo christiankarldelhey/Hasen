@@ -595,7 +595,7 @@
           "content": [
             {
               "type": "paragraph",
-              "text": "The game ends when a player reaches the agreed-upon target score (e.g., 200 or 300 points). The player with the highest total score wins."
+              "text": "The game ends when a player reaches 100 or -85 points. The player with the highest total score wins; on a tie, the lead player (mano) wins, or the tied player closest to the lead in turn order."
             }
           ]
         }

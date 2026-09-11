@@ -8,7 +8,7 @@ import { BotTurnCoordinator } from '@/ai/BotTurnCoordinator.js'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
-    const { gameName, hostPlayerId, userId, maxPlayers, pointsToWin, hostName, hostColor, botCount } = req.body
+    const { gameName, hostPlayerId, userId, maxPlayers, hostName, hostColor, botCount } = req.body
     
     if (!userId) {
       return res.status(400).json({ success: false, error: 'userId is required' })
@@ -24,7 +24,7 @@ export const createGame = async (req: Request, res: Response) => {
     }
     
     const resolvedHostPlayerId = (hostPlayerId || 'player_1') as PlayerId
-    const newGame = await GameService.createGame(gameName, resolvedHostPlayerId, userId, maxPlayers, pointsToWin)
+    const newGame = await GameService.createGame(gameName, resolvedHostPlayerId, userId, maxPlayers)
 
     if (hostName || hostColor) {
       await GameService.updatePlayerProfile(newGame.gameId, resolvedHostPlayerId, {
@@ -261,58 +261,7 @@ export const updatePlayerProfile = async (req: Request, res: Response) => {
   }
 }
 
-export const updateGameSettings = async (req: Request, res: Response) => {
-  try {
-    const { gameId } = req.params
-    const { userId, pointsToWin } = req.body
 
-    if (!userId) {
-      return res.status(400).json({ success: false, error: 'userId is required' })
-    }
-
-    if (typeof pointsToWin !== 'number') {
-      return res.status(400).json({ success: false, error: 'pointsToWin must be a number' })
-    }
-
-    const game = await GameModel.findOne({ gameId })
-    if (!game) {
-      return res.status(404).json({ success: false, error: 'Game not found' })
-    }
-
-    const assignedPlayerId = game.playerSessions?.get(userId)
-    if (!assignedPlayerId) {
-      return res.status(403).json({ success: false, error: 'User is not assigned to this game' })
-    }
-
-    const updatedGame = await GameService.updatePointsToWin(gameId, assignedPlayerId, pointsToWin)
-
-    const io = req.app.get('io')
-    GameSocketPublisher.publishLobbyRoomCreated(io, {
-      gameId: updatedGame.gameId,
-      gameName: updatedGame.gameName,
-      hostPlayer: updatedGame.hostPlayer,
-      activePlayers: updatedGame.activePlayers,
-      currentPlayers: updatedGame.activePlayers.length,
-      maxPlayers: updatedGame.gameSettings.maxPlayers,
-      minPlayers: updatedGame.gameSettings.minPlayers,
-      hasSpace: updatedGame.activePlayers.length < updatedGame.gameSettings.maxPlayers,
-      pointsToWin: updatedGame.gameSettings.pointsToWin,
-      createdAt: updatedGame.createdAt
-    })
-
-    res.status(200).json({
-      success: true,
-      data: {
-        gameId: updatedGame.gameId,
-        pointsToWin: updatedGame.gameSettings.pointsToWin
-      }
-    })
-  } catch (error: any) {
-    console.error('Error updating game settings:', error)
-    const status = error.message === 'Game not found' ? 404 : 400
-    res.status(status).json({ success: false, error: error.message })
-  }
-}
 
 export const startGame = async (req: Request, res: Response) => {
   try {

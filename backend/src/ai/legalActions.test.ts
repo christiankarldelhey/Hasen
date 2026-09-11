@@ -54,7 +54,7 @@ function buildBaseGame(): Game {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 300,
+      pointsToWin: 100,
       reconnectionTimeoutMinutes: 3
     },
     playerConnectionStatus: new Map<PlayerId, 'connected' | 'disconnected' | 'reconnecting'>(),

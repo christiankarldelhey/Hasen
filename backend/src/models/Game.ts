@@ -180,7 +180,7 @@ const GameSchema = new Schema<GameDocument>({
   gameSettings: {
     minPlayers: { type: Number, required: true, default: 2 },
     maxPlayers: { type: Number, required: true, default: 4 },
-    pointsToWin: { type: Number, required: true, default: 300 },
+    pointsToWin: { type: Number, required: true, default: 100 },
     reconnectionTimeoutMinutes: { type: Number, required: true, default: 3 }
   },
   playerConnectionStatus: {

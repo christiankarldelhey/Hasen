@@ -15,24 +15,24 @@
 
 /* Mobile layout tokens (single-column portrait board). Card AR ≈ 0.564. */
 :root {
-  --m-card-hand-w: 82px;
-  --m-card-hand-h: 145px;
-  --m-card-trick-w: 90px;
-  --m-card-trick-h: 160px;
+  --m-card-hand-w: 96px;
+  --m-card-hand-h: 170px;
+  --m-card-trick-w: 104px;
+  --m-card-trick-h: 184px;
   --m-zone-topbar: 52px;
   --m-zone-hud: 56px;
-  --m-zone-hand: 184px;
+  --m-zone-hand: 210px;
 }
 
 /* Short screens (small Android, rotated phone): shrink cards and hand zone */
 @media (max-height: 640px) {
   :root {
-    --m-card-hand-w: 66px;
-    --m-card-hand-h: 117px;
-    --m-card-trick-w: 72px;
-    --m-card-trick-h: 128px;
+    --m-card-hand-w: 78px;
+    --m-card-hand-h: 138px;
+    --m-card-trick-w: 84px;
+    --m-card-trick-h: 149px;
     --m-zone-topbar: 48px;
-    --m-zone-hand: 152px;
+    --m-zone-hand: 176px;
   }
 }
 

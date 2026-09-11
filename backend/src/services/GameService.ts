@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { getAvailablePlayerColors, getDefaultPlayerProfile, PLAYER_IDS } from '@domain/interfaces'
 import type { ActivePlayer, PlayerId, Game, PlayingCard } from '@domain/interfaces'
 import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
+import { GAME_END_MAX_SCORE } from '@domain/rules/GameEndRules.js'
 import { TrickService } from './TrickService.js'
 
 export class GameService {
@@ -88,7 +89,7 @@ export class GameService {
     return { awardedPoints, playerGameScore: awardedPoints }
   }
 
-  static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string, maxPlayers?: number, pointsToWin?: number) {
+  static async createGame(gameName?: string, hostPlayerId?: PlayerId, hostUserId?: string, maxPlayers?: number) {
     console.log("Creating game");
     const gameId = uuidv4();
     let deck = createDeck();
@@ -131,7 +132,7 @@ export class GameService {
       gameSettings: {
         minPlayers: 2,
         maxPlayers: maxPlayers || 4,
-        pointsToWin: pointsToWin || 300,
+        pointsToWin: GAME_END_MAX_SCORE,
         reconnectionTimeoutMinutes: 3
       }
     });
@@ -692,25 +693,5 @@ static async leaveGame(gameId: string, playerId: PlayerId, userId: string) {
     return { game, updatedPlayer: activePlayer }
   }
 
-  static async updatePointsToWin(gameId: string, hostPlayerId: PlayerId, pointsToWin: number) {
-    const game = await GameModel.findOne({ gameId })
-    if (!game) throw new Error('Game not found')
 
-    if (game.gamePhase !== 'setup') {
-      throw new Error('Game settings can only be updated in setup phase')
-    }
-
-    if (game.hostPlayer !== hostPlayerId) {
-      throw new Error('Only the host can update game settings')
-    }
-
-    if (!Number.isFinite(pointsToWin) || pointsToWin <= 0) {
-      throw new Error('pointsToWin must be a positive number')
-    }
-
-    game.gameSettings.pointsToWin = Math.floor(pointsToWin)
-    await game.save()
-
-    return game
-  }
 }
