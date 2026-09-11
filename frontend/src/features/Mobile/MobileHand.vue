@@ -69,7 +69,7 @@ const cardPositions = computed(() => {
   const n = props.cards.length
   if (n === 0) return []
 
-  const maxPeek = 60
+  const maxPeek = 72
   const minPeek = 34
   const available = containerWidth.value - 24 // horizontal padding
   const peek =

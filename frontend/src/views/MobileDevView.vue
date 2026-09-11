@@ -103,7 +103,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <GameLayout>
+  <GameLayout fixed>
     <MobileGameBoard
       :opponent-positions="opponentPositions"
       :trick-cards="trickCards"

@@ -42,10 +42,12 @@ const canMakeBids = computed(() => {
         <Bid 
           v-for="(bid, index) in roundBids.trickBids"
           :key="`trick-${index}`"
+          class="flex-1"
           :bid="bid"
           type="trick"
           :disabled="isBidDisabled('trick', bid)"
           :disabled-reason="getBidDisabledReason('trick', bid)"
+          block
         />
       </div>
 
@@ -54,10 +56,12 @@ const canMakeBids = computed(() => {
         <Bid 
           v-for="(bid, index) in roundBids.pointsBids"
           :key="`points-${index}`"
+          class="flex-1"
           :bid="bid"
           type="points"
           :disabled="isBidDisabled('points', bid)"
           :disabled-reason="getBidDisabledReason('points', bid)"
+          block
         />
       </div>
 
@@ -66,10 +70,12 @@ const canMakeBids = computed(() => {
         <Bid 
           v-for="(bid, index) in roundBids.setCollectionBids"
           :key="`set-collection-${index}`"
+          class="flex-1"
           :bid="bid"
           type="set_collection"
           :disabled="isBidDisabled('set_collection', bid)"
           :disabled-reason="getBidDisabledReason('set_collection', bid)"
+          block
         />
       </div>
 

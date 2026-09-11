@@ -4,6 +4,7 @@ import type { ActionBarState, SheetTab } from './composables/useMobileInteractio
 import { useI18n } from '@/common/composables/useI18n'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayerObjectiveStatus } from '@/features/Score/composables/usePlayerObjectiveStatus'
+import PlayerBidMarker from '@/common/components/PlayerBidMarker.vue'
 
 interface Props {
   state: ActionBarState
@@ -100,10 +101,15 @@ const primaryBtn =
       </button>
       <button
         type="button"
-        :class="props.canMakeBids ? primaryBtn : secondaryBtn"
+        :class="[props.canMakeBids ? primaryBtn : secondaryBtn, 'inline-flex items-center justify-center gap-1.5']"
         @click="emit('openSheet', 'bids')"
       >
-        {{ t('game.tabBids') }}{{ props.bidCount ? ` ${props.bidCount}` : '' }}
+        {{ t('game.tabBids') }}
+        <PlayerBidMarker
+          v-if="myId && props.bidCount > 0"
+          :player-id="myId"
+          size="small"
+        />
       </button>
     </template>
   </div>

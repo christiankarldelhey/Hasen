@@ -23,6 +23,16 @@ const sizeClasses = {
   large: 'h-8 w-8'
 }
 
+// En el trío de palos a evitar se usan iconos un poco más chicos
+// para que los tres entren en fila
+const trioSizeClasses = {
+  small: 'h-4 w-4',
+  medium: 'h-6 w-6',
+  large: 'h-6 w-6'
+}
+
+const avoidTrio = ['acorns', 'berries', 'leaves'] as const
+
 function getSymbol(collect: SuitSymbolKey) {
     switch (collect) {
     case 'acorns':
@@ -40,34 +50,26 @@ function getSymbol(collect: SuitSymbolKey) {
 </script>
 
 <template>
-    <div v-if="props.suit === 'avoidOtherSuits'" :class="['relative flex-shrink-0 mx-1', sizeClasses[props.size]]">
-        <img
-            :src="AcornSymbol"
-            alt="avoid acorns"
-            :class="['object-contain absolute left-0 top-0', sizeClasses[props.size]]"
-            style="transform: translate(-10%, 10%);"
-        />
-        <img
-            :src="BerrySymbol"
-            alt="avoid berries"
-            :class="['object-contain absolute left-0 top-0', sizeClasses[props.size]]"
-            style="transform: translate(12%, -8%);"
-        />
-        <img
-            :src="LeaveSymbol"
-            alt="avoid leaves"
-            :class="['object-contain absolute left-0 top-0', sizeClasses[props.size]]"
-            style="transform: translate(2%, 2%);"
-        />
-
-        <svg v-if="props.avoid" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line x1="0" y1="0" x2="100" y2="100"
-                stroke="#dc2626" stroke-width="5" />
-        </svg>
+    <div v-if="props.suit === 'avoidOtherSuits'" class="relative flex-shrink-0 mx-1 flex items-center gap-0.5">
+        <div
+            v-for="suitIcon in avoidTrio"
+            :key="suitIcon"
+            :class="['relative', trioSizeClasses[props.size]]"
+        >
+            <img
+                :src="getSymbol(suitIcon)"
+                :alt="`avoid ${suitIcon}`"
+                :class="['object-contain', trioSizeClasses[props.size]]"
+            />
+            <svg v-if="props.avoid" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line x1="4" y1="4" x2="96" y2="96"
+                    stroke="#dc2626" stroke-width="10" />
+            </svg>
+        </div>
 
         <div
             v-if="props.value !== undefined"
-            class="absolute inset-x-0 top-4 flex items-end justify-center pointer-events-none"
+            class="absolute inset-x-0 top-full -mt-1 flex items-end justify-center pointer-events-none"
         >
             <span class="bg-hasen-base rounded-full px-2 py-1 text-hasen-dark font-bold text-xs shadow-md border border-hasen-dark">
                 {{ props.value }}

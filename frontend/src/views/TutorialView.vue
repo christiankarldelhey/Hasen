@@ -204,7 +204,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <GameLayout>
+  <GameLayout fixed>
     <div ref="tutorialRoot" class="relative h-screen w-full">
       <div data-tutorial-id="game-info">
         <GameInfo />

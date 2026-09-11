@@ -278,7 +278,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <GameLayout>
+  <GameLayout fixed>
     <div v-if="loading" class="py-12" data-testid="game-loading">
       <RabbitLoader size="xl" />
     </div>

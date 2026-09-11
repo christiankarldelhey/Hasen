@@ -8,6 +8,7 @@ import { useGameScore } from '@/features/Score/composables/useGameScore'
 import { useI18n } from '@/common/composables/useI18n'
 import { useAnimationCoords } from '@/features/Animations'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
+import PlayerBidMarker from '@/common/components/PlayerBidMarker.vue'
 import PlayingCard from '@/common/components/PlayingCard.vue'
 
 interface Props {
@@ -102,12 +103,6 @@ const handleTap = () => emit('tap')
         </span>
       </div>
 
-      <!-- Bid marker dot -->
-      <span
-        v-if="hasBids"
-        class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-hasen-base border border-hasen-dark"
-      />
-
       <!-- Connection dot -->
       <span
         v-if="connectionStatus !== 'connected'"
@@ -115,6 +110,14 @@ const handleTap = () => emit('tap')
         :class="connectionStatus === 'disconnected' ? 'bg-hasen-red' : 'bg-yellow-400'"
       />
     </button>
+
+    <!-- Bids del jugador: pill con los iconos de cada bid (paridad con desktop) -->
+    <div
+      v-if="hasBids"
+      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+    >
+      <PlayerBidMarker :player-id="playerId" size="medium" />
+    </div>
 
     <!-- Carta pública durante player_drawing: sobresale apenas bajo el avatar -->
     <div
