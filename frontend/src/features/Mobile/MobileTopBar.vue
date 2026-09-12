@@ -105,7 +105,7 @@ const handleConfirmLogout = () => {
       <div
         v-for="i in 3"
         :key="i"
-        class="absolute w-6 h-9 rounded-sm border border-hasen-dark/60"
+        class="absolute inset-0 m-auto w-6 h-9 rounded-sm border border-hasen-dark/60"
         :style="{
           backgroundImage: `url(${cardBack})`,
           backgroundSize: 'cover',

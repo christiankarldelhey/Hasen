@@ -7,7 +7,6 @@ import { useSocketLobby } from '../../common/composables/useSocketLobby';
 import { userIdService } from '../../services/userIdService';
 import { healthService } from '../../services/healthService';
 import { useRouter } from 'vue-router';
-import { useAudio } from '../../common/composables/useAudio';
 import LobbyOptions from './LobbyOptions.vue';
 import Room from './Room.vue';
 import CreateGameMenu from './CreateGameMenu.vue';
@@ -22,7 +21,6 @@ const hasenStore = useHasenStore();
 const gameAPI = useGameAPI();
 const socketLobby = useSocketLobby();
 const router = useRouter();
-const { playMusic } = useAudio();
 const { t } = useI18n(); 
 
 type ViewState = 'menu' | 'room' | 'create-game' | 'join-game' | 'rules' | 'settings';
@@ -69,7 +67,6 @@ const handleTutorialView = () => {
 };
 
 const handleCreateGame = async (gameName: string, playerId: string, maxPlayers: number, botCount: number) => {
-  playMusic('lobby');
   try {
     const result = await gameAPI.createGame(
       gameName,
@@ -109,7 +106,6 @@ const getTitle = () => {
 };
 
 const handleJoinGame = async (gameId: string) => {
-  playMusic('lobby');
   try {
     await gameAPI.joinGame(gameId);
     handleViewChange('room');
@@ -175,7 +171,7 @@ const handleStartGame = async () => {
 
 <template>
   <div
-    class="card card-border bg-hasen-base w-full md:w-[40%] h-[85vh] shadow-lg flex flex-col relative overflow-hidden"
+    class="card bg-hasen-base w-full md:w-[40%] h-dvh md:h-[85vh] rounded-none md:card-border md:rounded-box md:shadow-lg flex flex-col relative overflow-hidden"
     data-testid="lobby-menu"
   >
     

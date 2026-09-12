@@ -8,10 +8,7 @@ export type SoundEffect =
   | 'leavesS'
   | 'acornsS';
 
-export type MusicTrack = 
-  | 'lobby'
-  | 'gameplay'
-  | 'endgame';
+export type MusicTrack = 'gameplay';
 
 export interface AudioSettings {
   masterVolume: number;
@@ -33,12 +30,6 @@ class AudioService {
     sfxVolume: 0.8,
     musicEnabled: true,
     sfxEnabled: true,
-  };
-
-  private musicPaths: Record<MusicTrack, string> = {
-    lobby: '/audio/music/lobby.mp3',
-    gameplay: '/audio/music/gameplay.mp3',
-    endgame: '/audio/music/endgame.mp3',
   };
 
   private gameplayMusicPaths: string[] = [
@@ -94,28 +85,10 @@ class AudioService {
     return this.settings.masterVolume * typeVolume;
   }
 
-  playMusic(track: MusicTrack, loop: boolean = true): void {
+  playMusic(_track: MusicTrack, _loop: boolean = true): void {
     if (!this.settings.musicEnabled) return;
 
-    if (track === 'gameplay') {
-      this.startGameplayPlaylist();
-      return;
-    }
-
-    if (this.currentTrack === track && this.musicAudio && !this.musicAudio.paused) {
-      return;
-    }
-
-    this.stopMusic();
-
-    this.musicAudio = new Audio(this.musicPaths[track]);
-    this.musicAudio.loop = loop;
-    this.musicAudio.volume = this.getEffectiveVolume('music');
-    this.currentTrack = track;
-
-    this.musicAudio.play().catch(error => {
-      console.warn('Audio playback blocked by browser. User interaction required:', error);
-    });
+    this.startGameplayPlaylist();
   }
 
   private startGameplayPlaylist(): void {

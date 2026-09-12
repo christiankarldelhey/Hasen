@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useConvertJSONToHTML } from '@/common/composables/useConvertJSONToHTML'
+import { useMarkdownRules } from '@/common/composables/useMarkdownRules'
 import { useI18n } from '@/common/composables/useI18n'
-import rulesEnRaw from '@/assets/rules.en.json'
-import rulesEsRaw from '@/assets/rules.es.json'
+import rulesEnRaw from '@/assets/rules.en.md?raw'
+import rulesEsRaw from '@/assets/rules.es.md?raw'
 
-const { convertRulesToVNodes, generateTableOfContents } = useConvertJSONToHTML()
+const { renderRules, generateTableOfContents } = useMarkdownRules()
 const { t, locale } = useI18n()
 const showTableOfContents = ref(true)
 
-const rulesData = computed(() => (locale.value === 'es' ? rulesEsRaw : rulesEnRaw) as any)
-const rulesVNodes = computed(() => convertRulesToVNodes(rulesData.value))
-const tocVNode = computed(() => generateTableOfContents(rulesData.value, t('rules.tableOfContents')))
+const rulesMarkdown = computed(() => (locale.value === 'es' ? rulesEsRaw : rulesEnRaw))
+const rulesVNodes = computed(() => renderRules(rulesMarkdown.value))
+const tocVNode = computed(() => generateTableOfContents(rulesMarkdown.value, t('rules.tableOfContents')))
 </script>
 
 <template>

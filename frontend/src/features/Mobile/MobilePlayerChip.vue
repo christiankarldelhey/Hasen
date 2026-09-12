@@ -119,10 +119,10 @@ const handleTap = () => emit('tap')
       <PlayerBidMarker :player-id="playerId" size="medium" />
     </div>
 
-    <!-- Carta pública durante player_drawing: sobresale apenas bajo el avatar -->
+    <!-- Carta pública durante player_drawing: sobresale bajo el avatar, con aire -->
     <div
       v-if="publicCard"
-      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none origin-top"
+      class="absolute top-full left-1/2 -translate-x-1/2 z-20 pointer-events-none origin-top mt-2"
     >
       <PlayingCard :card="publicCard" size="small" />
     </div>

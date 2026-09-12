@@ -77,6 +77,10 @@ const targetPublicCard = computed(() => {
   return card?.state === 'in_hand_visible' ? card : null
 })
 
+// Mano propia fija arriba del listado de apuestas: da contexto para elegir bid
+// mientras el sheet tapa la zona de la mano.
+const myHand = computed(() => gameStore.privateGameState?.hand ?? [])
+
 const tabs: { key: SheetTab; label: string }[] = [
   { key: 'bids', label: 'game.tabBids' },
   { key: 'score', label: 'game.tabScore' },
@@ -92,7 +96,7 @@ const tabs: { key: SheetTab; label: string }[] = [
         <div
           class="absolute bottom-0 left-0 right-0 bg-hasen-base rounded-t-2xl border-t-2 border-hasen-dark flex flex-col overflow-hidden"
           :style="{
-            height: 'min(62dvh, 480px)',
+            height: props.tab === 'bids' ? 'min(72dvh, 560px)' : 'min(62dvh, 480px)',
             transform: `translateY(${dragY}px)`,
             transition: dragging ? 'none' : 'transform 0.2s ease-out',
             paddingBottom: 'env(safe-area-inset-bottom)',
@@ -125,6 +129,21 @@ const tabs: { key: SheetTab; label: string }[] = [
             >
               {{ t(tabItem.label) }}
             </button>
+          </div>
+
+          <!-- Mano del jugador fija (no scrollea) en la pestaña de apuestas -->
+          <div
+            v-if="props.tab === 'bids' && myHand.length"
+            class="shrink-0 px-3 pb-2 pointer-events-none"
+          >
+            <div class="flex justify-center items-end gap-2">
+              <PlayingCard
+                v-for="card in myHand"
+                :key="card.id"
+                :card="card"
+                size="tiny"
+              />
+            </div>
           </div>
 
           <!-- Content -->
