@@ -12,6 +12,10 @@ Mechanically, Hasen is a **trick-taking game with bets**. Each round you play fi
 
 You can promise to gather a mountain of points, or almost none. To collect only berries. To win exactly one trick and not one more. The later you declare, the better your information — and the more it costs you if you're wrong anyway.
 
+![The Hasen table mid-trick: the bid pool top right, rivals on the sides, your hand below](/rules/en/board-overview.png)
+
+*The table mid-trick: bid pool top right, played cards in the center, your hand at the bottom.*
+
 ## The deck
 
 35 cards, 4 suits. **Flowers is always the trump suit.** It's not chosen, not drawn, not negotiated: in every trick of every round, Flowers rules.
@@ -67,6 +71,10 @@ At the start of every round:
 2. **Cards are dealt.** You receive 5 cards: 4 hidden in your hand and **1 face-up** in front of you, visible to everyone.
 3. The rest of the deck becomes the **draw pile**.
 
+![Your hand: 4 hidden cards plus your visible card, with your round score on the left](/rules/en/player-hand.png)
+
+*Your zone: your hand at the bottom, your round score on the left, the turn prompt on the right.*
+
 Your face-up card is worth remembering:
 
 - **Everyone sees it**, all round long.
@@ -74,6 +82,10 @@ Your face-up card is worth remembering:
 - **It joins your hand** once the swap phase ends, and from then on you play it like any other card.
 
 > *Drawing the Ace of Flowers face-up is a blessing and a curse at once: it gives you the strongest card in the game and tells the whole table you have it.*
+
+![A rival's visible card: their rabbit, their bids and their hidden hand](/rules/en/opponent.png)
+
+*Each rival shows their visible card next to their rabbit. Below, how many cards they have left in hand.*
 
 ## The swap
 
@@ -84,6 +96,10 @@ Before the first trick, **in turn order starting from the lead**, each player pi
 **B) Pass and bank +3.** Do nothing and take 3 points straight into your game score, right away.
 
 You only get one swap, and the phase only goes around once. When everyone's chosen, the face-up cards join their owners' hands and the first trick begins.
+
+![The draw pile](/rules/en/deck-zone.png)
+
+*The draw pile, where your new card comes from if you swap.*
 
 > **Careful with the +3:** it's a score bonus, not card points — so it won't push you into or out of a Points bet. Three points for doing nothing sounds small, but over a game it adds up.
 
@@ -101,6 +117,10 @@ A round is **5 tricks**. In each trick, every player plays exactly one card, clo
 **You never have to follow suit.** You can play any card you want, always, even holding cards of the led suit. This rule is the heart of the game: in Hasen you never know what the others are holding, and *"I can't, I don't have any"* is not an excuse that exists.
 
 **Resolution:** once everyone's played, cards are compared by the hierarchy below. The winner takes **all the cards in the trick** into their score pile and leads the next trick.
+
+![A trick in progress: four cards played on the table](/rules/en/trick.png)
+
+*A trick in progress: every rabbit has played a card and the table is about to resolve.*
 
 ## Card hierarchy
 
@@ -210,6 +230,10 @@ Once trick 3 ends, the kiosk closes: tricks 4 and 5 are played with no betting a
 1. Tap one of the six bid cards on the table.
 2. Your rabbit lands on it. You're committed.
 
+![The available bids panel: 2 trick, 2 points and 2 collection bids](/rules/en/bids-panel.png)
+
+*The available bids panel: Tricks 🔴 on top, Points 🔵 in the middle, Collection 🟡 at the bottom. The circle on the left is what you score if you make it.*
+
 The restrictions:
 
 - **One bet per window** — three rabbits, three bets, no more.
@@ -306,6 +330,10 @@ After the fifth trick resolves, everyone counts their round score:
 
 Then the deck is shuffled, rabbits are freed, the lead rotates one seat clockwise, and the next round begins.
 
+![Your round score panel: tricks won, your bid progress and cards collected by suit](/rules/en/round-score.png)
+
+*Your round score panel shows it all at a glance: which tricks you won, how your Points bid is doing (here: 12 points, inside the 11–30 range) and how many cards of each suit you collected.*
+
 > **This is the biggest decision in the game.** Not betting is a legitimate play: it banks the points of whatever you won, risk-free, with no high ceiling. Betting trades those points for a promise. A round where you won three tricks and 30 points is worth 30 if you kept quiet — and worth 0 if you bet Collection and fell short.
 
 ## Game end
@@ -315,6 +343,10 @@ The game ends as soon as a player **reaches 100 points** — or **drops to −85
 **The winner is whoever has the highest total score** — which isn't always the one who crossed the line first, since anyone can land a +70 in the last round.
 
 **Ties:** if players finish level, the tied player **closest to the lead** in turn order wins.
+
+![The game scoreboard with each rabbit's total score](/rules/en/game-scores.png)
+
+*The game scoreboard, always visible up top: each rabbit's total score.*
 
 ## Fine print
 

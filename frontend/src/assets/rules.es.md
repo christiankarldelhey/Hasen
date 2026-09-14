@@ -12,7 +12,7 @@ Mecánicamente, Hasen es un **juego de bazas con apuestas**. En cada ronda jugá
 
 Podés prometer que vas a juntar muchos puntos, o poquísimos. Que vas a llevarte solo bayas. Que vas a ganar exactamente una baza y ni una más. Cuanto más tarde declarás, mejor información tenés — y más caro pagás si te equivocás igual.
 
-![La mesa de Hasen en plena baza: el pozo de apuestas arriba a la derecha, los rivales a los costados, tu mano abajo](/rules/board-overview.png)
+![La mesa de Hasen en plena baza: el pozo de apuestas arriba a la derecha, los rivales a los costados, tu mano abajo](/rules/es/board-overview.png)
 
 *La mesa en plena baza: arriba a la derecha el pozo de apuestas, en el centro las cartas jugadas, abajo tu mano.*
 
@@ -71,7 +71,7 @@ Al comienzo de cada ronda:
 2. **Se reparte.** Recibís 5 cartas: 4 tapadas en la mano y **1 boca arriba** delante tuyo, a la vista de todos.
 3. El resto del mazo queda como **pila de robo**.
 
-![Tu mano: 4 cartas tapadas y tu carta visible ya sumada, con tu puntaje de ronda a la izquierda](/rules/player-hand.png)
+![Tu mano: 4 cartas tapadas y tu carta visible ya sumada, con tu puntaje de ronda a la izquierda](/rules/es/player-hand.png)
 
 *Tu zona de juego: abajo tu mano, a la izquierda tu puntaje de ronda, a la derecha el aviso de turno.*
 
@@ -83,7 +83,7 @@ Tu carta boca arriba tiene tres características que conviene tener claras:
 
 > *Que te toque el As de Flores boca arriba es una bendición y una maldición al mismo tiempo: te da la carta más fuerte del juego y le avisa a toda la mesa que la tenés.*
 
-![La carta visible de una rival: su conejo, sus apuestas y su mano tapada](/rules/opponent.png)
+![La carta visible de una rival: su conejo, sus apuestas y su mano tapada](/rules/es/opponent.png)
 
 *Cada rival muestra su carta visible junto a su conejo. Debajo, la cantidad de cartas que le quedan en la mano.*
 
@@ -97,7 +97,7 @@ Antes de la primera baza, **en orden de turno empezando por el mano**, cada juga
 
 Solo se cambia **una carta** y se pasa **una sola vez** por la fase. Cuando todos eligieron, las cartas visibles se suman a las manos y arranca la primera baza.
 
-![La pila de robo](/rules/deck-zone.png)
+![La pila de robo](/rules/es/deck-zone.png)
 
 *La pila de robo, de donde sale tu carta nueva si cambiás.*
 
@@ -118,7 +118,7 @@ Una ronda son **5 bazas**. En cada baza, todos los jugadores juegan exactamente 
 
 **Resolución:** cuando todos jugaron, se comparan las cartas según la jerarquía de abajo. El ganador se lleva **todas las cartas de la baza** a su montón y es mano de la baza siguiente.
 
-![Una baza en curso: cuatro cartas jugadas sobre la mesa](/rules/trick.png)
+![Una baza en curso: cuatro cartas jugadas sobre la mesa](/rules/es/trick.png)
 
 *Una baza en curso: cada conejo ya jugó su carta y la mesa está por resolverse.*
 
@@ -230,7 +230,7 @@ Cuando termina la baza 3 se cierra el kiosco: las bazas 4 y 5 se juegan sin pode
 1. Tocás una de las seis cartas de apuesta que están en la mesa.
 2. Tu conejo cae encima. Quedaste comprometido.
 
-![El panel de apuestas disponibles: 2 de bazas, 2 de puntaje y 2 de colección](/rules/bids-panel.png)
+![El panel de apuestas disponibles: 2 de bazas, 2 de puntaje y 2 de colección](/rules/es/bids-panel.png)
 
 *El panel de apuestas disponibles: arriba las de Bazas 🔴, en el medio las de Puntaje 🔵, abajo las de Colección 🟡. El círculo de la izquierda es lo que cobrás si cumplís.*
 
@@ -330,7 +330,7 @@ Cuando se resuelve la quinta baza, cada jugador cuenta su puntaje de la ronda:
 
 Después se mezcla el mazo, los conejos se liberan, la mano rota un asiento en sentido horario y arranca la ronda siguiente.
 
-![Tu panel de puntaje de ronda: bazas ganadas, progreso de tus apuestas y cartas juntadas por palo](/rules/round-score.png)
+![Tu panel de puntaje de ronda: bazas ganadas, progreso de tus apuestas y cartas juntadas por palo](/rules/es/round-score.png)
 
 *Tu panel de puntaje de ronda te muestra todo de un vistazo: qué bazas ganaste, cómo viene tu apuesta de Puntaje (acá: 12 puntos, dentro del rango 11–30) y cuántas cartas de cada palo juntaste.*
 
@@ -344,7 +344,7 @@ La partida termina en cuanto un jugador **llega a 100 puntos** — o **cae a −
 
 **Empates:** si hay jugadores igualados, gana el que esté **más cerca del mano** en el orden de turno.
 
-![El marcador de la partida con el puntaje total de cada conejo](/rules/game-scores.png)
+![El marcador de la partida con el puntaje total de cada conejo](/rules/es/game-scores.png)
 
 *El marcador de la partida, siempre visible arriba: el puntaje total de cada conejo.*
 

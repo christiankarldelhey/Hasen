@@ -10,10 +10,9 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 
 const BASE = process.argv[2] ?? 'http://localhost:5173'
-const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../frontend/public/rules')
-mkdirSync(OUT, { recursive: true })
-
 const LOCALE = process.env.LOCALE ?? 'es'
+const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), `../frontend/public/rules/${LOCALE}`)
+mkdirSync(OUT, { recursive: true })
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
