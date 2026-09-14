@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import type { Bid, BidType } from '@domain/interfaces/Bid'
 import type { PlayerId } from '@domain/interfaces/Player'
 import WinCondition from './BidWinCondition.vue'
@@ -27,6 +27,9 @@ const socketGame = useSocketGame()
 const gameStore = useGameStore()
 const hasenStore = useHasenStore()
 const { isPlayerTurn, getPlayerById } = usePlayers()
+
+// In the tutorial, bids are handled locally instead of going through the socket
+const tutorialActions = inject<{ makeBid: (type: BidType, bidId: string) => void } | null>('tutorialActions', null)
 
 const bidders = computed<PlayerId[]>(() => {
   if (!props.bid) return []
@@ -123,6 +126,11 @@ const handleBidClick = () => {
   }
   
   const trickNumber = currentTrick.trick_number
+
+  if (tutorialActions) {
+    tutorialActions.makeBid(props.type, props.bid.bid_id)
+    return
+  }
   
   socketGame.makeBid(gameId, props.type, trickNumber, props.bid.bid_id)
   console.log(`🎯 Making bid: ${props.type} (${props.bid.bid_id}) on trick ${trickNumber}`)

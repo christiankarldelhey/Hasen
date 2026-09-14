@@ -18,14 +18,9 @@ const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 await page.addInitScript(locale => window.localStorage.setItem('hasen.locale', locale), LOCALE)
 
-await page.goto(`${BASE}/tutorial/basic-rules`, { waitUntil: 'networkidle' })
-
-// Hide the tutorial overlay (highlights + notification bubble) and any fixed overlays
-await page.addStyleTag({
-  content: `
-    .fixed.inset-0.z-50 { display: none !important; }
-  `
-})
+// ?bare=1 renders the board full-size, without the tutorial sidebar/highlights.
+// &state=full-board renders the demo snapshot covering every zone we capture.
+await page.goto(`${BASE}/tutorial/first-round?bare=1&state=full-board`, { waitUntil: 'networkidle' })
 
 // Let sprites/animations settle
 await page.waitForTimeout(1800)

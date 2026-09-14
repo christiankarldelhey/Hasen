@@ -1,31 +1,13 @@
-import type { Bid, PlayerId, PlayingCard, PublicGameState, PrivateGameState, Trick } from '@domain/interfaces'
+import type { Bid, PlayerId, PublicGameState, PrivateGameState, Trick } from '@domain/interfaces'
 import { AVAILABLE_PLAYERS } from '@domain/interfaces/Player'
+import { demoCard } from './tutorialCards'
+
+export const TUTORIAL_PLAYER_ID: PlayerId = 'player_1'
 
 interface TutorialMockState {
   publicGameState: PublicGameState
   privateGameState: PrivateGameState
   currentPlayerId: PlayerId
-}
-
-function createCard(
-  id: string,
-  owner: PlayerId | null,
-  state: PlayingCard['state'],
-  suit: PlayingCard['suit'],
-  char: PlayingCard['char'],
-  points: PlayingCard['points'],
-  spritePos: PlayingCard['spritePos']
-): PlayingCard {
-  return {
-    id,
-    owner,
-    state,
-    suit,
-    char,
-    points,
-    rank: { base: 3, onSuit: suit === 'flowers' ? null : 9 },
-    spritePos
-  }
 }
 
 function createTutorialBids(): Bid[] {
@@ -70,27 +52,31 @@ function createTutorialBids(): Bid[] {
 }
 
 export function createTutorialMockState(): TutorialMockState {
-  const currentPlayerId: PlayerId = 'player_1'
+  const currentPlayerId: PlayerId = TUTORIAL_PLAYER_ID
 
-  const playerVisibleCard = createCard('p1-visible', 'player_1', 'in_hand_visible', 'acorns', '9', 0, { row: 0, col: 4 })
+  const playerVisibleCard = demoCard('acorns', '9', {
+    id: 'p1-visible',
+    owner: 'player_1',
+    state: 'in_hand_visible'
+  })
   const playerHandHidden = [
-    createCard('p1-hidden-1', 'player_1', 'in_hand_hidden', 'flowers', 'K', 11, { row: 3, col: 7 }),
-    createCard('p1-hidden-2', 'player_1', 'in_hand_hidden', 'berries', '10', 10, { row: 2, col: 5 }),
-    createCard('p1-hidden-3', 'player_1', 'in_hand_hidden', 'leaves', 'U', 3, { row: 1, col: 7 }),
-    createCard('p1-hidden-4', 'player_1', 'in_hand_hidden', 'acorns', 'O', 4, { row: 0, col: 8 })
+    demoCard('flowers', 'K', { id: 'p1-hidden-1', owner: 'player_1', state: 'in_hand_hidden' }),
+    demoCard('berries', '10', { id: 'p1-hidden-2', owner: 'player_1', state: 'in_hand_hidden' }),
+    demoCard('leaves', 'U', { id: 'p1-hidden-3', owner: 'player_1', state: 'in_hand_hidden' }),
+    demoCard('acorns', 'O', { id: 'p1-hidden-4', owner: 'player_1', state: 'in_hand_hidden' })
   ]
 
   const opponentVisibleCards = [
-    createCard('p2-visible', 'player_2', 'in_hand_visible', 'leaves', '8', 0, { row: 1, col: 3 }),
-    createCard('p3-visible', 'player_3', 'in_hand_visible', 'berries', 'U', 3, { row: 2, col: 7 }),
-    createCard('p4-visible', 'player_4', 'in_hand_visible', 'flowers', '3', 3, { row: 3, col: 2 })
+    demoCard('leaves', '8', { id: 'p2-visible', owner: 'player_2', state: 'in_hand_visible' }),
+    demoCard('berries', 'U', { id: 'p3-visible', owner: 'player_3', state: 'in_hand_visible' }),
+    demoCard('flowers', '3', { id: 'p4-visible', owner: 'player_4', state: 'in_hand_visible' })
   ]
 
   const trickCards = [
-    createCard('trick-p1', 'player_1', 'in_trick', 'acorns', '10', 10, { row: 0, col: 5 }),
-    createCard('trick-p2', 'player_2', 'in_trick', 'leaves', 'O', 4, { row: 1, col: 8 }),
-    createCard('trick-p3', 'player_3', 'in_trick', 'berries', 'S', 0, { row: 2, col: 6 }),
-    createCard('trick-p4', 'player_4', 'in_trick', 'flowers', 'A', 12, { row: 3, col: 8 })
+    demoCard('acorns', '10', { id: 'trick-p1', owner: 'player_1', state: 'in_trick' }),
+    demoCard('leaves', 'O', { id: 'trick-p2', owner: 'player_2', state: 'in_trick' }),
+    demoCard('berries', 'S', { id: 'trick-p3', owner: 'player_3', state: 'in_trick' }),
+    demoCard('flowers', 'A', { id: 'trick-p4', owner: 'player_4', state: 'in_trick' })
   ]
 
   const allPublicCards = [playerVisibleCard, ...opponentVisibleCards, ...trickCards]

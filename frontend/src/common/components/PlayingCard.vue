@@ -5,7 +5,7 @@ import deckSprite from '@/assets/sprites/deck-sprite_v3.jpg'
 
 interface Props {
   card: PlayingCard
-  size?: 'tiny' | 'small' | 'medium' | 'large' | 'mobile' | 'mobileTrick'
+  size?: 'inline' | 'tiny' | 'small' | 'medium' | 'large' | 'mobile' | 'mobileTrick'
   selectable?: boolean
 }
 
@@ -16,6 +16,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const sizeClasses = computed(() => {
   switch (props.size) {
+    case 'inline':
+      return 'w-[26px] h-[44px]'
     case 'tiny':
       return 'w-[50px] h-[85px]'
     case 'small':
@@ -44,7 +46,7 @@ const backgroundPosition = computed(() => {
 <template>
   <div 
     :class="[
-      props.size === 'tiny' ? 'rounded shadow-sm' : 'rounded-lg drop-shadow-2xl',
+      props.size === 'tiny' || props.size === 'inline' ? 'rounded shadow-sm' : 'rounded-lg drop-shadow-2xl',
       sizeClasses
     ]"
     :style="{

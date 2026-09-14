@@ -95,13 +95,14 @@ const primaryBtn =
 
     <!-- Estado normal: accesos a la hoja -->
     <template v-else>
-      <button type="button" :class="secondaryBtn" @click="emit('openSheet', 'score')">
+      <button type="button" :class="secondaryBtn" data-tutorial-id="game-scores player-round-score" @click="emit('openSheet', 'score')">
         {{ t('game.tabScore') }}
         <span :class="['ml-1 tabular-nums font-bold', scoreColor]">{{ points }}</span>
       </button>
       <button
         type="button"
         :class="[props.canMakeBids ? primaryBtn : secondaryBtn, 'inline-flex items-center justify-center gap-1.5']"
+        data-tutorial-id="available-bids"
         @click="emit('openSheet', 'bids')"
       >
         {{ t('game.tabBids') }}

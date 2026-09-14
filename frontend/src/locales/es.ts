@@ -16,7 +16,7 @@ export default {
     createGameTitle: 'Crear partida',
     rulesTitle: 'Reglas',
     settingsTitle: 'Configuración',
-    tutorial: 'Tutorial',
+    tutorial: 'Cómo jugar',
     rules: 'Reglas',
     settings: 'Configuración',
     noGamesAvailable: 'No hay partidas disponibles en este momento.',
@@ -168,41 +168,234 @@ export default {
     restart: 'Reiniciar',
     next: 'Siguiente',
     finish: 'Finalizar',
+    exit: 'Salir',
+    skipAction: 'Hacerlo por mí',
+    actionRequired: '👉 Tu turno: hacé la acción indicada en la mesa',
+    genericHint: 'Esa no es la acción que pide este paso. Releé la instrucción o tocá "Hacerlo por mí".',
+    menu: {
+      title: 'Cómo jugar',
+      steps: '{count} pasos',
+    },
     scenarios: {
-      basicRules: {
-        title: 'Tutorial básico de Hasen',
+      firstRound: {
+        title: 'Tu primera partida',
+        description: 'Una partida guiada de 3 rondas: cambiás cartas, apostás puntaje, colección y bazas, y las tres aves entran en acción.',
         steps: {
-          deckZone: {
-            title: 'El mazo',
-            description: 'Este es el mazo principal, donde se gestionan las cartas durante la ronda.',
+          intro: {
+            title: 'Tu primera ronda',
+            description: 'Vas a jugar una ronda entera contra Anna, Hans y Magda. Te guiamos paso a paso: en cada momento te decimos qué carta jugar y por qué. Cuando un paso pida una acción, hacela sobre la mesa.',
           },
-          playerHand: {
-            title: 'Tu zona de juego',
-            description: 'Aquí puedes ver tu mano y tus acciones principales durante tu turno.',
+          yourHand: {
+            title: 'Tu mano',
+            description: 'Recibiste 5 cartas: el [[card:acorns-9|9 de bellotas]] visible para todos, y ocultas el [[card:flowers-K|Rey de flores]] (11), el [[card:berries-10|10 de bayas]] (10), el [[card:leaves-8|8 de hojas]] (0) y el [[card:acorns-O|Ober de bellotas]] (4). La visible no se puede cambiar.',
           },
-          otherPlayersZone: {
-            title: 'Zona de otros jugadores',
-            description: 'Estas son las manos visibles y estados de tus oponentes.',
+          swap: {
+            title: 'El cambio',
+            description: 'Antes de la primera baza podés cambiar una carta oculta o pasar y ganar +3. El 8 de hojas no vale nada y no hace nada: cambialo. Tocá el [[card:leaves-8|8 de hojas]] y confirmá con "Reemplazar".',
+            hint: 'Esa no: cambiá el 8 de hojas (la carta visible no se puede cambiar).',
           },
-          availableBids: {
-            title: 'Apuestas disponibles',
-            description: 'Aquí puedes revisar y planificar las apuestas que puedes declarar en esta ronda.',
+          swapResult: {
+            title: '¡Sacaste el Búho!',
+            description: 'Robaste el [[card:berries-S|Búho]]: si sale primero en una baza, la gana. Anna y Magda pasaron (+3 cada una, mirá el marcador) y Hans cambió una carta. Las cartas visibles ya se sumaron a las manos.',
           },
-          trickCenter: {
-            title: 'Centro de baza',
-            description: 'En esta zona puedes ver las cartas jugadas y cuál carta va ganando la baza.',
+          bet: {
+            title: 'Ventana 1: apostá',
+            description: 'Es tu turno en la baza 1 y podés apostar antes de jugar. Tu mano es fuerte: Rey de flores, 10 de bayas, Ober y el Búho. Apostá "Puntaje 35 o más" (+60) tocándola en el panel de apuestas.',
+            hint: 'Para este tutorial, elegí la apuesta de puntaje "35 o más".',
           },
-          gameScores: {
-            title: 'Puntuación global',
-            description: 'Este panel muestra la puntuación acumulada de todos los jugadores en la partida.',
+          playOber: {
+            title: 'Salís vos',
+            description: 'Como salís, tu carta define el palo de la baza. Jugá el [[card:acorns-O|Ober de bellotas]]: es color mayor de su palo, así que solo un triunfo (flores) podría ganarle.',
+            hint: 'Jugá el Ober de bellotas.',
           },
-          playerRoundScore: {
-            title: 'Tu puntuación de ronda',
-            description: 'Aquí puedes seguir tu progreso actual de ronda: bazas, puntos y combinaciones.',
+          trick1Result: {
+            title: 'Baza 1: tuya',
+            description: 'Anna tiró el 7 de bellotas, Hans el 8 y Magda el Unter: todos del palo, ninguno supera al Ober. Te llevás las 4 cartas: 7 puntos. Tocá "Terminar baza" para recogerlas.',
           },
-          gameControls: {
-            title: 'Controles de partida',
-            description: 'Desde aquí puedes salir de la partida y alternar música y efectos de sonido.',
+          playGarbage: {
+            title: 'Soltá la basura',
+            description: 'Volvés a salir. El [[card:acorns-9|9 de bellotas]] no vale nada: es el momento de deshacerte de él, aunque salir con basura invita a que te ganen barato.',
+            hint: 'Jugá el 9 de bellotas.',
+          },
+          trick2Result: {
+            title: 'Baza 2: de Anna',
+            description: 'Anna tiró el [[card:flowers-2|2 de flores]] y se lleva la baza: un triunfo, por chico que sea, le gana a cualquier color. Solo perdiste 2 puntos ajenos. Anna sale en la próxima.',
+          },
+          trick3Watch: {
+            title: 'Baza 3: mirá antes de jugar',
+            description: 'Anna salió con el 7 de bayas (palo: bayas), Hans tiró el 9 de bayas y Magda el [[card:flowers-1|1 de flores]]: va ganando con un triunfo menor. Es también la ventana 3, la última para apostar — hoy la dejamos pasar.',
+          },
+          playKing: {
+            title: 'Rey de flores',
+            description: 'Jugá el [[card:flowers-K|Rey de flores]]: es triunfo mayor y le gana al 1 de flores. Recordá que el Rey suma sus 11 puntos a tu pila — ideal para tu apuesta de 35+.',
+            hint: 'Jugá el Rey de flores.',
+          },
+          trick3Result: {
+            title: 'Baza 3: tuya',
+            description: 'Te llevás 12 puntos: los 11 del Rey más el 1 de la flor de Magda. Vas 19 y necesitás 35. Quedan dos bazas y salís vos. Terminá la baza.',
+          },
+          playOwl: {
+            title: 'La hora del Búho',
+            description: 'Jugado de primero, el [[card:berries-S|Búho]] gana la baza salvo que aparezca la Reina de flores. Salí con el Búho.',
+            hint: 'Jugá el Búho (la S de bayas).',
+          },
+          trick4Result: {
+            title: 'Baza 4: tuya',
+            description: 'Magda tiró el 3 de flores y Hans el Unter de bayas: nada vence al Búho de salida. +6 puntos, vas 25. Terminá la baza.',
+          },
+          playLast: {
+            title: 'Última carta',
+            description: 'Te queda el [[card:berries-10|10 de bayas]]. Salís con palo bayas: si nadie tiene bayas ni triunfos, gana.',
+            hint: 'Jugá el 10 de bayas.',
+          },
+          trick5Result: {
+            title: 'Baza 5: tuya',
+            description: 'Hans se quedó sin opciones y tiró su 10 de hojas: 10 puntos de regalo. Ganaste 20 en esta baza: total 45, y la apuesta pedía 35 o más. Terminá la baza.',
+          },
+          roundScoring: {
+            title: 'Cierre de ronda',
+            description: 'Como apostaste, tus 45 puntos de cartas no suman: sirvieron para medir la apuesta. Cumpliste "35 o más": +60. Anna no apostó y cobra sus 2 puntos de cartas, más los +3 del cambio.',
+          },
+          roundDone: {
+            title: 'Fin de la ronda 1',
+            description: 'Ganaste +60 y vas puntero: 60 contra 3 de Anna y Magda, 0 de Hans. Quedan dos rondas — en la próxima, apuestas de colección.',
+          },
+          r2Intro: {
+            title: 'Ronda 2 — Apuestas de colección',
+            description: 'Reparten de nuevo: 5 cartas, otra visible, nuevo cambio y nuevo pozo de apuestas. Esta ronda es para las apuestas de colección: juntar cartas de un palo y evitar otro.',
+          },
+          r2Hand: {
+            title: 'Tu mano',
+            description: 'Tenés el [[card:leaves-6|6 de hojas]] visible y ocultas el [[card:leaves-7|7 de hojas]], el [[card:leaves-S|Gorrión]] (más hojas), el [[card:acorns-10|10 de bellotas]] (10) y el [[card:berries-9|9 de bayas]] que no aporta nada.',
+          },
+          r2Swap: {
+            title: 'El cambio',
+            description: 'El 9 de bayas no ayuda a tu plan de hojas ni vale puntos: cambialo. Tocá el [[card:berries-9|9 de bayas]] y confirmá con "Reemplazar".',
+            hint: 'Cambiá el 9 de bayas.',
+          },
+          r2Bet: {
+            title: 'La apuesta de colección',
+            description: 'Las de colección piden juntar cartas de un palo y evitar otro — cuenta cada carta, no sus puntos. Neto = deseadas ×10 − prohibidas × penalidad de tu ventana (−10 en ventana 1). Apostá "hojas sí, flores no".',
+            hint: 'Elegí la apuesta de colección hojas/flores.',
+          },
+          r2Sparrow: {
+            title: 'El Gorrión',
+            description: 'Anna salió con el 10 de hojas y todos tiraron hojas: esta baza no la ganás ni queriendo. Jugá el [[card:leaves-S|Gorrión]] — nunca gana, pero te deja robar una carta de la baza antes de que el ganador cobre.',
+            hint: 'Jugá el Gorrión (la S de hojas).',
+          },
+          r2Trick1Result: {
+            title: 'El robo del Gorrión',
+            description: 'El Unter de hojas de Magda le ganó al 10 — el Unter del palo de salida es color mayor. Pero tu Gorrión le robó el [[card:leaves-10|10 de hojas]] para tu pila: 10 puntos y una hoja más para tu colección. Terminá la baza.',
+          },
+          r2Play10: {
+            title: 'El 10 gana',
+            description: 'Magda sale con el 8 de bellotas. Tu [[card:acorns-10|10 de bellotas]] es la carta más alta del palo si nadie tiene Ober, Unter ni triunfo: ganá la baza.',
+            hint: 'Jugá el 10 de bellotas.',
+          },
+          r2Trick2Result: {
+            title: 'Cuatro bellotas',
+            description: '10 puntos a tu pila — palo equivocado para la colección, pero cada carta que ganás sale de las pilas ajenas. Y recordá: esos puntos no cuentan para tu apuesta, solo las hojas. Terminá la baza.',
+          },
+          r2Play9: {
+            title: 'Salí con hojas',
+            description: 'Salís vos. El 9 de hojas pierde contra cualquier carta del palo… pero nadie más tiene hojas. Jugá el [[card:leaves-9|9 de hojas]].',
+            hint: 'Jugá el 9 de hojas.',
+          },
+          r2Trick3Result: {
+            title: 'Otra hoja a la pila',
+            description: 'Nadie tenía hojas: ganás la baza y tu 9 se queda en tu pila. Ya son 2 deseadas — el neto sería 20. Terminá la baza.',
+          },
+          r2Play6: {
+            title: 'Mismo plan',
+            description: 'De nuevo: [[card:leaves-6|6 de hojas]], otra hoja para la colección si la baza es tuya.',
+            hint: 'Jugá el 6 de hojas.',
+          },
+          r2Trick4Result: {
+            title: 'Tres deseadas',
+            description: 'Nadie tenía hojas ni triunfos: otra baza, otra hoja en la pila. Ya son 3, neto 30. Terminá la baza.',
+          },
+          r2Play7: {
+            title: 'Última carta',
+            description: 'Te queda el [[card:leaves-7|7 de hojas]]. Salís con hojas de nuevo: si alguien guarda un triunfo, esta baza se va.',
+            hint: 'Jugá el 7 de hojas.',
+          },
+          r2Trick5Result: {
+            title: 'Baza de Magda',
+            description: 'Magda guardaba el [[card:flowers-4|4 de flores]]: un triunfo menor le alcanzó. Tu 7 se fue a su pila — pero tu colección ya está completa. Terminá la baza.',
+          },
+          r2Scoring: {
+            title: 'Cierre de ronda',
+            description: 'Colección: 3 hojas deseadas ×10 − 0 flores prohibidas ×10 = neto 30. El mínimo era 10: cumplida, +30. Tus 30 puntos de cartas no cuentan porque apostaste.',
+          },
+          r2Done: {
+            title: '90 y subiendo',
+            description: '60 + 30 = 90 puntos. Falta una ronda: en la próxima, apuestas de bazas — y otra ave te va a sacar de un apuro.',
+          },
+          r3Intro: {
+            title: 'Ronda 3 — Apuestas de bazas',
+            description: 'Última ronda: predecir cuántas bazas ganás. Suena fácil… hasta que recordás que nadie está obligado a seguir el palo.',
+          },
+          r3Hand: {
+            title: 'Tu mano',
+            description: '[[card:berries-9|9 de bayas]] visible; ocultas el [[card:acorns-10|10 de bellotas]] (10), el [[card:flowers-5|5 de flores]] (triunfo), el [[card:acorns-S|Carpintero]] y el [[card:berries-O|Ober de bayas]] (4).',
+          },
+          r3Skip: {
+            title: 'Pasá el cambio',
+            description: 'Esta vez tu mano está bien armada: no cambies nada. Tocá "Pasar" y llevate +3 directos al marcador.',
+            hint: 'Esta vez pasá: tocá el botón de saltar el cambio.',
+          },
+          r3Bet: {
+            title: 'La apuesta de bazas',
+            description: 'Predecí cuántas bazas ganás. Con un 10, un triunfo y el Carpintero, "exactamente 2" (+55) es alcanzable — y ganar de más también pierde. Apostala.',
+            hint: 'Elegí la apuesta de bazas "exactamente 2".',
+          },
+          r3Trick1Watch: {
+            title: 'Baza 1: no te conviene',
+            description: 'Hans sale con el 10 de bayas y Magda le gana con el Ober. Tirás tu 9 de bayas: fuera de tu plan, mejor regalarla que el Ober.',
+          },
+          r3Play10: {
+            title: 'Primera baza ganada',
+            description: 'Magda sale con el 6 de bellotas. Tu [[card:acorns-10|10]] es la carta más alta del palo: ganala. Una de dos.',
+            hint: 'Jugá el 10 de bellotas.',
+          },
+          r3Trick2Result: {
+            title: '1 de 2',
+            description: 'Ganaste tu primera baza: 10 puntos a la pila y, más importante, una baza hacia tu apuesta. Terminá la baza.',
+          },
+          r3LeadOber: {
+            title: 'Cuidado con ganar de más',
+            description: 'Salís vos y NO querés ganar: apostaste exactamente 2. Jugá el [[card:berries-O|Ober de bayas]] igual — es fuerte, pero si alguien guarda un triunfo te salva de una baza de más.',
+            hint: 'Jugá el Ober de bayas.',
+          },
+          r3Trick3Result: {
+            title: 'Baza de Hans',
+            description: 'La Reina de flores de Hans — la Karnoffel — se comió hasta a tu Ober: 4 puntos perdidos, pero tu apuesta sigue intacta. Terminá la baza.',
+          },
+          r3Woodpecker: {
+            title: 'El Carpintero',
+            description: 'Hans sale con el 8 de bellotas y Magda ya tiró el Unter de bayas. Jugá el [[card:acorns-S|Carpintero]]: no gana bazas, pero al resolver VOS elegís quién sale en la próxima.',
+            hint: 'Jugá el Carpintero (la S de bellotas).',
+          },
+          r3Trick4Result: {
+            title: 'Te elegís a vos',
+            description: 'El [[card:flowers-1|1 de flores]] de Anna ganó la baza… pero tu Carpintero manda: elegiste salir VOS en la última baza, donde espera tu 5 de flores. Terminá la baza.',
+          },
+          r3PlayTrump: {
+            title: 'El plan completo',
+            description: 'Salís con el [[card:flowers-5|5 de flores]]: es triunfo y nadie puede ganarle sin flores más altas. Sería tu segunda baza — exactamente la apuesta.',
+            hint: 'Jugá el 5 de flores.',
+          },
+          r3Trick5Result: {
+            title: 'Exactamente 2',
+            description: 'Nadie tenía flores: ganaste tu segunda baza, ni una más ni una menos. Terminá la baza y vamos al cierre.',
+          },
+          r3Scoring: {
+            title: 'Cierre de ronda',
+            description: 'Ganaste exactamente 2 bazas: +55. Más los +3 del cambio que pasaste: 58 en la ronda. Las apuestas de bazas son traicioneras: ganar de más también pierde.',
+          },
+          gameDone: {
+            title: '¡Ganaste la partida!',
+            description: '148 puntos: cruzaste los 100 y la partida termina. Ya sabés cambiar, apostar puntaje, colección y bazas, y usar las tres aves. Creá una partida contra bots y probá por tu cuenta.',
           },
         },
       },

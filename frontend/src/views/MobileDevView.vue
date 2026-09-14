@@ -81,7 +81,7 @@ onMounted(() => {
   // ?phase=player_drawing → estado con cartas públicas visibles bajo los chips
   const snapshot =
     route.query.phase === 'player_drawing'
-      ? buildTutorialState({ stepId: 'scripted-deal', dealCompleted: true })
+      ? buildTutorialState({ stateId: 'scripted-deal', dealCompleted: true })
       : createTutorialMockState()
   gameStore.setPublicGameState(snapshot.publicGameState)
   gameStore.setPrivateGameState(snapshot.privateGameState)

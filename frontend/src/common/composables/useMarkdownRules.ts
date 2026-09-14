@@ -59,7 +59,7 @@ function buildDisplayCard(suit: Suit, char: Character): PlayingCardModel | null 
   }
 }
 
-function renderInlineText(text?: string): Array<string | VNode> {
+export function renderInlineText(text?: string, cardSize: 'tiny' | 'inline' = 'tiny'): Array<string | VNode> {
   if (!text) return []
 
   const nodes: Array<string | VNode> = []
@@ -85,7 +85,7 @@ function renderInlineText(text?: string): Array<string | VNode> {
 
     nodes.push(
       h('span', { class: 'inline-flex items-center align-middle mx-1 gap-1' }, [
-        h(PlayingCard, { card, size: 'tiny' }),
+        h(PlayingCard, { card, size: cardSize }),
         label ? h('span', { class: 'text-[0.95em]' }, label) : null
       ])
     )

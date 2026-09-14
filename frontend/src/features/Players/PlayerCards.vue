@@ -92,6 +92,7 @@ const cardPositions = computed(() => {
       <div
         v-for="(pos, _index) in cardPositions"
         :key="pos.card.id"
+        :data-testid="`player-card-${pos.card.id}`"
         class="absolute pointer-events-auto transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
         :style="{
           transform: `translateX(${pos.translateX}px) translateY(${pos.translateY}px) rotate(${pos.rotation}deg)`,

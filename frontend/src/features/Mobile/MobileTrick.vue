@@ -121,7 +121,7 @@ const cardPositions = computed(() => {
     @click.self="emit('backgroundTap')"
   >
     <!-- Cards row -->
-    <div ref="trickEl" class="relative h-[calc(var(--m-card-trick-h)+22px)] w-full" @click.self="emit('backgroundTap')">
+    <div ref="trickEl" data-tutorial-id="trick-center" class="relative h-[calc(var(--m-card-trick-h)+22px)] w-full" @click.self="emit('backgroundTap')">
       <template v-if="cardPositions.length > 0">
         <div
           v-for="pos in cardPositions"

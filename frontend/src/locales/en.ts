@@ -16,7 +16,7 @@ export default {
     createGameTitle: 'Create Game',
     rulesTitle: 'Rules',
     settingsTitle: 'Settings',
-    tutorial: 'Tutorial',
+    tutorial: 'How to Play',
     rules: 'Rules',
     settings: 'Settings',
     noGamesAvailable: 'There are no available games at the moment.',
@@ -168,41 +168,234 @@ export default {
     restart: 'Restart',
     next: 'Next',
     finish: 'Finish',
+    exit: 'Exit',
+    skipAction: 'Do it for me',
+    actionRequired: '👉 Your move: perform the action on the table',
+    genericHint: 'That\'s not what this step asks for. Re-read the instruction or tap "Do it for me".',
+    menu: {
+      title: 'How to Play',
+      steps: '{count} steps',
+    },
     scenarios: {
-      basicRules: {
-        title: 'Hasen basic tutorial',
+      firstRound: {
+        title: 'Your first game',
+        description: 'A guided 3-round match: swap cards, bet points, collection and tricks, and all three birds in action.',
         steps: {
-          deckZone: {
-            title: 'The deck',
-            description: 'This is the main deck, where cards are managed during the round.',
+          intro: {
+            title: 'Your first round',
+            description: 'You\'ll play a whole round against Anna, Hans and Magda. We guide you step by step: at every moment we tell you which card to play and why. When a step asks for an action, do it on the table.',
           },
-          playerHand: {
-            title: 'Your play area',
-            description: 'Here you can see your hand and your main actions during your turn.',
+          yourHand: {
+            title: 'Your hand',
+            description: 'You were dealt 5 cards: the [[card:acorns-9|9 of Acorns]] face-up for everyone, and hidden the [[card:flowers-K|King of Flowers]] (11), the [[card:berries-10|10 of Berries]] (10), the [[card:leaves-8|8 of Leaves]] (0) and the [[card:acorns-O|Ober of Acorns]] (4). The face-up card can\'t be swapped.',
           },
-          otherPlayersZone: {
-            title: 'Other players area',
-            description: 'These are the visible hands and statuses of your opponents.',
+          swap: {
+            title: 'The swap',
+            description: 'Before the first trick you may swap one hidden card, or pass and bank +3. The 8 of Leaves is worth nothing and does nothing: swap it. Tap the [[card:leaves-8|8 of Leaves]] and confirm with "Replace".',
+            hint: 'Not that one: swap the 8 of Leaves (the face-up card can\'t be swapped).',
           },
-          availableBids: {
-            title: 'Available bids',
-            description: 'Here you can review and plan the bids you can declare in this round.',
+          swapResult: {
+            title: 'You drew the Owl!',
+            description: 'You drew the [[card:berries-S|Owl]]: if it leads a trick, it wins it. Anna and Magda passed (+3 each, check the scoreboard) and Hans swapped a card. The face-up cards have joined everyone\'s hands.',
           },
-          trickCenter: {
-            title: 'Trick center',
-            description: 'In this area you can see the played cards and which card is currently winning the trick.',
+          bet: {
+            title: 'Window 1: place a bet',
+            description: 'It\'s your turn in trick 1 and you may bet before playing. Your hand is strong: King of Flowers, 10 of Berries, an Ober and the Owl. Bet "Points 35 or more" (+60) by tapping it in the bids panel.',
+            hint: 'For this tutorial, pick the "35 or more" points bet.',
           },
-          gameScores: {
-            title: 'Global score',
-            description: 'This panel shows the accumulated score of all players in the match.',
+          playOber: {
+            title: 'You lead',
+            description: 'Since you lead, your card sets the suit of the trick. Play the [[card:acorns-O|Ober of Acorns]]: it\'s a major color of its suit, so only a trump (Flowers) could beat it.',
+            hint: 'Play the Ober of Acorns.',
           },
-          playerRoundScore: {
-            title: 'Your round score',
-            description: 'Here you can track your current round progress: tricks, points, and combinations.',
+          trick1Result: {
+            title: 'Trick 1: yours',
+            description: 'Anna threw the 7 of Acorns, Hans the 8 and Magda the Unter: all on suit, none beats the Ober. You take all 4 cards: 7 points. Tap "Finish trick" to collect them.',
           },
-          gameControls: {
-            title: 'Game controls',
-            description: 'From here you can leave the match and toggle music and sound effects.',
+          playGarbage: {
+            title: 'Dump the garbage',
+            description: 'You lead again. The [[card:acorns-9|9 of Acorns]] is worth nothing: now is the time to get rid of it — though leading with garbage invites a cheap steal.',
+            hint: 'Play the 9 of Acorns.',
+          },
+          trick2Result: {
+            title: 'Trick 2: Anna\'s',
+            description: 'Anna threw the [[card:flowers-2|2 of Flowers]] and takes the trick: a trump, however small, beats any color. You only lost 2 points that weren\'t yours. Anna leads next.',
+          },
+          trick3Watch: {
+            title: 'Trick 3: look before you play',
+            description: 'Anna led the 7 of Berries (led suit: Berries), Hans threw the 9 of Berries and Magda the [[card:flowers-1|1 of Flowers]]: she\'s winning with a minor trump. This is also window 3, your last chance to bet — we\'ll let it pass today.',
+          },
+          playKing: {
+            title: 'King of Flowers',
+            description: 'Play the [[card:flowers-K|King of Flowers]]: it\'s a major trump and beats the 1 of Flowers. Remember the King adds its own 11 points to your pile — perfect for your 35+ bet.',
+            hint: 'Play the King of Flowers.',
+          },
+          trick3Result: {
+            title: 'Trick 3: yours',
+            description: 'You take 12 points: the King\'s 11 plus 1 from Magda\'s flower. You\'re at 19 and need 35. Two tricks left, and you lead. Finish the trick.',
+          },
+          playOwl: {
+            title: 'Time for the Owl',
+            description: 'Played first, the [[card:berries-S|Owl]] wins the trick unless the Queen of Flowers shows up. Lead with the Owl.',
+            hint: 'Play the Owl (the S of Berries).',
+          },
+          trick4Result: {
+            title: 'Trick 4: yours',
+            description: 'Magda threw the 3 of Flowers and Hans the Unter of Berries: nothing beats a leading Owl. +6 points, you\'re at 25. Finish the trick.',
+          },
+          playLast: {
+            title: 'Last card',
+            description: 'You\'re left with the [[card:berries-10|10 of Berries]]. You lead Berries: if nobody has Berries or trumps, it wins.',
+            hint: 'Play the 10 of Berries.',
+          },
+          trick5Result: {
+            title: 'Trick 5: yours',
+            description: 'Hans ran out of options and threw his 10 of Leaves: 10 free points. You won 20 in this trick: 45 total, and the bet asked for 35 or more. Finish the trick.',
+          },
+          roundScoring: {
+            title: 'Round scoring',
+            description: 'Since you bet, your 45 card points don\'t score: they were the measuring stick for the bet. You made "35 or more": +60. Anna didn\'t bet and banks her 2 card points plus the +3 from the swap.',
+          },
+          roundDone: {
+            title: 'End of round 1',
+            description: 'You made +60 and lead: 60 against Anna and Magda\'s 3, Hans\' 0. Two rounds left — next up, collection bets.',
+          },
+          r2Intro: {
+            title: 'Round 2 — Collection bets',
+            description: 'Fresh deal: 5 cards, one face-up, a new swap and a new bid pool. This round is about collection bets: gather cards of one suit while avoiding another.',
+          },
+          r2Hand: {
+            title: 'Your hand',
+            description: 'You got the [[card:leaves-6|6 of Leaves]] face-up, and hidden the [[card:leaves-7|7 of Leaves]], the [[card:leaves-S|Sparrow]] (more leaves), the [[card:acorns-10|10 of Acorns]] (10) and the [[card:berries-9|9 of Berries]] which does nothing.',
+          },
+          r2Swap: {
+            title: 'The swap',
+            description: 'The 9 of Berries doesn\'t help your leaves plan and isn\'t worth points: swap it. Tap the [[card:berries-9|9 of Berries]] and confirm with "Replace".',
+            hint: 'Swap the 9 of Berries.',
+          },
+          r2Bet: {
+            title: 'The collection bet',
+            description: 'Collection bets ask you to gather cards of one suit and avoid another — every card counts, not its points. Net = wanted ×10 − forbidden × your window\'s penalty (−10 in window 1). Bet "leaves yes, flowers no".',
+            hint: 'Pick the leaves/flowers collection bet.',
+          },
+          r2Sparrow: {
+            title: 'The Sparrow',
+            description: 'Anna led the 10 of Leaves and everyone threw leaves: you can\'t win this trick anyway. Play the [[card:leaves-S|Sparrow]] — it never wins, but it lets you steal one card from the trick before the winner collects.',
+            hint: 'Play the Sparrow (the S of Leaves).',
+          },
+          r2Trick1Result: {
+            title: 'The Sparrow\'s theft',
+            description: 'Magda\'s Unter of Leaves beat the 10 — the Unter of the led suit is a major color. But your Sparrow stole the [[card:leaves-10|10 of Leaves]] into your pile: 10 points and one more leaf for your collection. Finish the trick.',
+          },
+          r2Play10: {
+            title: 'The 10 wins',
+            description: 'Magda leads the 8 of Acorns. Your [[card:acorns-10|10 of Acorns]] is the highest card of the suit if nobody holds Ober, Unter or a trump: win it.',
+            hint: 'Play the 10 of Acorns.',
+          },
+          r2Trick2Result: {
+            title: 'Four acorns',
+            description: '10 points into your pile — wrong suit for the collection, but every card you win leaves a rival\'s pile. And remember: those points don\'t count for your bet, only leaves do. Finish the trick.',
+          },
+          r2Play9: {
+            title: 'Lead leaves',
+            description: 'You lead. The 9 of Leaves loses to anything on suit… but nobody else has leaves. Play the [[card:leaves-9|9 of Leaves]].',
+            hint: 'Play the 9 of Leaves.',
+          },
+          r2Trick3Result: {
+            title: 'Another leaf banked',
+            description: 'Nobody had leaves: you win and your 9 stays in your pile. That\'s 2 wanted — net would be 20. Finish the trick.',
+          },
+          r2Play6: {
+            title: 'Same plan',
+            description: 'Again: [[card:leaves-6|6 of Leaves]], another leaf for the collection if the trick is yours.',
+            hint: 'Play the 6 of Leaves.',
+          },
+          r2Trick4Result: {
+            title: 'Three wanted',
+            description: 'Nobody had leaves or trumps: another trick, another leaf in the pile. That\'s 3, net 30. Finish the trick.',
+          },
+          r2Play7: {
+            title: 'Last card',
+            description: 'You\'re left with the [[card:leaves-7|7 of Leaves]]. You lead leaves again: if someone kept a trump, this trick is gone.',
+            hint: 'Play the 7 of Leaves.',
+          },
+          r2Trick5Result: {
+            title: 'Magda\'s trick',
+            description: 'Magda was keeping the [[card:flowers-4|4 of Flowers]]: a minor trump was enough. Your 7 went to her pile — but your collection is already complete. Finish the trick.',
+          },
+          r2Scoring: {
+            title: 'Round scoring',
+            description: 'Collection: 3 wanted leaves ×10 − 0 forbidden flowers ×10 = net 30. The minimum was 10: made, +30. Your 30 card points don\'t count because you bet.',
+          },
+          r2Done: {
+            title: '90 and climbing',
+            description: '60 + 30 = 90 points. One round to go: next, trick bets — and another bird will get you out of a jam.',
+          },
+          r3Intro: {
+            title: 'Round 3 — Trick bets',
+            description: 'Last round: predict how many tricks you\'ll win. Sounds easy… until you remember nobody has to follow suit.',
+          },
+          r3Hand: {
+            title: 'Your hand',
+            description: '[[card:berries-9|9 of Berries]] face-up; hidden the [[card:acorns-10|10 of Acorns]] (10), the [[card:flowers-5|5 of Flowers]] (trump), the [[card:acorns-S|Woodpecker]] and the [[card:berries-O|Ober of Berries]] (4).',
+          },
+          r3Skip: {
+            title: 'Pass the swap',
+            description: 'This time your hand is well built: change nothing. Tap "Skip" and bank +3 straight into the scoreboard.',
+            hint: 'Pass this time: tap the skip-swap button.',
+          },
+          r3Bet: {
+            title: 'The trick bet',
+            description: 'Predict how many tricks you\'ll win. With a 10, a trump and the Woodpecker, "exactly 2" (+55) is within reach — and winning one too many also loses. Place it.',
+            hint: 'Pick the "exactly 2" trick bet.',
+          },
+          r3Trick1Watch: {
+            title: 'Trick 1: not for you',
+            description: 'Hans leads the 10 of Berries and Magda beats it with the Ober. You throw your 9 of Berries: off your plan, better gifted than the Ober.',
+          },
+          r3Play10: {
+            title: 'First trick won',
+            description: 'Magda leads the 6 of Acorns. Your [[card:acorns-10|10]] is the highest card of the suit: win it. One of two.',
+            hint: 'Play the 10 of Acorns.',
+          },
+          r3Trick2Result: {
+            title: '1 of 2',
+            description: 'You won your first trick: 10 points into the pile and, more importantly, one trick toward your bet. Finish the trick.',
+          },
+          r3LeadOber: {
+            title: 'Careful not to overwin',
+            description: 'You lead and you do NOT want this one: you bet exactly 2. Play the [[card:berries-O|Ober of Berries]] anyway — it\'s strong, but if someone kept a trump it saves you from an extra trick.',
+            hint: 'Play the Ober of Berries.',
+          },
+          r3Trick3Result: {
+            title: 'Hans\' trick',
+            description: 'Hans\' Queen of Flowers — the Karnoffel — ate even your Ober: 4 points you lost, but your bet is intact. Finish the trick.',
+          },
+          r3Woodpecker: {
+            title: 'The Woodpecker',
+            description: 'Hans leads the 8 of Acorns and Magda already threw the Unter of Berries. Play the [[card:acorns-S|Woodpecker]]: it can\'t win tricks, but when it resolves YOU choose who leads the next one.',
+            hint: 'Play the Woodpecker (the S of Acorns).',
+          },
+          r3Trick4Result: {
+            title: 'You pick yourself',
+            description: 'Anna\'s [[card:flowers-1|1 of Flowers]] won the trick… but your Woodpecker calls the shots: you chose YOURSELF to lead the last trick, where your 5 of Flowers is waiting. Finish the trick.',
+          },
+          r3PlayTrump: {
+            title: 'The plan complete',
+            description: 'You lead the [[card:flowers-5|5 of Flowers]]: it\'s a trump and nobody can beat it without a higher flower. That would be your second trick — exactly the bet.',
+            hint: 'Play the 5 of Flowers.',
+          },
+          r3Trick5Result: {
+            title: 'Exactly 2',
+            description: 'Nobody had flowers: you won your second trick, not one more, not one less. Finish the trick and let\'s close out.',
+          },
+          r3Scoring: {
+            title: 'Round scoring',
+            description: 'You won exactly 2 tricks: +55. Plus the +3 from the swap you passed: 58 this round. Trick bets are treacherous — winning one too many also loses.',
+          },
+          gameDone: {
+            title: 'You won the game!',
+            description: '148 points: you crossed 100 and the game ends. You now know how to swap, bet points, collection and tricks, and use all three birds. Create a game against bots and try it yourself.',
           },
         },
       },

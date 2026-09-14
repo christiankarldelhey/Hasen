@@ -23,9 +23,13 @@ test.describe('Lobby navigation', () => {
     await expect(page.getByTestId('lobby-tutorial-btn')).toBeVisible()
     await page.getByTestId('lobby-tutorial-btn').locator('button').click({ force: true })
 
-    await expect(page).toHaveURL(/\/tutorial(?:\/|$)/)
-    await expect(page.getByTestId('tutorial-notification')).toBeVisible()
-    await expect(page.getByTestId('tutorial-step-title')).toHaveText('The deck')
+    await expect(page).toHaveURL(/\/tutorial$/)
+    await expect(page.getByTestId('tutorial-menu')).toBeVisible()
+
+    await page.getByTestId('tutorial-scenario-first-round').click()
+    await expect(page).toHaveURL(/\/tutorial\/first-round/)
+    await expect(page.getByTestId('tutorial-sidebar')).toBeVisible()
+    await expect(page.getByTestId('tutorial-step-title')).toHaveText('Your first round')
   })
 
 })

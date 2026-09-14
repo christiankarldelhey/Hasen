@@ -79,12 +79,13 @@ const handleConfirmLogout = () => {
       type="button"
       class="flex items-center justify-center w-11 h-11 rounded-lg text-hasen-base shrink-0"
       :aria-label="t('game.menu')"
+      data-tutorial-id="game-controls"
       @click="menuOpen = !menuOpen"
     >
       <IconMenu2 :size="22" />
     </button>
 
-    <div class="flex-1 flex items-center justify-center gap-2 overflow-visible min-w-0">
+    <div class="flex-1 flex items-center justify-center gap-2 overflow-visible min-w-0" data-tutorial-id="other-players-zone">
       <MobilePlayerChip
         v-for="opponent in props.opponentPositions"
         :key="opponent.playerId"
@@ -101,7 +102,7 @@ const handleConfirmLogout = () => {
     </div>
 
     <!-- Mini deck (deal animation origin) -->
-    <div ref="deckEl" class="relative w-9 h-12 shrink-0 mr-1">
+    <div ref="deckEl" class="relative w-9 h-12 shrink-0 mr-1" data-tutorial-id="deck-zone">
       <div
         v-for="i in 3"
         :key="i"

@@ -29,14 +29,12 @@ const { t } = useI18n();
       />
     </div>
 
-    <!-- Tutorial temporalmente deshabilitado
     <div data-testid="lobby-tutorial-btn" @click="emit('tutorial')">
       <ActionButton
         :label="t('lobby.tutorial')"
         variant="primary"
       />
     </div>
-    -->
     
     <div data-testid="lobby-rules-btn" @click="emit('rules')">
       <ActionButton 
