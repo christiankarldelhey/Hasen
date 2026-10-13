@@ -54,7 +54,6 @@ function buildBaseGame(): Game {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 100,
       reconnectionTimeoutMinutes: 3
     },
     playerConnectionStatus: new Map<PlayerId, 'connected' | 'disconnected' | 'reconnecting'>(),
@@ -134,7 +133,7 @@ describe('HeuristicAgent', () => {
         id: 'card-1',
         suit: 'acorns',
         char: '1',
-        rank: { base: 1, onSuit: 5 },
+        rank: { base: 30, onSuit: 5 },
         owner: 'player_2',
         state: 'in_hand_hidden',
         points: 4,
@@ -145,7 +144,7 @@ describe('HeuristicAgent', () => {
         id: 'card-2',
         suit: 'leaves',
         char: '2',
-        rank: { base: 2, onSuit: 6 },
+        rank: { base: 30, onSuit: 6 },
         owner: 'player_2',
         state: 'in_hand_hidden',
         points: 4,
@@ -156,7 +155,7 @@ describe('HeuristicAgent', () => {
         id: 'card-3',
         suit: 'berries',
         char: '3',
-        rank: { base: 3, onSuit: 7 },
+        rank: { base: 30, onSuit: 7 },
         owner: 'player_2',
         state: 'in_hand_hidden',
         points: 4,
@@ -390,5 +389,79 @@ describe('HeuristicAgent', () => {
     })
 
     expect(decision).toEqual({ type: 'play_card', cardId: 'weak-card' })
+  })
+
+  it('chooses an exact trick bid when projected tricks match the target', async () => {
+    const game = buildBaseGame()
+    const agent = new HeuristicAgent()
+
+    game.round.currentTrick!.trick_number = 1
+    game.deck = [0, 1, 2, 3, 4].map(index => ({
+      id: `strong-card-${index}`,
+      suit: 'acorns' as const,
+      char: `${index}`,
+      rank: { base: 30, onSuit: 5 },
+      owner: 'player_2' as const,
+      state: 'in_hand_hidden' as const,
+      points: 4,
+      spritePos: { row: 0, col: index },
+      position: index
+    }))
+    game.round.roundBids.bids = [
+      {
+        bid_id: 'exactly-two',
+        bid_type: 'trick',
+        bid_score: 70,
+        win_condition: { win_min_tricks: 2, win_max_tricks: 2 }
+      }
+    ]
+
+    const decision = await agent.decide({
+      game,
+      playerId: 'player_2',
+      legalActions: [
+        { type: 'play_card', cardId: 'strong-card-0' },
+        { type: 'make_bid', bidType: 'trick', bidId: 'exactly-two' }
+      ]
+    })
+
+    expect(decision).toEqual({ type: 'make_bid', bidType: 'trick', bidId: 'exactly-two' })
+  })
+
+  it('chooses a collection bid when the hand supports the target suit', async () => {
+    const game = buildBaseGame()
+    const agent = new HeuristicAgent()
+
+    game.round.currentTrick!.trick_number = 1
+    game.deck = [0, 1, 2].map(index => ({
+      id: `acorn-${index}`,
+      suit: 'acorns' as const,
+      char: `${index}`,
+      rank: { base: 10, onSuit: 20 },
+      owner: 'player_2' as const,
+      state: 'in_hand_hidden' as const,
+      points: 0,
+      spritePos: { row: 0, col: index },
+      position: index
+    }))
+    game.round.roundBids.bids = [
+      {
+        bid_id: 'collect-acorns',
+        bid_type: 'set_collection',
+        bid_score: 15,
+        win_condition: { win_suit: 'acorns', floor: 10 }
+      }
+    ]
+
+    const decision = await agent.decide({
+      game,
+      playerId: 'player_2',
+      legalActions: [
+        { type: 'play_card', cardId: 'acorn-0' },
+        { type: 'make_bid', bidType: 'set_collection', bidId: 'collect-acorns' }
+      ]
+    })
+
+    expect(decision).toEqual({ type: 'make_bid', bidType: 'set_collection', bidId: 'collect-acorns' })
   })
 })

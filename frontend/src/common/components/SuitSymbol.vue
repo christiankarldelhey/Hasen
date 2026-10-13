@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import type { Suit } from '@domain/interfaces/Card'
 import AcornSymbol from '@/assets/symbols/acorn.png'
 import BerrySymbol from '@/assets/symbols/berry.png'
 import FlowerSymbol from '@/assets/symbols/flower.png'
@@ -11,6 +13,7 @@ const props = withDefaults(defineProps<{
   avoid?: boolean
   size?: 'small' | 'medium' | 'large'
   value?: number | string
+  exceptSuit?: Suit
 }>(), {
   avoid: false,
   size: 'large',
@@ -31,7 +34,10 @@ const trioSizeClasses = {
   large: 'h-6 w-6'
 }
 
-const avoidTrio = ['acorns', 'berries', 'leaves'] as const
+const avoidTrio = computed<Suit[]>(() => {
+  const suits: Suit[] = ['acorns', 'leaves', 'berries', 'flowers']
+  return props.exceptSuit ? suits.filter(suit => suit !== props.exceptSuit) : ['acorns', 'berries', 'leaves']
+})
 
 function getSymbol(collect: SuitSymbolKey) {
     switch (collect) {

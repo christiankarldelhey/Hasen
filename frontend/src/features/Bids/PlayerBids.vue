@@ -121,12 +121,13 @@ const bidsTitle = computed(() => {
         <span 
           class="text-2xl"
           :class="pointsBidScore.score !== null && pointsDisplay 
-            ? (points >= pointsDisplay.minPoints && points <= pointsDisplay.maxPoints ? 'text-hasen-green' : 'text-hasen-red')
+            ? (points >= pointsDisplay.minPoints && (pointsDisplay.isOpen || points <= pointsDisplay.maxPoints) ? 'text-hasen-green' : 'text-hasen-red')
             : 'text-hasen-dark'"
         >
           {{ points }}
         </span>
-        <PointsToWin size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
+        <span v-if="pointsDisplay?.isOpen" class="text-2xl font-bold text-hasen-dark">+</span>
+        <PointsToWin v-else size="medium" :points="pointsDisplay ? pointsDisplay.maxPoints : 100" :class="pointsDisplay ? '' : 'opacity-30'" />
       </div>
     </PlayerBidScoreRow>
 
@@ -144,7 +145,8 @@ const bidsTitle = computed(() => {
       <div v-if="suitDisplays.length >= 2" class="flex flex-row items-center justify-between w-full">
           <template v-for="(sd, index) in suitDisplays" :key="sd.suit">
             <SuitSymbol 
-              :suit="sd.suit" 
+              :suit="sd.suit"
+              :except-suit="setCollectionDisplay?.winSuit"
               :avoid="sd.isAvoid"
               :value="sd.score !== null ? sd.score : sd.count"
               :class="[
@@ -155,9 +157,9 @@ const bidsTitle = computed(() => {
             <span 
               v-if="setCollectionDisplay && index === 0"
               class="text-2xl font-semibold mx-2"
-              :class="(setCollectionDisplay.winScore + setCollectionDisplay.avoidScore) < 10 ? 'text-hasen-red' : 'text-hasen-green'"
+              :class="setCollectionDisplay.netScore < setCollectionDisplay.floor ? 'text-hasen-red' : 'text-hasen-green'"
             >
-              {{ setCollectionDisplay.winScore + setCollectionDisplay.avoidScore }}
+              {{ setCollectionDisplay.netScore }} / {{ setCollectionDisplay.floor }}
             </span>
           </template>
       </div>

@@ -1,98 +1,99 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { BidType, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
-import type { Suit } from '@domain/interfaces/Card'
+import type { BidType, TrickBidCondition, PointsBidCondition, SetCollectionBidCondition } from '@domain/interfaces/Bid'
+import { POINTS_BID_OPEN_MAX } from '@domain/data/bidDefinitions'
 import TrickSymbol from '@/common/components/TrickSymbol.vue'
-import PointsToWin from '@/common/components/PointsToWin.vue'
 import SuitSymbol from '@/common/components/SuitSymbol.vue'
-
-type SuitDisplayKey = Suit | 'avoidOtherSuits'
+import PointsToWin from '@/common/components/PointsToWin.vue'
 
 const props = defineProps<{
   type: BidType
-  win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
+  win_condition: TrickBidCondition | PointsBidCondition | SetCollectionBidCondition
   winSuitCount?: number
-  avoidSuitCount?: number
+  otherSuitCount?: number
+  bidScore?: number
 }>()
 
-const pointsCondition = computed(() => props.win_condition as PointsBidCondition)
-const setCondition = computed(() => props.win_condition as SetCollectionBidCondition)
-const trickCondition = computed(() => props.win_condition as TrickBidCondition)
-const avoidSuitDisplay = computed<SuitDisplayKey>(() => {
-  const avoidSuits = Array.isArray(setCondition.value.avoid_suit)
-    ? setCondition.value.avoid_suit
-    : [setCondition.value.avoid_suit]
+const trickCondition = computed(() =>
+  props.type === 'trick' ? props.win_condition as TrickBidCondition : null
+)
 
-  return avoidSuits.length > 1 ? 'avoidOtherSuits' : (avoidSuits[0] ?? 'acorns')
+const pointsCondition = computed(() =>
+  props.type === 'points' ? props.win_condition as PointsBidCondition : null
+)
+
+const setCondition = computed(() =>
+  props.type === 'set_collection' ? props.win_condition as SetCollectionBidCondition : null
+)
+
+const trickNumbers = computed<number[]>(() => {
+  if (!trickCondition.value) return []
+  return [1, 2, 3, 4, 5]
 })
 
-const sortedTricks = computed(() => {
-  if (props.type !== 'trick') return []
+const getTrickState = (num: number): 'win' | 'lose' | 'neutral' | 'blank' => {
+  if (!trickCondition.value) return 'blank'
   
-  const tricks: Array<{ position: number, state: 'win' | 'lose' | 'neutral' }> = []
   const condition = trickCondition.value
   
-  condition.lose_trick_position?.forEach(pos => {
-    tricks.push({ position: pos, state: 'lose' })
-  })
+  if (condition.win_trick_position?.includes(num as 1|2|3|4|5)) return 'win'
+  if (condition.lose_trick_position?.includes(num as 1|2|3|4|5)) return 'lose'
+  if (condition.may_win_trick_position?.includes(num as 1|2|3|4|5)) return 'neutral'
   
-  condition.win_trick_position?.forEach(pos => {
-    tricks.push({ position: pos, state: 'win' })
-  })
+  if (condition.win_min_tricks !== undefined && condition.win_max_tricks !== undefined) {
+    if (condition.win_min_tricks === 0 && condition.win_max_tricks === 0) return 'lose'
+    if (condition.win_min_tricks === 1 && condition.win_max_tricks === 1) return 'neutral'
+    if (condition.win_min_tricks === 2 && condition.win_max_tricks === 2) return 'neutral'
+    if (condition.win_min_tricks === 3 && condition.win_max_tricks === 3) return 'neutral'
+    if (condition.win_min_tricks === 4 && condition.win_max_tricks === 4) return 'neutral'
+    if (condition.win_min_tricks === 5 && condition.win_max_tricks === 5) return 'win'
+    if (condition.win_min_tricks === 1 && condition.win_max_tricks === 3) return 'neutral'
+    if (condition.win_min_tricks === 4 && condition.win_max_tricks === 5) return 'neutral'
+  }
   
-  condition.may_win_trick_position?.forEach(pos => {
-    tricks.push({ position: pos, state: 'neutral' })
-  })
-  
-  return tricks.sort((a, b) => a.position - b.position)
-})
+  return 'blank'
+}
 
+const isOpenPointsBid = computed(() =>
+  pointsCondition.value?.max_points === POINTS_BID_OPEN_MAX
+)
+
+const collectionCardValue = computed(() => props.bidScore ?? 15)
 </script>
+
 <template>
-    <!-- POINTS -->
-    <div v-if="props.type === 'points'" class="flex flex-row gap-3 px-1">
-        <PointsToWin :points="pointsCondition.min_points" />
-        <span class="text-hasen-dark text-2xl font-semibold pt-1">  -  </span>  
-        <PointsToWin :points="pointsCondition.max_points" />
+  <div class="flex items-center">
+    <!-- Trick bid: show 5 trick symbols -->
+    <div v-if="type === 'trick'" class="flex items-center gap-0.5">
+      <TrickSymbol
+        v-for="num in trickNumbers"
+        :key="num"
+        :char="num"
+        :state="getTrickState(num)"
+        size="small"
+      />
     </div>
 
-    <!-- SET COLLECTION -->
-    <div v-if="props.type === 'set_collection'" 
-        class="px-1">
-            <div class="flex flex-row justify-center">
-                <div class="flex flex-row pr-2">
-                    <SuitSymbol :suit="setCondition.win_suit" />
-                    <span class="text-hasen-green text-md pt-1">
-                      10
-                      <span v-if="winSuitCount !== undefined" class="text-md ml-1">× {{ winSuitCount }}</span>
-                    </span>
-                </div>
-
-                <div class="flex flex-row">
-                    <SuitSymbol :suit="avoidSuitDisplay" :avoid="true" />
-                    <span class="text-hasen-red text-md pt-1">
-                      -10
-                      <span v-if="avoidSuitCount !== undefined" class="text-md ml-1">× {{ avoidSuitCount }}</span>
-                    </span>
-                </div>
-            </div> 
+    <!-- Points bid: show min-max or min+ -->
+    <div v-else-if="type === 'points' && pointsCondition" class="flex items-center gap-0.5">
+      <PointsToWin size="small" :points="pointsCondition.min_points" />
+      <span v-if="isOpenPointsBid" class="text-hasen-dark font-bold">+</span>
+      <template v-else>
+        <span class="text-hasen-dark font-bold">-</span>
+        <PointsToWin size="small" :points="pointsCondition.max_points" />
+      </template>
     </div>
 
-    <!-- TRICK -->
-    <div v-if="props.type === 'trick'" class="flex flex-row px-1 gap-1">
-        <TrickSymbol 
-            v-for="trick in sortedTricks" 
-            :key="trick.position"
-            :state="trick.state" 
-            :char="trick.position" 
-        />
-        <!-- Ganar determinado truco -->
-        <template v-if="trickCondition.win_min_tricks && trickCondition.win_max_tricks && trickCondition.win_min_tricks < trickCondition.win_max_tricks">
-            <TrickSymbol state="win" v-for="_num in trickCondition.win_min_tricks" />
-        </template>
-        <template v-if="trickCondition?.win_max_tricks && trickCondition?.win_min_tricks === trickCondition?.win_max_tricks">
-            <TrickSymbol v-for="(_, i) in trickCondition.win_max_tricks" state="win" :key="i" />
-            <TrickSymbol v-for="(_, i) in (5 - trickCondition.win_max_tricks)" state="lose" :key="i" />
-        </template>
+    <!-- Collection bid: target suit, penalty for other suits and floor -->
+    <div v-else-if="type === 'set_collection' && setCondition" class="flex items-center gap-0.5">
+      <SuitSymbol :suit="setCondition.win_suit" :value="winSuitCount ?? `×${collectionCardValue}`" />
+      <SuitSymbol
+        suit="avoidOtherSuits"
+        :except-suit="setCondition.win_suit"
+        avoid
+        :value="otherSuitCount ?? '-2/4/6'"
+      />
+      <span class="ml-1 text-xs font-bold text-hasen-dark whitespace-nowrap">≥ {{ setCondition.floor }}</span>
     </div>
+  </div>
 </template>

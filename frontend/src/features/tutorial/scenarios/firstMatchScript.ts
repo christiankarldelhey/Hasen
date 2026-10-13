@@ -11,10 +11,10 @@ export const firstMatchScript: ScriptedMatch = {
   rounds: [
     // ------------------------------------------------------------------ R1
     // Lenz: acorns 9 (vis) · flowers K · berries 10 · leaves 8 · acorns O
-    //   swap leaves 8 → berries S (the Owl). Points bet "35+" (+60, window 1).
-    // T1 Lenz acorns O wins (6) · T2 Anna flowers 2 wins (0) ·
-    // T3 Lenz flowers K wins (11) · T4 Lenz Owl wins (2) · T5 Lenz berries 10 (20)
-    // → 39 card points, bet made: +60.
+    //   swap leaves 8 → berries S (the Owl). Points bet "35+" (+55, window 1).
+    // T1 Lenz acorns O wins (7) · T2 Anna flowers 2 wins (0) ·
+    // T3 Lenz flowers K wins (12) · T4 Lenz Owl wins (6) · T5 Lenz berries 10 (20)
+    // → 45 card points, bet made: +55.
     {
       hands: {
         player_1: {
@@ -89,22 +89,22 @@ export const firstMatchScript: ScriptedMatch = {
         ]
       ],
       bids: [
-        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 40, win_condition: { win_min_tricks: 3, win_max_tricks: 3 } },
+        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 80, win_condition: { win_min_tricks: 3, win_max_tricks: 3 } },
         { bid_id: 'trick-2', bid_type: 'trick', bid_score: 50, win_condition: { win_min_tricks: 1, win_max_tricks: 1 } },
-        { bid_id: 'points-1', bid_type: 'points', bid_score: 40, win_condition: { min_points: 11, max_points: 30 } },
-        { bid_id: 'points-2', bid_type: 'points', bid_score: 60, win_condition: { min_points: 35, max_points: 100 } },
-        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'acorns', avoid_suit: 'leaves' } },
-        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'berries', avoid_suit: 'acorns' } }
+        { bid_id: 'points-1', bid_type: 'points', bid_score: 45, win_condition: { min_points: 10, max_points: 30 } },
+        { bid_id: 'points-2', bid_type: 'points', bid_score: 55, win_condition: { min_points: 35, max_points: 100 } },
+        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'acorns', floor: 10 } },
+        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'berries', floor: 10 } }
       ],
       playerBids: [{ bidId: 'points-2', trickNumber: 1 }]
     },
 
     // ------------------------------------------------------------------ R2
     // Collection bets: Lenz gets a leaves-heavy hand + the Sparrow.
-    // Bet: collect leaves / avoid flowers (window 1, −10 per forbidden card).
+    // Bet: collect leaves, floor 10 (window 1, −2 per other-suit card).
     // T1 Anna leads leaves — Magda's Unter (major color) wins the trick, but
     // Lenz's Sparrow steals the 10 of leaves. T2–T4 Lenz wins; T5 Magda's
-    // 4 of flowers takes it. Pile: 3 wanted leaves, 0 flowers → net 30 → +30.
+    // 4 of flowers takes it. Pile: 3 leaves, 10 other-suit cards → net 25 → +25.
     {
       hands: {
         player_1: {
@@ -180,18 +180,18 @@ export const firstMatchScript: ScriptedMatch = {
       ],
       steals: [{ trick: 1, by: 'player_1', card: { suit: 'leaves', char: '10' } }],
       bids: [
-        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 50, win_condition: { win_min_tricks: 2, win_max_tricks: 2 } },
-        { bid_id: 'trick-2', bid_type: 'trick', bid_score: 70, win_condition: { win_min_tricks: 4, win_max_tricks: 5 } },
-        { bid_id: 'points-1', bid_type: 'points', bid_score: 45, win_condition: { min_points: 16, max_points: 35 } },
-        { bid_id: 'points-2', bid_type: 'points', bid_score: 65, win_condition: { min_points: 36, max_points: 100 } },
-        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'leaves', avoid_suit: 'flowers' } },
-        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'berries', avoid_suit: 'leaves' } }
+        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 70, win_condition: { win_min_tricks: 2, win_max_tricks: 2 } },
+        { bid_id: 'trick-2', bid_type: 'trick', bid_score: 35, win_condition: { may_win_trick_position: [1, 2, 3], win_trick_position: [4, 5] } },
+        { bid_id: 'points-1', bid_type: 'points', bid_score: 45, win_condition: { min_points: 15, max_points: 35 } },
+        { bid_id: 'points-2', bid_type: 'points', bid_score: 55, win_condition: { min_points: 35, max_points: 100 } },
+        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'leaves', floor: 10 } },
+        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'berries', floor: 10 } }
       ],
       playerBids: [{ bidId: 'set-1', trickNumber: 1 }]
     },
 
     // ------------------------------------------------------------------ R3
-    // Trick bets: "win exactly 2" (+55, window 1). Lenz passes the swap (+3),
+    // Trick bets: "win exactly 2" (+70, window 1). Lenz passes the swap (+3),
     // wins T2 with the 10 of acorns, drops the Woodpecker in T4 (Anna's flower
     // wins the trick, but Lenz picks the next lead: himself), then wins T5
     // with the 5 of flowers → exactly 2 tricks.
@@ -269,12 +269,12 @@ export const firstMatchScript: ScriptedMatch = {
         ]
       ],
       bids: [
-        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 55, win_condition: { win_min_tricks: 2, win_max_tricks: 2 } },
+        { bid_id: 'trick-1', bid_type: 'trick', bid_score: 70, win_condition: { win_min_tricks: 2, win_max_tricks: 2 } },
         { bid_id: 'trick-2', bid_type: 'trick', bid_score: 50, win_condition: { win_min_tricks: 1, win_max_tricks: 1 } },
-        { bid_id: 'points-1', bid_type: 'points', bid_score: 40, win_condition: { min_points: 11, max_points: 30 } },
-        { bid_id: 'points-2', bid_type: 'points', bid_score: 60, win_condition: { min_points: 35, max_points: 100 } },
-        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'acorns', avoid_suit: 'berries' } },
-        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 10, win_condition: { win_suit: 'flowers', avoid_suit: 'acorns' } }
+        { bid_id: 'points-1', bid_type: 'points', bid_score: 45, win_condition: { min_points: 10, max_points: 30 } },
+        { bid_id: 'points-2', bid_type: 'points', bid_score: 55, win_condition: { min_points: 35, max_points: 100 } },
+        { bid_id: 'set-1', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'acorns', floor: 10 } },
+        { bid_id: 'set-2', bid_type: 'set_collection', bid_score: 15, win_condition: { win_suit: 'flowers', floor: 20 } }
       ],
       playerBids: [{ bidId: 'trick-1', trickNumber: 1 }]
     }

@@ -1,27 +1,21 @@
 import type { Game, PlayerId } from '../interfaces'
+import { canDrawBidPool } from './BidDeckRules'
 
 export interface GameEndResult {
   hasEnded: boolean
   winner: PlayerId | null
 }
 
-export const GAME_END_MAX_SCORE = 100
-export const GAME_END_MIN_SCORE = -85
-
+/**
+ * La partida termina cuando los mazos de apuestas ya no alcanzan para repartir
+ * un pool completo. Gana el mayor puntaje; en empate, el jugador más cercano al
+ * mano de la última ronda.
+ */
 export function hasGameEnded(game: Game): GameEndResult {
-  if (game.playerScores.length === 0) {
+  if (game.playerScores.length === 0 || canDrawBidPool(game.bidDecks)) {
     return { hasEnded: false, winner: null }
   }
 
-  const ended = game.playerScores.some(
-    ps => ps.score >= GAME_END_MAX_SCORE || ps.score <= GAME_END_MIN_SCORE
-  )
-  if (!ended) {
-    return { hasEnded: false, winner: null }
-  }
-
-  // Gana el mayor puntaje; en empate, el más cercano al mano
-  // (playerTurnOrder[0] es el mano de la ronda que terminó)
   const topScore = Math.max(...game.playerScores.map(ps => ps.score))
   const tied = new Set(
     game.playerScores.filter(ps => ps.score === topScore).map(ps => ps.playerId)
@@ -40,6 +34,6 @@ export function getWinnerName(winnerId: PlayerId): string {
     'player_3': 'Hans',
     'player_4': 'Magda'
   }
-  
+
   return nameMap[winnerId]
 }

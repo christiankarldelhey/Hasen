@@ -21,7 +21,7 @@ export interface CreateGameResponse {
   currentPlayers: number;
   maxPlayers: number;
   minPlayers: number;
-  pointsToWin: number;
+  totalLaps: number;
   hasSpace: boolean;
   createdAt: string;
   gamePhase?: 'setup' | 'playing' | 'ended';

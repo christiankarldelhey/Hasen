@@ -15,38 +15,38 @@ function createTutorialBids(): Bid[] {
     {
       bid_id: 'trick-1',
       bid_type: 'trick',
-      bid_score: 30,
+      bid_score: 35,
       win_condition: { may_win_trick_position: [1, 2, 3], win_trick_position: [4, 5] }
     },
     {
       bid_id: 'trick-2',
       bid_type: 'trick',
-      bid_score: 45,
+      bid_score: 50,
       win_condition: { win_min_tricks: 1, win_max_tricks: 1 }
     },
     {
       bid_id: 'points-1',
       bid_type: 'points',
-      bid_score: 40,
-      win_condition: { min_points: 11, max_points: 30 }
+      bid_score: 45,
+      win_condition: { min_points: 10, max_points: 30 }
     },
     {
       bid_id: 'points-2',
       bid_type: 'points',
-      bid_score: 45,
-      win_condition: { min_points: 35, max_points: 100 }
+      bid_score: 70,
+      win_condition: { min_points: 20, max_points: 40 }
     },
     {
       bid_id: 'set-1',
       bid_type: 'set_collection',
-      bid_score: 10,
-      win_condition: { win_suit: 'acorns', avoid_suit: 'leaves' }
+      bid_score: 15,
+      win_condition: { win_suit: 'acorns', floor: 10 }
     },
     {
       bid_id: 'set-2',
       bid_type: 'set_collection',
-      bid_score: 10,
-      win_condition: { win_suit: 'berries', avoid_suit: 'acorns' }
+      bid_score: 15,
+      win_condition: { win_suit: 'berries', floor: 10 }
     }
   ]
 }
@@ -143,6 +143,11 @@ export function createTutorialMockState(): TutorialMockState {
         { playerId: 'player_4', points: 15, tricksWon: [2], setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 1 } }
       ]
     },
+    bidDeckCounts: {
+      set_collection: 14,
+      points: 14,
+      trick: 14
+    },
     playerScores: [
       { playerId: 'player_1', score: 12 },
       { playerId: 'player_2', score: 9 },
@@ -161,7 +166,6 @@ export function createTutorialMockState(): TutorialMockState {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 100,
       reconnectionTimeoutMinutes: 5
     }
   }

@@ -84,7 +84,7 @@ const iconMap = {
           </div>
           
           <template v-if="type === 'setCollection' && avoidSuit">
-            <SuitSymbol :suit="avoidSuit" size="small" />
+            <SuitSymbol :suit="avoidSuit" :except-suit="winSuit ?? undefined" size="small" />
           </template>
           <span class="text-lg font-semibold text-hasen-red w-6 text-center">
             {{ onLose }}

@@ -64,7 +64,7 @@ export function useGameAPI() {
         maxPlayers: result.maxPlayers as 2 | 3 | 4,
         minPlayers: result.minPlayers as 2,
         hasSpace: result.hasSpace,
-        pointsToWin: result.pointsToWin,
+        totalLaps: result.totalLaps,
         createdAt: result.createdAt || new Date().toISOString()
       })
       

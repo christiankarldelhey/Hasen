@@ -1,6 +1,7 @@
 import type { Bid, PointsBidCondition, SetCollectionBidCondition, TrickBidCondition } from '@domain/interfaces/Bid'
 import type { Suit } from '@domain/interfaces/Card'
 import { useI18n } from './useI18n'
+import { POINTS_BID_OPEN_MAX } from '@domain/data/bidDefinitions'
 
 export type TooltipType = 'info' | 'error'
 
@@ -30,10 +31,10 @@ function formatTrickPositions(positions: number[]): string {
 function getPointsBidDescription(condition: PointsBidCondition, t: (key: string, params?: Record<string, string | number>) => string): string {
   const { min_points, max_points } = condition
   
-  if (max_points >= 100) {
+  if (max_points >= POINTS_BID_OPEN_MAX) {
     return t('bids.scorePoints', { min: min_points })
   }
-  
+
   if (min_points === max_points) {
     return t('bids.scoreExactly', { points: min_points })
   }
@@ -42,16 +43,17 @@ function getPointsBidDescription(condition: PointsBidCondition, t: (key: string,
 }
 
 function getSetCollectionBidDescription(
-  condition: SetCollectionBidCondition,
+  bid: Bid,
   t: (key: string, params?: Record<string, string | number>) => string
 ): string {
+  const condition = bid.win_condition as SetCollectionBidCondition
   const winSuit = t(suitNames[condition.win_suit])
-  const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
-  const avoidSuit = avoidSuits
-    .map(suit => t(suitNames[suit]))
-    .join(', ')
-  
-  return t('bids.collectAvoid', { win: winSuit, avoid: avoidSuit })
+
+  return t('bids.collectFloor', {
+    win: winSuit,
+    value: bid.bid_score,
+    floor: condition.floor
+  })
 }
 
 function getTrickBidDescription(
@@ -101,7 +103,7 @@ export function useBidTooltips() {
       case 'points':
         return getPointsBidDescription(bid.win_condition as PointsBidCondition, t)
       case 'set_collection':
-        return getSetCollectionBidDescription(bid.win_condition as SetCollectionBidCondition, t)
+        return getSetCollectionBidDescription(bid, t)
       case 'trick':
         return getTrickBidDescription(bid.win_condition as TrickBidCondition, t)
       default:
@@ -116,7 +118,8 @@ export function useBidTooltips() {
     gameNotFound: t('errors.gameNotFound'),
     maxBidsReached: t('errors.maxBidsReached'),
     bidAlreadyTaken: t('errors.bidAlreadyTaken'),
-    cannotBidAfterPlaying: t('errors.cannotBidAfterPlaying')
+    cannotBidAfterPlaying: t('errors.cannotBidAfterPlaying'),
+    bidNoLongerPossible: t('errors.bidNoLongerPossible')
   }
 
   const getErrorTooltip = (reason?: string): BidTooltip | null => {
@@ -136,6 +139,8 @@ export function useBidTooltips() {
       errorText = errorMessages.maxBidsReached
     } else if (reason.includes('already taken')) {
       errorText = errorMessages.bidAlreadyTaken
+    } else if (reason.includes('no longer possible')) {
+      errorText = errorMessages.bidNoLongerPossible
     } else if (reason.includes('after playing')) {
       errorText = errorMessages.cannotBidAfterPlaying
     }

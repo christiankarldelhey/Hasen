@@ -126,12 +126,13 @@ const shouldShowResults = computed(() => {
                 :type="bidInfo.bid.bid_type" 
                 :win_condition="bidInfo.bid.win_condition"
                 :winSuitCount="bidInfo.setCollectionData?.winSuitCount"
-                :avoidSuitCount="bidInfo.setCollectionData?.avoidSuitCount"
+                :otherSuitCount="bidInfo.setCollectionData?.otherSuitCount"
+                :bid-score="bidInfo.bid.bid_score"
               />
             </div>
             <div class="flex items-center gap-2">
               <span class="font-bold px-2 py-1 rounded text-lg text-hasen-dark/70" >
-                {{ bidInfo.score > 0 ? '+' : '' }}{{ bidInfo.score }}
+                {{ bidInfo.score + bidInfo.duelScore > 0 ? '+' : '' }}{{ bidInfo.score + bidInfo.duelScore }}
               </span>
             </div>
           </div>

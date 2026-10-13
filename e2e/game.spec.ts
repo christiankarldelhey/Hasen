@@ -69,6 +69,11 @@ test.describe('Game view smoke', () => {
             }
           ]
         },
+        bidDeckCounts: {
+          set_collection: 8,
+          points: 8,
+          trick: 8
+        },
         playerScores: [
           { playerId: 'player_1', score: 0 },
           { playerId: 'player_2', score: 0 }
@@ -83,7 +88,6 @@ test.describe('Game view smoke', () => {
         gameSettings: {
           minPlayers: 2,
           maxPlayers: 2,
-          pointsToWin: 100,
           reconnectionTimeoutMinutes: 2
         }
       },

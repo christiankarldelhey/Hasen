@@ -11,7 +11,7 @@ interface LobbyRoomCreatedPayload {
   maxPlayers: number
   minPlayers: number
   hasSpace: boolean
-  pointsToWin: number
+  totalLaps: number
   createdAt: Date
 }
 

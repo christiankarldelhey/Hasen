@@ -60,6 +60,10 @@ const handleNewGame = () => {
 
 <template>
   <BaseModal :isOpen="isOpen" :title="t('game.gameEnded')" maxWidth="lg" @close="emit('close')">
+    <p class="mb-4 text-center text-sm text-hasen-dark/70">
+      {{ t('game.endedDeckExhausted') }}
+    </p>
+
     <!-- Winner Section -->
     <div v-if="winnerInfo" class="mb-6 text-center">
       <div class="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-xl border-2 border-yellow-400">

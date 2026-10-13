@@ -2,7 +2,7 @@
 
 *A trick-taking game where winning tricks is the tool, not the goal — the real points come from the bets you declare along the way.*
 
-**Players:** 2–4 · **A round:** 5 tricks · **Game ends:** when someone reaches **100** or drops to **−85**
+**Players:** 2–4 · **A round:** 5 tricks · **Game ends:** when the bid decks can no longer deal a complete pool
 
 ## What is Hasen?
 
@@ -67,7 +67,7 @@ Full details in [The three birds](#the-three-birds).
 
 At the start of every round:
 
-1. **The bid pool is dealt.** Six bid cards go face-up in the middle: 2 Points, 2 Collection, 2 Tricks. Those six — and only those — can be claimed this round.
+1. **The bid pool is dealt.** Six bid cards go face-up in the middle: 2 Points, 2 Collection, 2 Tricks. They come from three decks that run out during the game: those six — and only those — can be claimed this round, and they never come back.
 2. **Cards are dealt.** You receive 5 cards: 4 hidden in your hand and **1 face-up** in front of you, visible to everyone.
 3. The rest of the deck becomes the **draw pile**.
 
@@ -232,7 +232,7 @@ Once trick 3 ends, the kiosk closes: tricks 4 and 5 are played with no betting a
 
 ![The available bids panel: 2 trick, 2 points and 2 collection bids](/rules/en/bids-panel.png)
 
-*The available bids panel: Tricks 🔴 on top, Points 🔵 in the middle, Collection 🟡 at the bottom. The circle on the left is what you score if you make it.*
+*The available bids panel: Tricks 🔴 on top, Points 🔵 in the middle, Collection 🟡 at the bottom. The circle on the left is the prize if you make it; in Collection, it is the value of each bet-suit card.*
 
 The restrictions:
 
@@ -240,7 +240,7 @@ The restrictions:
 - **Bets must be from different categories.** No doubling up on Points.
 - **You have to make good on all of them**, at once. No choosing which one to save at the end.
 - **Every bet is public.** Nothing is hidden here.
-- **Max 2 players per bid card.** The third one who wants it has to pick another — no hard feelings, no extra penalty for sharing.
+- **Max 2 players per bid card.** The third one who wants it has to pick another. If exactly two players share a bid and only one succeeds, the duel pays **+5** to the winner and **−5** to the loser.
 
 ### What failing costs
 
@@ -248,68 +248,82 @@ The penalty depends on **the window where you declared**, not on when it resolve
 
 | Category | Window 1 | Window 2 | Window 3 |
 | --- | --- | --- | --- |
-| 🟡 Collection | −10 | −15 | −20 |
+| 🟡 Collection — with 2 players | −15 | −20 | −25 |
+| 🟡 Collection — with 3 or 4 players | −10 | −15 | −20 |
 | 🔵 Points and 🔴 Tricks | −20 | −25 | −30 |
 
-For Collection bets those numbers are **per forbidden card** you end up holding — not a flat fine.
+These are fixed fines. In Collection, betting later also makes the condition harder because each card of the other suits subtracts more from your net.
 
 > **Why wait.** In window 1 you bet almost blind: you've seen your hand and everyone's face-up card. By window 3 you've watched three full tricks, you know which trumps are gone, and you can bet nearly on sure thing. The game charges you for that information. The question isn't *"do I dare?"* — it's *"how much information do I need for this bet to be safe, and can I afford the price?"*
 
 ## The bids
 
-Each round only **2 cards per category** are on the table, drawn at random — so part of the game is adapting your hand to what came out. Think of them as **recipe orders**: promises about what you'll bring back from the forest, priced by how hard they are to keep.
+Each round only **2 cards per category** are on the table, drawn from decks that run out. The catalog changes by player count: some bids only exist with 2, 3 or 4 players, and their prize can change. Think of them as **recipe orders**: promises about what you'll bring back from the forest, priced by how hard they are to keep.
+
+In the tables, **2P / 3P / 4P** show the prize by player count. **Copies** tells you how many copies of that bid are in the deck, always in the order 2P / 3P / 4P. A `—` means it does not exist in that game.
 
 ### 🔵 Points — *"I know exactly how much I'll score"*
 
 You predict how many **card points** you'll have at round end — everything you won in tricks plus whatever the Sparrow brought home.
 
-| You need | It pays |
-| --- | --- |
-| 11–30 points | +40 |
-| 22–40 points | +45 |
-| 5–20 points | +50 |
-| 3–15 points | +55 |
-| 35 points or more | +60 |
-| 2–10 points | +65 |
-| 45 points or more | +70 |
+| You need | 2P | 3P | 4P | Copies |
+| --- | ---: | ---: | ---: | --- |
+| 1–20 points | +35 | +45 | +45 | 2 / 2 / 2 |
+| 5–25 points | +30 | +40 | +50 | 1 / 2 / 2 |
+| 10–30 points | +25 | +35 | +45 | 2 / 2 / 2 |
+| 15–35 points | +25 | +35 | +45 | 2 / 2 / 2 |
+| 20–40 points | — | +55 | +70 | 0 / 2 / 2 |
+| 25 points or more | +30 | +25 | +25 | 1 / 2 / 2 |
+| 30 points or more | — | — | +40 | 0 / 0 / 2 |
+| 35 points or more | — | — | +55 | 0 / 0 / 2 |
 
-The ranges **overlap on purpose** — with 12 points you'd satisfy three different bets. Notice the payout pattern: the tighter and more uncomfortable the promise, the more it pays. Scoring 45+ is a flex; scoring between 2 and 10 while holding winning cards is a high-wire act, and it's priced like one.
+The ranges **overlap on purpose** — with 25 points you'd satisfy several different bets. The open-ended bets are strong-hand bets: they pay less on their own, but combine beautifully with a Flowers collection or with a bid that asks you to finish by winning.
 
-> **Example.** You bet **2–10** in window 1. You're coasting at 6 points into the last trick, but the only card left in your hand is the **King of Flowers**. You have to play it. It crushes everything, adds 11, and you finish with 17. Failed: **−20**. You won a trick you didn't want with a card you couldn't not play.
+> **Example.** You bet **1–20** in window 1 with 4 players. You're coasting at 12 points into the last trick, but the only card left in your hand is the **King of Flowers**. You have to play it. It crushes everything, adds 11, and you finish with 23. Failed: **−20**. You won a trick you didn't want with a card you couldn't not play.
 >
 > **Moral:** in the low bets, the problem isn't bad cards. It's good ones.
 
-### 🟡 Collection — *"I want these, I don't want those"*
+### 🟡 Collection — *"I want to gather this suit"*
 
-Collect cards of one suit, avoid another. **Every** card that lands in your pile counts — trick wins and Sparrow steals alike.
+You bet on **one suit**. There is no declared forbidden suit: **every card of the other suits subtracts**. Every card that lands in your pile counts — trick wins and Sparrow steals alike.
 
-The seven combinations that exist: Acorns/no-Leaves · Acorns/no-Berries · Berries/no-Acorns · Berries/no-Leaves · Leaves/no-Berries · Leaves/no-Acorns · **Flowers/no-everything-else**.
+| Bid | Floor | Copies |
+| --- | ---: | --- |
+| Acorns | net 10 | 2 / 4 / 5 |
+| Leaves | net 10 | 2 / 4 / 5 |
+| Berries | net 10 | 2 / 4 / 5 |
+| Flowers | net 20 | 2 / 0 / 1 |
 
 **How it's counted:**
 
-`NET = (wanted-suit cards × 10) − (forbidden-suit cards × your window's penalty)`
+`NET = (bet-suit cards × 15) − (other-suit cards × your window's penalty)`
 
-You make the bet if the **net is 10 or more**, and you score the net. Fail it and it always costs you: **at least −10**, and if the net is even lower, you pay the whole thing.
+The penalty for each card of another suit is **−2** in window 1, **−4** in window 2 and **−6** in window 3.
+
+- If the net reaches the printed floor, **you score the net**.
+- If it doesn't, you pay the **fixed fine** for your window. A negative net is never charged as a number.
 
 **This bet doesn't look at points — it looks at card counts.** A worthless 8 of Berries counts exactly the same as the 10. It's the one category where garbage is gold.
 
-> **Example A — comfortable.** You bet "Berries / no Leaves" in **window 1**. You finish with 4 Berries and 1 Leaf: `4 × 10 = 40` minus `1 × 10 = 10` → **net 30**. Made it with room: you score **30**.
+> **Example A — comfortable.** You bet "Berries, floor 10" in **window 1**. You finish with 4 Berries and 1 card of another suit: `4 × 15 = 60` minus `1 × 2 = 2` → **net 58**. Made it with room: you score **58**.
 >
-> **Example B — same pile, three tricks later.** Same bet in **window 3**. That single Leaf now costs you 20: `40 − 20` → **net 20**. Still made, but waiting cost you 10 points.
+> **Example B — same pile, three tricks later.** Same bet in **window 3**. That single other card now costs you 6: `60 − 6` → **net 54**. Still made, but waiting cost you 4 points.
 >
-> **Example C — on the edge.** Window 2, you end with 3 Berries and 2 Leaves: `30 − 30` → **net 0**. Zero is less than ten: **failed**, and it costs you **−10**. One more card of either suit would have flipped the result.
+> **Example C — on the edge.** Window 1, you end with 1 Berry and 4 other-suit cards: `15 − 8` → **net 7**. Seven is less than ten: **failed**, and with 3 or 4 players it costs you **−10**. One more Berry would have flipped the result.
 
 ### 🔴 Tricks — *"I know exactly which tricks I'll win"*
 
-| You have to | It pays |
-| --- | --- |
-| Win exactly 3 tricks | +40 |
-| Win tricks 4 and 5 (earlier ones don't matter) | +45 |
-| Win exactly 1 trick | +50 |
-| Win 4 or 5 tricks | +55 |
-| Lose tricks 1–3 and win 4 and 5 | +60 |
-| Win **only** trick 5 — nothing else | +65 |
-| Win all 5 tricks | +70 |
+| You have to | 2P | 3P | 4P | Copies |
+| --- | ---: | ---: | ---: | --- |
+| Win no tricks | +40 | +25 | +20 | 2 / 2 / 2 |
+| Win exactly 1 trick | +80 | +65 | +50 | 2 / 2 / 2 |
+| Win exactly 2 tricks | — | — | +70 | 0 / 0 / 2 |
+| Win exactly 3 tricks | — | +55 | +80 | 0 / 2 / 2 |
+| Win tricks 4 and 5; tricks 1–3 are free | +15 | +25 | +35 | 1 / 2 / 2 |
+| Lose tricks 1–3 and win 4 and 5 | — | +55 | +70 | 0 / 2 / 2 |
+| Win **only** trick 4 | — | — | +65 | 0 / 0 / 2 |
+| Win **only** trick 5 | +80 | +75 | +60 | 2 / 2 / 2 |
+| Win all 5 tricks | +80 | — | — | 1 / 0 / 0 |
 
 **"Exactly 1 trick" is this category's beautiful trap.** It looks like the easiest bet on the board and it's where most people fall. Winning a single trick sounds trivial until you remember you also have to **lose** the other four — and nobody is obliged to follow suit, including the rival who'd love to hand you a trick you didn't want.
 
@@ -328,21 +342,23 @@ After the fifth trick resolves, everyone counts their round score:
 3. **Subtract what you owe** for each bet you failed (by the window where you declared it).
 4. The **+3** for skipping the swap already went into your total when you took it.
 
-Then the deck is shuffled, rabbits are freed, the lead rotates one seat clockwise, and the next round begins.
+Then the deck is shuffled, rabbits are freed, the lead rotates one seat clockwise, and the next round begins — if enough bid cards remain to deal a complete pool.
 
 ![Your round score panel: tricks won, your bid progress and cards collected by suit](/rules/en/round-score.png)
 
-*Your round score panel shows it all at a glance: which tricks you won, how your Points bid is doing (here: 12 points, inside the 11–30 range) and how many cards of each suit you collected.*
+*Your round score panel shows it all at a glance: which tricks you won, how your Points bid is doing (here: 12 points, inside the 10–30 range) and how many cards of each suit you collected.*
 
 > **This is the biggest decision in the game.** Not betting is a legitimate play: it banks the points of whatever you won, risk-free, with no high ceiling. Betting trades those points for a promise. A round where you won three tricks and 30 points is worth 30 if you kept quiet — and worth 0 if you bet Collection and fell short.
 
 ## Game end
 
-The game ends as soon as a player **reaches 100 points** — or **drops to −85**. The forest giveth and the forest taketh away.
+Bids come from **three separate decks** — Tricks, Points and Collection — that run out during the game. Each deck has **8 cards with 2 players, 12 with 3 and 16 with 4**, and every round consumes 2 cards of each. Because the lead rotates, the result is **two complete laps**: 4 rounds with 2 players, 6 with 3 and 8 with 4.
 
-**The winner is whoever has the highest total score** — which isn't always the one who crossed the line first, since anyone can land a +70 in the last round.
+The game ends **after the final round**, when there are no longer 2 cards of each category left to deal the next pool. Nobody gets an early finish advantage from having led more times.
 
-**Ties:** if players finish level, the tied player **closest to the lead** in turn order wins.
+**The winner is whoever has the highest total score.**
+
+**Ties:** if players finish level, the tied player **closest to the lead** in the final round's turn order wins.
 
 ![The game scoreboard with each rabbit's total score](/rules/en/game-scores.png)
 

@@ -52,6 +52,7 @@ const handleRoundSetupCompleted: GameEventHandler = (event, context) => {
   context.publicGameState.round.playerTurn = payload.playerTurn
   context.publicGameState.round.currentTrick = payload.currentTrick
   context.publicGameState.round.roundScore = []
+  context.publicGameState.bidDeckCounts = payload.bidDeckCounts
   
   console.log(`✅ ROUND_SETUP_COMPLETED: Round ${payload.round}`)
 }

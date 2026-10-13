@@ -21,7 +21,7 @@ export default {
     settings: 'Configuración',
     noGamesAvailable: 'No hay partidas disponibles en este momento.',
     joining: 'Uniéndose...',
-    pointsToWinLabel: '{points} puntos',
+    totalLapsLabel: '{laps} vueltas',
     yourProfile: 'Tu perfil',
     yourName: 'Tu nombre',
     roomDeleteConfirm: '¿Seguro que quieres eliminar esta sala?',
@@ -96,12 +96,16 @@ export default {
     cardSpecialLeaves: 'Roba una carta de la baza.',
     cardSpecialAcorns: 'Al final de la baza, elige quién abre la siguiente.',
     cardPointsValue: '{points} puntos',
+    roundProgress: 'Ronda {round}/{total}',
+    lapProgress: 'Vuelta {lap}/{total}',
+    bidDecksShort: 'Apuestas B{tricks} · P{points} · C{collection}',
+    endedDeckExhausted: 'Los mazos de apuestas ya no alcanzan para repartir otra ronda completa.',
   },
   bids: {
     scorePoints: 'Anota {min}+ puntos',
     scoreExactly: 'Anota exactamente {points} puntos',
     scoreRange: 'Anota {min}-{max} puntos',
-    collectAvoid: 'Colecciona {win}, evita {avoid}',
+    collectFloor: 'Colecciona {win}: +{value} por carta; neto ≥ {floor}',
     winTrick: 'Gana la baza {number}',
     winTricks: 'Gana las bazas {numbers}',
     winExactlyOne: 'Gana exactamente 1 baza',
@@ -120,8 +124,9 @@ export default {
     noActiveTrick: 'No hay baza activa',
     gameNotFound: 'Partida o jugador no encontrado',
     maxBidsReached: 'Se alcanzó el máximo de apuestas para esta baza',
-    bidAlreadyTaken: 'Esta apuesta ya fue tomada por otro jugador',
+    bidAlreadyTaken: 'Esta apuesta ya fue tomada por dos jugadores',
     cannotBidAfterPlaying: 'No puedes apostar después de jugar una carta',
+    bidNoLongerPossible: 'Esta apuesta ya no es posible con tu puntuación actual',
     errorFetchingGames: 'Error al cargar partidas',
     errorCreatingGame: 'Error al crear partida',
     errorJoiningGame: 'Error al unirse a la partida',
@@ -200,7 +205,7 @@ export default {
           },
           bet: {
             title: 'Ventana 1: apostá',
-            description: 'Es tu turno en la baza 1 y podés apostar antes de jugar. Tu mano es fuerte: Rey de flores, 10 de bayas, Ober y el Búho. Apostá "Puntaje 35 o más" (+60) tocándola en el panel de apuestas.',
+            description: 'Es tu turno en la baza 1 y podés apostar antes de jugar. Tu mano es fuerte: Rey de flores, 10 de bayas, Ober y el Búho. Apostá "Puntaje 35 o más" (+55) tocándola en el panel de apuestas.',
             hint: 'Para este tutorial, elegí la apuesta de puntaje "35 o más".',
           },
           playOber: {
@@ -254,15 +259,15 @@ export default {
           },
           roundScoring: {
             title: 'Cierre de ronda',
-            description: 'Como apostaste, tus 45 puntos de cartas no suman: sirvieron para medir la apuesta. Cumpliste "35 o más": +60. Anna no apostó y cobra sus 2 puntos de cartas, más los +3 del cambio.',
+            description: 'Como apostaste, tus 45 puntos de cartas no suman: sirvieron para medir la apuesta. Cumpliste "35 o más": +55. Anna no apostó y cobra sus 2 puntos de cartas, más los +3 del cambio.',
           },
           roundDone: {
             title: 'Fin de la ronda 1',
-            description: 'Ganaste +60 y vas puntero: 60 contra 3 de Anna y Magda, 0 de Hans. Quedan dos rondas — en la próxima, apuestas de colección.',
+            description: 'Ganaste +55 y vas puntero: 55 contra 3 de Anna y Magda, 0 de Hans. Quedan dos rondas — en la próxima, apuestas de colección.',
           },
           r2Intro: {
             title: 'Ronda 2 — Apuestas de colección',
-            description: 'Reparten de nuevo: 5 cartas, otra visible, nuevo cambio y nuevo pozo de apuestas. Esta ronda es para las apuestas de colección: juntar cartas de un palo y evitar otro.',
+            description: 'Reparten de nuevo: 5 cartas, otra visible, nuevo cambio y nuevo pozo de apuestas. Esta ronda es para las apuestas de colección: juntar un palo sin ensuciarte demasiado con los demás.',
           },
           r2Hand: {
             title: 'Tu mano',
@@ -275,8 +280,8 @@ export default {
           },
           r2Bet: {
             title: 'La apuesta de colección',
-            description: 'Las de colección piden juntar cartas de un palo y evitar otro — cuenta cada carta, no sus puntos. Neto = deseadas ×10 − prohibidas × penalidad de tu ventana (−10 en ventana 1). Apostá "hojas sí, flores no".',
-            hint: 'Elegí la apuesta de colección hojas/flores.',
+            description: 'Las de colección piden juntar cartas de un palo — cuenta cada carta, no sus puntos. Neto = palo ×15 − otras cartas × penalidad de tu ventana (−2 en ventana 1), y hay que llegar al piso. Apostá "Hojas, piso 10".',
+            hint: 'Elegí la apuesta de colección de hojas.',
           },
           r2Sparrow: {
             title: 'El Gorrión',
@@ -294,7 +299,7 @@ export default {
           },
           r2Trick2Result: {
             title: 'Cuatro bellotas',
-            description: '10 puntos a tu pila — palo equivocado para la colección, pero cada carta que ganás sale de las pilas ajenas. Y recordá: esos puntos no cuentan para tu apuesta, solo las hojas. Terminá la baza.',
+            description: '10 puntos a tu pila — palo equivocado para la colección, así que cada carta resta 2 al neto. Y recordá: los puntos no cuentan para tu apuesta, solo las hojas. Terminá la baza.',
           },
           r2Play9: {
             title: 'Salí con hojas',
@@ -303,7 +308,7 @@ export default {
           },
           r2Trick3Result: {
             title: 'Otra hoja a la pila',
-            description: 'Nadie tenía hojas: ganás la baza y tu 9 se queda en tu pila. Ya son 2 deseadas — el neto sería 20. Terminá la baza.',
+            description: 'Nadie tenía hojas: ganás la baza y tu 9 se queda en tu pila. Ya son 2 hojas; la basura que acumulaste todavía te deja por encima del piso. Terminá la baza.',
           },
           r2Play6: {
             title: 'Mismo plan',
@@ -312,7 +317,7 @@ export default {
           },
           r2Trick4Result: {
             title: 'Tres deseadas',
-            description: 'Nadie tenía hojas ni triunfos: otra baza, otra hoja en la pila. Ya son 3, neto 30. Terminá la baza.',
+            description: 'Nadie tenía hojas ni triunfos: otra baza, otra hoja en la pila. Ya son 3 hojas y 10 cartas de otros palos: neto 25. Terminá la baza.',
           },
           r2Play7: {
             title: 'Última carta',
@@ -325,11 +330,11 @@ export default {
           },
           r2Scoring: {
             title: 'Cierre de ronda',
-            description: 'Colección: 3 hojas deseadas ×10 − 0 flores prohibidas ×10 = neto 30. El mínimo era 10: cumplida, +30. Tus 30 puntos de cartas no cuentan porque apostaste.',
+            description: 'Colección: 3 hojas ×15 − 10 cartas de otros palos ×2 = neto 25. El piso era 10: cumplida, +25. Tus 30 puntos de cartas no cuentan porque apostaste.',
           },
           r2Done: {
-            title: '90 y subiendo',
-            description: '60 + 30 = 90 puntos. Falta una ronda: en la próxima, apuestas de bazas — y otra ave te va a sacar de un apuro.',
+            title: '80 y subiendo',
+            description: '55 + 25 = 80 puntos. Falta una ronda: en la próxima, apuestas de bazas — y otra ave te va a sacar de un apuro.',
           },
           r3Intro: {
             title: 'Ronda 3 — Apuestas de bazas',
@@ -346,7 +351,7 @@ export default {
           },
           r3Bet: {
             title: 'La apuesta de bazas',
-            description: 'Predecí cuántas bazas ganás. Con un 10, un triunfo y el Carpintero, "exactamente 2" (+55) es alcanzable — y ganar de más también pierde. Apostala.',
+            description: 'Predecí cuántas bazas ganás. Con un 10, un triunfo y el Carpintero, "exactamente 2" (+70) es alcanzable — y ganar de más también pierde. Apostala.',
             hint: 'Elegí la apuesta de bazas "exactamente 2".',
           },
           r3Trick1Watch: {
@@ -391,11 +396,11 @@ export default {
           },
           r3Scoring: {
             title: 'Cierre de ronda',
-            description: 'Ganaste exactamente 2 bazas: +55. Más los +3 del cambio que pasaste: 58 en la ronda. Las apuestas de bazas son traicioneras: ganar de más también pierde.',
+            description: 'Ganaste exactamente 2 bazas: +70. Más los +3 del cambio que pasaste: 73 en la ronda. Las apuestas de bazas son traicioneras: ganar de más también pierde.',
           },
           gameDone: {
             title: '¡Ganaste la partida!',
-            description: '148 puntos: cruzaste los 100 y la partida termina. Ya sabés cambiar, apostar puntaje, colección y bazas, y usar las tres aves. Creá una partida contra bots y probá por tu cuenta.',
+            description: '153 puntos cuando se agotaron las apuestas de la partida: ganaste. Ya sabés cambiar, apostar puntaje, colección y bazas, y usar las tres aves. Creá una partida contra bots y probá por tu cuenta.',
           },
         },
       },

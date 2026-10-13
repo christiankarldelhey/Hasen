@@ -1,7 +1,7 @@
 import { computed, type ComputedRef } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
 import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
-import { isWinningBid } from '@domain/rules/BidRules'
+import { getBidDuelAdjustment, getCollectionNetScore, getPlayerBidOutcome, getPlayerScoreFromRound } from '@domain/rules/BidRules'
 import { useGameStore } from '@/stores/gameStore'
 
 export interface RoundBidResult {
@@ -9,10 +9,13 @@ export interface RoundBidResult {
   bidEntry: PlayerBidEntry
   isWinning: boolean | null
   score: number
+  duelScore: number
   setCollectionData?: {
     winSuitCount: number
-    avoidSuitCount: number
+    otherSuitCount: number
     penaltyPerCard: number
+    netScore: number
+    floor: number
   }
 }
 
@@ -46,49 +49,40 @@ export function useRoundScore(): UseRoundScoreReturn {
   const calculateBidResult = (
     bid: Bid,
     bidEntry: PlayerBidEntry,
-    playerRoundScore: import('@domain/interfaces/Round').PlayerRoundScore
+    playerRoundScore: import('@domain/interfaces/Round').PlayerRoundScore,
+    playerId: PlayerId
   ): RoundBidResult | null => {
-    const isWinning = isWinningBid(bid, playerRoundScore, true)
-    let score = 0
+    const outcome = getPlayerBidOutcome(bid, bidEntry, playerRoundScore)
+    const duelScore = getBidDuelAdjustment(
+      gameStore.publicGameState as unknown as import('@domain/interfaces/Game').Game,
+      playerId,
+      bidEntry,
+      outcome.isWinning
+    )
     let setCollectionData: RoundBidResult['setCollectionData'] = undefined
 
-    if (isWinning === true) {
-      if (bid.bid_type === 'set_collection') {
-        const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
-        const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-        const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
-        const avoidSuitCount = avoidSuits.reduce((total, suit) => total + (playerRoundScore.setCollection[suit] || 0), 0)
-        const penaltyPerCard = Math.abs(bidEntry.onLose)
-        score = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
-        setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }
-      } else {
-        score = bid.bid_score
-      }
-    } else if (isWinning === false) {
-      if (bid.bid_type === 'set_collection') {
-        const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
-        const winSuitCount = playerRoundScore.setCollection[condition.win_suit]
-        const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
-        const avoidSuitCount = avoidSuits.reduce((total, suit) => total + (playerRoundScore.setCollection[suit] || 0), 0)
-        const penaltyPerCard = Math.abs(bidEntry.onLose)
-        const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard)
-        setCollectionData = { winSuitCount, avoidSuitCount, penaltyPerCard }
-        
-        if (netPoints >= -9 && netPoints <= 9) {
-          score = -10
-        } else {
-          score = netPoints
-        }
-      } else {
-        score = bidEntry.onLose
+    if (bid.bid_type === 'set_collection') {
+      const condition = bid.win_condition as import('@domain/interfaces/Bid').SetCollectionBidCondition
+      const winSuitCount = playerRoundScore.setCollection[condition.win_suit] || 0
+      const otherSuitCount = Object.entries(playerRoundScore.setCollection)
+        .reduce((total, [suit, count]) => total + (suit === condition.win_suit ? 0 : count), 0)
+      const netScore = getCollectionNetScore(bid, playerRoundScore, bidEntry)
+
+      setCollectionData = {
+        winSuitCount,
+        otherSuitCount,
+        penaltyPerCard: bidEntry.trickNumber * 2,
+        netScore,
+        floor: condition.floor
       }
     }
 
     return {
       bid,
       bidEntry,
-      isWinning,
-      score,
+      isWinning: outcome.isWinning,
+      score: outcome.score,
+      duelScore,
       setCollectionData
     }
   }
@@ -131,7 +125,7 @@ export function useRoundScore(): UseRoundScoreReturn {
       playerBidEntries.forEach(bidEntry => {
         const bid = round.roundBids.bids.find(b => b.bid_id === bidEntry.bidId)
         if (bid) {
-          const result = calculateBidResult(bid, bidEntry, playerRoundScore)
+          const result = calculateBidResult(bid, bidEntry, playerRoundScore, playerId)
           if (result) {
             bidResults.push(result)
           }
@@ -145,7 +139,7 @@ export function useRoundScore(): UseRoundScoreReturn {
         roundScore = playerRoundScore.points
         cardPoints = playerRoundScore.points
       } else {
-        roundScore = bidResults.reduce((sum, bid) => sum + bid.score, 0)
+        roundScore = getPlayerScoreFromRound(gameStore.publicGameState as unknown as import('@domain/interfaces/Game').Game, playerId)
         cardPoints = playerRoundScore.points
       }
 

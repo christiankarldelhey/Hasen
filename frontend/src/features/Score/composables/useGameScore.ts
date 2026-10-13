@@ -1,6 +1,6 @@
 import { computed, type ComputedRef } from 'vue'
 import type { PlayerId } from '@domain/interfaces/Player'
-import type { SetCollectionBidCondition } from '@domain/interfaces/Bid'
+import { getCollectionNetScore } from '@domain/rules/BidRules'
 import { useGameStore } from '@/stores/gameStore'
 
 export interface UseGameScoreReturn {
@@ -93,17 +93,7 @@ export function useGameScore(playerId: PlayerId): UseGameScoreReturn {
     const bid = allBids.find(b => b.bid_id === setBidEntry.bidId)
     if (!bid) return 0
     
-    const condition = bid.win_condition as SetCollectionBidCondition
-    const setCollection = playerRoundScore.value.setCollection
-    
-    const winCount = setCollection[condition.win_suit] || 0
-    const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
-    const avoidCount = avoidSuits.reduce((total, suit) => total + (setCollection[suit] || 0), 0)
-    
-    const winScore = winCount * bid.bid_score
-    const avoidScore = avoidCount * setBidEntry.onLose
-    
-    return winScore + avoidScore
+    return getCollectionNetScore(bid, playerRoundScore.value, setBidEntry)
   })
 
   return {

@@ -150,12 +150,14 @@ function roundResult(script: ScriptedRound, players: PlayerId[], playerId: Playe
   // Only the tutorial player places bids in our scripts.
   const entries: PlayerBidEntry[] = script.playerBids.map(placed => {
     const bid = script.bids.find(b => b.bid_id === placed.bidId)!
-    return {
+    const entry: PlayerBidEntry = {
       bidId: placed.bidId,
       trickNumber: placed.trickNumber,
       onLose: calculateBidOnLose(bid.bid_type, placed.trickNumber),
-      isPlayerWinning: isWinningBid(bid, roundScore.get(TUTORIAL_PLAYER_ID)!, true)
+      isPlayerWinning: null
     }
+    entry.isPlayerWinning = isWinningBid(bid, roundScore.get(TUTORIAL_PLAYER_ID)!, true, { bidEntry: entry })
+    return entry
   })
   const game = {
     round: {
@@ -248,12 +250,14 @@ export function scriptedState(match: ScriptedMatch, cursor: ScriptCursor): Tutor
     const myScore = roundScore.get(TUTORIAL_PLAYER_ID)!
     const entries: PlayerBidEntry[] = placedBids.map(placed => {
       const bid = script.bids.find(b => b.bid_id === placed.bidId)!
-      return {
+      const entry: PlayerBidEntry = {
         bidId: placed.bidId,
         trickNumber: placed.trickNumber,
         onLose: calculateBidOnLose(bid.bid_type, placed.trickNumber),
-        isPlayerWinning: isWinningBid(bid, myScore, cursor.phase === 'scoring')
+        isPlayerWinning: null
       }
+      entry.isPlayerWinning = isWinningBid(bid, myScore, cursor.phase === 'scoring', { bidEntry: entry })
+      return entry
     })
 
     gs.round.roundBids = {

@@ -1,11 +1,40 @@
 import { describe, expect, it } from 'vitest'
+import type { Bid } from '../interfaces/Bid'
 import type { Game, PlayerScore } from '../interfaces/Game'
 import type { PlayerId } from '../interfaces/Player'
-import { GAME_END_MAX_SCORE, GAME_END_MIN_SCORE, hasGameEnded } from './GameEndRules'
+import { hasGameEnded } from './GameEndRules'
+
+function bid(id: string, type: Bid['bid_type']): Bid {
+  const win_condition =
+    type === 'points'
+      ? { min_points: 1, max_points: 20 }
+      : type === 'set_collection'
+        ? { win_suit: 'acorns' as const, floor: 10 }
+        : { win_min_tricks: 1, win_max_tricks: 1 }
+
+  return { bid_id: id, bid_type: type, bid_score: 10, win_condition }
+}
+
+function fullDecks(): Game['bidDecks'] {
+  return {
+    setCollectionBidDeck: [bid('set-1', 'set_collection'), bid('set-2', 'set_collection')],
+    pointsBidDeck: [bid('points-1', 'points'), bid('points-2', 'points')],
+    tricksBidDeck: [bid('trick-1', 'trick'), bid('trick-2', 'trick')]
+  }
+}
+
+function emptyDecks(): Game['bidDecks'] {
+  return {
+    setCollectionBidDeck: [],
+    pointsBidDeck: [],
+    tricksBidDeck: []
+  }
+}
 
 function createGameFixture(options?: {
   playerScores?: PlayerScore[]
   playerTurnOrder?: PlayerId[]
+  bidDecks?: Game['bidDecks']
 }): Game {
   return {
     gameId: 'game-1',
@@ -19,11 +48,7 @@ function createGameFixture(options?: {
     ],
     deck: [],
     discardPile: [],
-    bidDecks: {
-      setCollectionBidDeck: [],
-      pointsBidDeck: [],
-      tricksBidDeck: []
-    },
+    bidDecks: options?.bidDecks ?? fullDecks(),
     gamePhase: 'playing',
     round: {
       round: 1,
@@ -41,48 +66,41 @@ function createGameFixture(options?: {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 100,
       reconnectionTimeoutMinutes: 3
     }
   }
 }
 
 describe('hasGameEnded', () => {
-  it('does not end when nobody reached the thresholds', () => {
+  it('does not end before any round has been scored', () => {
+    const game = createGameFixture({ playerScores: [], bidDecks: emptyDecks() })
+    expect(hasGameEnded(game)).toEqual({ hasEnded: false, winner: null })
+  })
+
+  it('does not end while the decks can still provide a complete pool', () => {
     const game = createGameFixture({
       playerScores: [
-        { playerId: 'player_1', score: 50 },
-        { playerId: 'player_2', score: GAME_END_MAX_SCORE - 1 },
-        { playerId: 'player_3', score: GAME_END_MIN_SCORE + 1 }
-      ]
+        { playerId: 'player_1', score: 150 },
+        { playerId: 'player_2', score: 40 },
+        { playerId: 'player_3', score: -90 }
+      ],
+      bidDecks: fullDecks()
     })
 
     expect(hasGameEnded(game)).toEqual({ hasEnded: false, winner: null })
   })
 
-  it('does not end with no scores', () => {
-    const game = createGameFixture({ playerScores: [] })
-    expect(hasGameEnded(game)).toEqual({ hasEnded: false, winner: null })
-  })
-
-  it('ends when a player reaches +100 and the highest score wins', () => {
+  it('ends when any deck has fewer cards than a complete pool needs', () => {
     const game = createGameFixture({
+      bidDecks: {
+        setCollectionBidDeck: [bid('set-last', 'set_collection')],
+        pointsBidDeck: [bid('points-1', 'points'), bid('points-2', 'points')],
+        tricksBidDeck: [bid('trick-1', 'trick'), bid('trick-2', 'trick')]
+      },
       playerScores: [
-        { playerId: 'player_1', score: GAME_END_MAX_SCORE },
+        { playerId: 'player_1', score: 10 },
         { playerId: 'player_2', score: 40 },
-        { playerId: 'player_3', score: 10 }
-      ]
-    })
-
-    expect(hasGameEnded(game)).toEqual({ hasEnded: true, winner: 'player_1' })
-  })
-
-  it('ends when a player reaches -85 and someone else wins', () => {
-    const game = createGameFixture({
-      playerScores: [
-        { playerId: 'player_1', score: GAME_END_MIN_SCORE },
-        { playerId: 'player_2', score: 40 },
-        { playerId: 'player_3', score: 10 }
+        { playerId: 'player_3', score: 30 }
       ]
     })
 
@@ -90,8 +108,8 @@ describe('hasGameEnded', () => {
   })
 
   it('the mano wins a tie at the top score', () => {
-    // player_2 es el mano (playerTurnOrder[0])
     const game = createGameFixture({
+      bidDecks: emptyDecks(),
       playerScores: [
         { playerId: 'player_1', score: 110 },
         { playerId: 'player_2', score: 110 },
@@ -103,13 +121,11 @@ describe('hasGameEnded', () => {
   })
 
   it('when the mano is not tied, the tied player closest to the mano wins', () => {
-    // Orden desde el mano: player_2 (mano), player_3, player_1
-    // Empatados en el máximo: player_1 y player_3 → gana player_3
-    // El fin lo dispara el mano llegando a -85
     const game = createGameFixture({
+      bidDecks: emptyDecks(),
       playerScores: [
         { playerId: 'player_1', score: 60 },
-        { playerId: 'player_2', score: GAME_END_MIN_SCORE },
+        { playerId: 'player_2', score: 10 },
         { playerId: 'player_3', score: 60 }
       ]
     })
@@ -120,9 +136,10 @@ describe('hasGameEnded', () => {
   it('falls back to the first top scorer when playerTurnOrder is empty', () => {
     const game = createGameFixture({
       playerTurnOrder: [],
+      bidDecks: emptyDecks(),
       playerScores: [
         { playerId: 'player_1', score: 30 },
-        { playerId: 'player_2', score: GAME_END_MAX_SCORE }
+        { playerId: 'player_2', score: 80 }
       ]
     })
 

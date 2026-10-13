@@ -40,7 +40,10 @@ export function usePlayerObjectiveStatus(
     const results = entries.map((entry) => {
       const bid = bids.find((b) => b.bid_id === entry.bidId)
       if (!bid) return null
-      return isWinningBid(bid, score, isRoundComplete)
+      return isWinningBid(bid, score, isRoundComplete, {
+        bidEntry: entry,
+        currentTrickNumber: gameStore.publicGameState?.round.currentTrick?.trick_number
+      })
     })
 
     if (results.some((r) => r === false)) return 'losing'

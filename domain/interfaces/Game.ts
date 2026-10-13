@@ -35,7 +35,6 @@ export interface Game {
   gameSettings: {
     minPlayers: number
     maxPlayers: number
-    pointsToWin: number
     reconnectionTimeoutMinutes: number
   }
 }
@@ -54,7 +53,7 @@ export interface LobbyGame {
   maxPlayers: 2 | 3 | 4;
   minPlayers: 2;
   hasSpace: boolean;
-  pointsToWin: number;
+  totalLaps: number;
   createdAt: string;
 }
 
@@ -86,6 +85,12 @@ export interface PublicGameState {
   playerTurnOrder: PlayerId[]
   round: PublicRoundState
   playerScores: PlayerScore[];
+  /** Cartas que quedan en cada mazo de apuestas; nunca expone las próximas apuestas */
+  bidDeckCounts: {
+    set_collection: number
+    points: number
+    trick: number
+  }
   winner: PlayerId | null;
   playerConnectionStatus: Record<PlayerId, PlayerConnectionStatus>
   isPaused: boolean
@@ -93,7 +98,6 @@ export interface PublicGameState {
   gameSettings: {
     minPlayers: number
     maxPlayers: number
-    pointsToWin: number
     reconnectionTimeoutMinutes: number
   }
 }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { Bid, BidType, PlayerBidsMap } from '../interfaces/Bid'
+import type { Bid, BidType, PlayerBidsMap, PlayerCount } from '../interfaces/Bid'
 import type { Game } from '../interfaces/Game'
 import type { PlayerId } from '../interfaces/Player'
 import type { RoundPhase } from '../interfaces/Round'
 import type { TrickNumber, TrickState } from '../interfaces/Trick'
-import { calculateBidOnLose, canMakeBid, isWinningBid, getPlayerScoreFromRound } from './BidRules'
+import { calculateBidOnLose, canMakeBid, canMakeSpecificBid, isWinningBid, getPlayerScoreFromRound } from './BidRules'
 
 function createGameFixture(options?: {
   playerTurn?: PlayerId
@@ -97,7 +97,6 @@ function createGameFixture(options?: {
     gameSettings: {
       minPlayers: 2,
       maxPlayers: 4,
-      pointsToWin: 100,
       reconnectionTimeoutMinutes: 3
     }
   }
@@ -181,22 +180,52 @@ describe('canMakeBid', () => {
     expect(result.canMakeBid).toBe(false)
     expect(result.reason).toBe('No trick bids are possible given your current progress')
   })
+
+  it('rejects a specific bid once two players already took it', () => {
+    const trickBid: Bid = {
+      bid_id: 'shared-trick',
+      bid_type: 'trick',
+      bid_score: 50,
+      win_condition: { win_min_tricks: 1, win_max_tricks: 1 }
+    }
+    const otherTrickBid: Bid = {
+      bid_id: 'other-trick',
+      bid_type: 'trick',
+      bid_score: 35,
+      win_condition: { win_min_tricks: 0, win_max_tricks: 0 }
+    }
+    const game = createGameFixture({
+      bids: [trickBid, otherTrickBid],
+      playerBids: {
+        player_2: [{ bidId: trickBid.bid_id, trickNumber: 1, onLose: -20, isPlayerWinning: null }],
+        player_3: [{ bidId: trickBid.bid_id, trickNumber: 1, onLose: -20, isPlayerWinning: null }]
+      }
+    })
+
+    const result = canMakeSpecificBid(game, 'player_1', trickBid, 1)
+
+    expect(result.canMakeBid).toBe(false)
+    expect(result.reason).toBe('This bid already has the maximum of 2 players')
+  })
 })
 
 describe('calculateBidOnLose', () => {
-  it.each<[BidType, TrickNumber, number]>([
-    ['set_collection', 1, -10],
-    ['set_collection', 2, -15],
-    ['set_collection', 3, -20],
-    ['trick', 1, -20],
-    ['trick', 2, -25],
-    ['trick', 3, -30],
-    ['points', 1, -20],
-    ['points', 2, -25],
-    ['points', 3, -30],
-    ['trick', 4, 0]
-  ])('returns %s penalty for trick %i', (bidType: BidType, trickNumber: TrickNumber, expected: number) => {
-    expect(calculateBidOnLose(bidType, trickNumber)).toBe(expected)
+  it.each<[BidType, TrickNumber, PlayerCount, number]>([
+    ['set_collection', 1, 4, -10],
+    ['set_collection', 2, 4, -15],
+    ['set_collection', 3, 4, -20],
+    ['set_collection', 1, 2, -15],
+    ['set_collection', 2, 2, -20],
+    ['set_collection', 3, 2, -25],
+    ['trick', 1, 4, -20],
+    ['trick', 2, 4, -25],
+    ['trick', 3, 4, -30],
+    ['points', 1, 4, -20],
+    ['points', 2, 4, -25],
+    ['points', 3, 4, -30],
+    ['trick', 4, 4, 0]
+  ])('returns %s penalty for trick %i with %i players', (bidType: BidType, trickNumber: TrickNumber, playerCount: PlayerCount, expected: number) => {
+    expect(calculateBidOnLose(bidType, trickNumber, playerCount)).toBe(expected)
   })
 })
 
@@ -250,14 +279,14 @@ describe('isWinningBid', () => {
     expect(result).toBe(true)
   })
 
-  it('returns true for set_collection bid when net points are >= 10', () => {
+  it('returns true for set_collection bid when the net reaches the floor', () => {
     const setBid: Bid = {
-      bid_id: 'set-net-positive',
+      bid_id: 'set-floor',
       bid_type: 'set_collection',
       bid_score: 15,
       win_condition: {
         win_suit: 'acorns',
-        avoid_suit: 'leaves'
+        floor: 10
       }
     }
 
@@ -269,45 +298,49 @@ describe('isWinningBid', () => {
         tricksWon: [],
         setCollection: { acorns: 2, leaves: 1, berries: 0, flowers: 0 }
       },
-      true
+      true,
+      { bidEntry: { bidId: setBid.bid_id, trickNumber: 1, onLose: -10, isPlayerWinning: null } }
     )
 
     expect(result).toBe(true)
   })
 
-  it('returns false during round when avoid suit already makes bid impossible', () => {
+  it('uses the bid window penalty for every card of the other suits', () => {
     const setBid: Bid = {
-      bid_id: 'set-impossible',
+      bid_id: 'set-window-penalty',
       bid_type: 'set_collection',
       bid_score: 15,
       win_condition: {
         win_suit: 'berries',
-        avoid_suit: 'flowers'
+        floor: 20
       }
     }
+    const playerRoundScore = {
+      playerId: 'player_1' as PlayerId,
+      points: 0,
+      tricksWon: [] as TrickNumber[],
+      setCollection: { acorns: 1, leaves: 1, berries: 2, flowers: 0 }
+    }
 
-    const result = isWinningBid(
-      setBid,
-      {
-        playerId: 'player_1',
-        points: 0,
-        tricksWon: [],
-        setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 1 }
-      },
-      false
-    )
+    const windowOneResult = isWinningBid(setBid, playerRoundScore, true, {
+      bidEntry: { bidId: setBid.bid_id, trickNumber: 1, onLose: -10, isPlayerWinning: null }
+    })
+    const windowThreeResult = isWinningBid(setBid, playerRoundScore, true, {
+      bidEntry: { bidId: setBid.bid_id, trickNumber: 3, onLose: -20, isPlayerWinning: null }
+    })
 
-    expect(result).toBe(false)
+    expect(windowOneResult).toBe(true) // 30 - 2×2 = 26
+    expect(windowThreeResult).toBe(false) // 30 - 2×6 = 18
   })
 
-  it('returns true for set_collection bid with multiple avoid suits when net points are >= 10', () => {
+  it('returns null during the round while a collection bid can still reach the floor', () => {
     const setBid: Bid = {
-      bid_id: 'set-flowers-avoid-others',
+      bid_id: 'set-in-progress',
       bid_type: 'set_collection',
-      bid_score: 10,
+      bid_score: 15,
       win_condition: {
-        win_suit: 'flowers',
-        avoid_suit: ['acorns', 'berries', 'leaves']
+        win_suit: 'acorns',
+        floor: 10
       }
     }
 
@@ -317,22 +350,23 @@ describe('isWinningBid', () => {
         playerId: 'player_1',
         points: 0,
         tricksWon: [],
-        setCollection: { acorns: 0, leaves: 1, berries: 0, flowers: 2 }
+        setCollection: { acorns: 0, leaves: 2, berries: 0, flowers: 0 }
       },
-      true
+      false,
+      { bidEntry: { bidId: setBid.bid_id, trickNumber: 1, onLose: -10, isPlayerWinning: null } }
     )
 
-    expect(result).toBe(true)
+    expect(result).toBeNull()
   })
 
-  it('returns false for set_collection bid with multiple avoid suits when net points are below 10', () => {
+  it('returns false at round end when the collection net is below the floor', () => {
     const setBid: Bid = {
-      bid_id: 'set-flowers-avoid-others',
+      bid_id: 'set-below-floor',
       bid_type: 'set_collection',
-      bid_score: 10,
+      bid_score: 15,
       win_condition: {
         win_suit: 'flowers',
-        avoid_suit: ['acorns', 'berries', 'leaves']
+        floor: 20
       }
     }
 
@@ -342,12 +376,13 @@ describe('isWinningBid', () => {
         playerId: 'player_1',
         points: 0,
         tricksWon: [],
-        setCollection: { acorns: 1, leaves: 1, berries: 0, flowers: 2 }
+        setCollection: { acorns: 1, leaves: 1, berries: 0, flowers: 1 }
       },
-      true
+      true,
+      { bidEntry: { bidId: setBid.bid_id, trickNumber: 1, onLose: -10, isPlayerWinning: null } }
     )
 
-    expect(result).toBe(false)
+    expect(result).toBe(false) // 15 - 2×2 = 11
   })
 
   it('returns false for trick bid when winning outside may+required positions', () => {
@@ -416,10 +451,10 @@ describe('getPlayerScoreFromRound', () => {
     const setCollectionBid: Bid = {
       bid_id: 'set-bid-1',
       bid_type: 'set_collection',
-      bid_score: 10,
+      bid_score: 15,
       win_condition: {
         win_suit: 'acorns',
-        avoid_suit: 'berries'
+        floor: 10
       }
     }
     
@@ -450,7 +485,7 @@ describe('getPlayerScoreFromRound', () => {
     
     const score = getPlayerScoreFromRound(game, 'player_1')
     
-    expect(score).toBe(-30)
+    expect(score).toBe(-35)
   })
   
   it('should return card points for players without bids', () => {
@@ -474,5 +509,73 @@ describe('getPlayerScoreFromRound', () => {
     const score = getPlayerScoreFromRound(game, 'player_1')
     
     expect(score).toBe(25)
+  })
+
+  it('pays the collection net when the floor is reached', () => {
+    const collectionBid: Bid = {
+      bid_id: 'set-net-win',
+      bid_type: 'set_collection',
+      bid_score: 15,
+      win_condition: { win_suit: 'acorns', floor: 10 }
+    }
+    const game: any = {
+      round: {
+        roundScore: [
+          {
+            playerId: 'player_1',
+            points: 0,
+            tricksWon: [],
+            setCollection: { acorns: 2, leaves: 1, berries: 1, flowers: 0 }
+          }
+        ],
+        roundBids: {
+          bids: [collectionBid],
+          playerBids: {
+            player_1: [
+              { bidId: collectionBid.bid_id, trickNumber: 1, onLose: -10, isPlayerWinning: null }
+            ]
+          }
+        }
+      }
+    }
+
+    expect(getPlayerScoreFromRound(game, 'player_1')).toBe(26) // 30 - 2×2
+  })
+
+  it('applies the ±5 duel adjustment when two players share a bid and only one wins', () => {
+    const sharedBid: Bid = {
+      bid_id: 'shared-points',
+      bid_type: 'points',
+      bid_score: 45,
+      win_condition: { min_points: 10, max_points: 30 }
+    }
+    const game: any = {
+      round: {
+        roundScore: [
+          {
+            playerId: 'player_1',
+            points: 20,
+            tricksWon: [],
+            setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+          },
+          {
+            playerId: 'player_2',
+            points: 45,
+            tricksWon: [],
+            setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
+          }
+        ],
+        roundBids: {
+          bids: [sharedBid],
+          playerBids: {
+            player_1: [{ bidId: sharedBid.bid_id, trickNumber: 1, onLose: -20, isPlayerWinning: null }],
+            player_2: [{ bidId: sharedBid.bid_id, trickNumber: 1, onLose: -20, isPlayerWinning: null }]
+          }
+        }
+      }
+    }
+
+    expect(getPlayerScoreFromRound(game, 'player_1')).toBe(50)
+    expect(getPlayerScoreFromRound(game, 'player_2')).toBe(-25)
   })
 })

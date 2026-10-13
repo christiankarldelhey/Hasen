@@ -3,6 +3,7 @@ import type { TrickNumber } from './Trick'
 
 export type BidType = 'points' | 'set_collection' | 'trick'
 export type BidScore = number
+export type PlayerCount = 2 | 3 | 4
 
 export interface PointsBidCondition {
   min_points: number
@@ -11,15 +12,15 @@ export interface PointsBidCondition {
 
 export interface SetCollectionBidCondition {
   win_suit: Suit
-  avoid_suit: Suit | Suit[]
+  floor: number
 }
 
 export interface TrickBidCondition {
   win_trick_position?: TrickNumber[]
   lose_trick_position?: TrickNumber[]
   may_win_trick_position?: TrickNumber[]
-  win_min_tricks?: TrickNumber
-  win_max_tricks?: TrickNumber
+  win_min_tricks?: number
+  win_max_tricks?: number
 }
 
 export interface PlayerBidEntry {
@@ -39,6 +40,7 @@ export interface PlayerBidsMap {
 export interface Bid {
   bid_id: string
   bid_type: BidType
+  /** Premio por cumplir (o valor por carta del palo en Colección), ya resuelto para la cantidad de jugadores de la partida */
   bid_score: BidScore
   win_condition: PointsBidCondition | SetCollectionBidCondition | TrickBidCondition
 }

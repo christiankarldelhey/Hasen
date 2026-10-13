@@ -6,22 +6,29 @@ import Deck from './Deck.vue'
 import GamePanel from '@/common/components/GamePanel.vue'
 import BaseModal from '@/common/components/BaseModal.vue'
 import ActionButton from '@/common/components/ActionButton.vue'
-// import { useGameStore } from '@/stores/gameStore'
+import { useGameStore } from '@/stores/gameStore'
 import { useAudio } from '@/common/composables/useAudio'
 import { useI18n } from '@/common/composables/useI18n'
 import { useSocket } from '@/common/composables/useSocket'
 import { useHasenStore } from '@/stores/hasenStore'
 import { userIdService } from '@/services/userIdService'
 import { IconLogout2, IconMusic, IconMusicOff, IconVolume, IconVolumeOff } from '@tabler/icons-vue'
+import { GAME_TOTAL_LAPS, getTotalRounds } from '@domain/rules/BidDeckRules'
 
-// const gameStore = useGameStore()
+const gameStore = useGameStore()
 const route = useRoute()
 const router = useRouter()
 const socket = useSocket()
 const hasenStore = useHasenStore()
 const { t } = useI18n()
 
-// const pointsToWin = computed(() => gameStore.publicGameState?.gameSettings.pointsToWin ?? 0)
+const playerCount = computed(() => gameStore.publicGameState?.activePlayers.length ?? 4)
+const totalRounds = computed(() => getTotalRounds(playerCount.value))
+const currentLap = computed(() => {
+  const round = gameStore.publicGameState?.round.round ?? 1
+  return Math.min(GAME_TOTAL_LAPS, Math.ceil(round / Math.max(1, playerCount.value)))
+})
+const bidDeckCounts = computed(() => gameStore.publicGameState?.bidDeckCounts)
 
 const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx } = useAudio()
 
@@ -78,14 +85,12 @@ const handleConfirmLogout = () => {
     <div class="flex flex-col gap-1">
       <div class="flex flex-row gap-2">
         <div class="flex flex-col gap-1" data-tutorial-id="deck-zone">
-          <!-- Ranking de jugadores ordenado por score -->
-          <!-- <div class="flex flex-row w-full justify-end">
-            <div v-if="pointsToWin" class="flex items-center align-right px-1 shadow-md">
-              <IconStarFilled :size="14" class="text-hasen-base" />
-              <span class="pl-1 text-hasen-base text-md">{{ pointsToWin }}</span>
-            </div>
-          </div> -->
           <Deck />
+          <div v-if="bidDeckCounts" class="flex flex-col items-center gap-0.5 text-[10px] font-semibold text-hasen-base">
+            <span>{{ t('game.roundProgress', { round: gameStore.publicGameState?.round.round ?? 1, total: totalRounds }) }}</span>
+            <span>{{ t('game.lapProgress', { lap: currentLap, total: GAME_TOTAL_LAPS }) }}</span>
+            <span>{{ t('game.bidDecksShort', { tricks: bidDeckCounts.trick, points: bidDeckCounts.points, collection: bidDeckCounts.set_collection }) }}</span>
+          </div>
         </div>
         <div data-tutorial-id="game-scores">
           <GameScores />

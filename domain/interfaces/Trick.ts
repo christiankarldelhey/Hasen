@@ -1,6 +1,7 @@
 import type { PlayerId } from './Player'
 import type { PlayingCardId, Suit } from './Card'
 
+export const TOTAL_TRICKS = 5
 export type TrickNumber = 1 | 2 | 3 | 4 | 5
 export type TrickState = 'in_progress' | 'awaiting_special_action' | 'resolve' | 'ended'
 export type LeadSuit = 'acorns' | 'leaves' | 'berries'

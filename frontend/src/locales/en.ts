@@ -21,7 +21,7 @@ export default {
     settings: 'Settings',
     noGamesAvailable: 'There are no available games at the moment.',
     joining: 'Joining...',
-    pointsToWinLabel: '{points} points',
+    totalLapsLabel: '{laps} laps',
     yourProfile: 'Your profile',
     yourName: 'Your name',
     roomDeleteConfirm: 'Are you sure you want to delete this room?',
@@ -96,12 +96,16 @@ export default {
     cardSpecialLeaves: 'Steal a card from the trick.',
     cardSpecialAcorns: 'At the end of the trick, choose who leads the next one.',
     cardPointsValue: '{points} points',
+    roundProgress: 'Round {round}/{total}',
+    lapProgress: 'Lap {lap}/{total}',
+    bidDecksShort: 'Bids T{tricks} · P{points} · C{collection}',
+    endedDeckExhausted: 'The bid decks cannot provide another complete round.',
   },
   bids: {
     scorePoints: 'Score {min}+ points',
     scoreExactly: 'Score exactly {points} points',
     scoreRange: 'Score {min}-{max} points',
-    collectAvoid: 'Collect {win}, avoid {avoid}',
+    collectFloor: 'Collect {win}: +{value} per card; net ≥ {floor}',
     winTrick: 'Win trick {number}',
     winTricks: 'Win tricks {numbers}',
     winExactlyOne: 'Win exactly 1 trick',
@@ -120,8 +124,9 @@ export default {
     noActiveTrick: 'No active trick',
     gameNotFound: 'Game or player not found',
     maxBidsReached: 'Maximum bids reached for this trick',
-    bidAlreadyTaken: 'This bid is already taken by another player',
+    bidAlreadyTaken: 'This bid is already taken by two players',
     cannotBidAfterPlaying: 'Cannot bid after playing a card',
+    bidNoLongerPossible: 'This bid is no longer possible with your current progress',
     errorFetchingGames: 'Error when fetching games',
     errorCreatingGame: 'Error creating new game',
     errorJoiningGame: 'Error joining game',
@@ -200,7 +205,7 @@ export default {
           },
           bet: {
             title: 'Window 1: place a bet',
-            description: 'It\'s your turn in trick 1 and you may bet before playing. Your hand is strong: King of Flowers, 10 of Berries, an Ober and the Owl. Bet "Points 35 or more" (+60) by tapping it in the bids panel.',
+            description: 'It\'s your turn in trick 1 and you may bet before playing. Your hand is strong: King of Flowers, 10 of Berries, an Ober and the Owl. Bet "Points 35 or more" (+55) by tapping it in the bids panel.',
             hint: 'For this tutorial, pick the "35 or more" points bet.',
           },
           playOber: {
@@ -254,15 +259,15 @@ export default {
           },
           roundScoring: {
             title: 'Round scoring',
-            description: 'Since you bet, your 45 card points don\'t score: they were the measuring stick for the bet. You made "35 or more": +60. Anna didn\'t bet and banks her 2 card points plus the +3 from the swap.',
+            description: 'Since you bet, your 45 card points don\'t score: they were the measuring stick for the bet. You made "35 or more": +55. Anna didn\'t bet and banks her 2 card points plus the +3 from the swap.',
           },
           roundDone: {
             title: 'End of round 1',
-            description: 'You made +60 and lead: 60 against Anna and Magda\'s 3, Hans\' 0. Two rounds left — next up, collection bets.',
+            description: 'You made +55 and lead: 55 against Anna and Magda\'s 3, Hans\' 0. Two rounds left — next up, collection bets.',
           },
           r2Intro: {
             title: 'Round 2 — Collection bets',
-            description: 'Fresh deal: 5 cards, one face-up, a new swap and a new bid pool. This round is about collection bets: gather cards of one suit while avoiding another.',
+            description: 'Fresh deal: 5 cards, one face-up, a new swap and a new bid pool. This round is about collection bets: gather one suit without taking too much of the others.',
           },
           r2Hand: {
             title: 'Your hand',
@@ -275,8 +280,8 @@ export default {
           },
           r2Bet: {
             title: 'The collection bet',
-            description: 'Collection bets ask you to gather cards of one suit and avoid another — every card counts, not its points. Net = wanted ×10 − forbidden × your window\'s penalty (−10 in window 1). Bet "leaves yes, flowers no".',
-            hint: 'Pick the leaves/flowers collection bet.',
+            description: 'Collection bets ask you to gather cards of one suit — every card counts, not its points. Net = suit cards ×15 − other-suit cards × your window\'s penalty (−2 in window 1), and you must reach the floor. Bet "Leaves, floor 10".',
+            hint: 'Pick the leaves collection bet.',
           },
           r2Sparrow: {
             title: 'The Sparrow',
@@ -294,7 +299,7 @@ export default {
           },
           r2Trick2Result: {
             title: 'Four acorns',
-            description: '10 points into your pile — wrong suit for the collection, but every card you win leaves a rival\'s pile. And remember: those points don\'t count for your bet, only leaves do. Finish the trick.',
+            description: '10 points into your pile — wrong suit for the collection, so each card subtracts 2 from the net. And remember: those points don\'t count for your bet, only leaves do. Finish the trick.',
           },
           r2Play9: {
             title: 'Lead leaves',
@@ -303,7 +308,7 @@ export default {
           },
           r2Trick3Result: {
             title: 'Another leaf banked',
-            description: 'Nobody had leaves: you win and your 9 stays in your pile. That\'s 2 wanted — net would be 20. Finish the trick.',
+            description: 'Nobody had leaves: you win and your 9 stays in your pile. That\'s 2 leaves; the other cards you took still leave you above the floor. Finish the trick.',
           },
           r2Play6: {
             title: 'Same plan',
@@ -312,7 +317,7 @@ export default {
           },
           r2Trick4Result: {
             title: 'Three wanted',
-            description: 'Nobody had leaves or trumps: another trick, another leaf in the pile. That\'s 3, net 30. Finish the trick.',
+            description: 'Nobody had leaves or trumps: another trick, another leaf in the pile. That\'s 3 leaves and 10 other-suit cards: net 25. Finish the trick.',
           },
           r2Play7: {
             title: 'Last card',
@@ -325,11 +330,11 @@ export default {
           },
           r2Scoring: {
             title: 'Round scoring',
-            description: 'Collection: 3 wanted leaves ×10 − 0 forbidden flowers ×10 = net 30. The minimum was 10: made, +30. Your 30 card points don\'t count because you bet.',
+            description: 'Collection: 3 leaves ×15 − 10 other-suit cards ×2 = net 25. The floor was 10 — made, +25. Your 30 card points don\'t count because you bet.',
           },
           r2Done: {
-            title: '90 and climbing',
-            description: '60 + 30 = 90 points. One round to go: next, trick bets — and another bird will get you out of a jam.',
+            title: '80 and climbing',
+            description: '55 + 25 = 80 points. One round to go: next, trick bets — and another bird will get you out of a jam.',
           },
           r3Intro: {
             title: 'Round 3 — Trick bets',
@@ -346,7 +351,7 @@ export default {
           },
           r3Bet: {
             title: 'The trick bet',
-            description: 'Predict how many tricks you\'ll win. With a 10, a trump and the Woodpecker, "exactly 2" (+55) is within reach — and winning one too many also loses. Place it.',
+            description: 'Predict how many tricks you\'ll win. With a 10, a trump and the Woodpecker, "exactly 2" (+70) is within reach — and winning one too many also loses. Place it.',
             hint: 'Pick the "exactly 2" trick bet.',
           },
           r3Trick1Watch: {
@@ -391,11 +396,11 @@ export default {
           },
           r3Scoring: {
             title: 'Round scoring',
-            description: 'You won exactly 2 tricks: +55. Plus the +3 from the swap you passed: 58 this round. Trick bets are treacherous — winning one too many also loses.',
+            description: 'You won exactly 2 tricks: +70. Plus the +3 from the swap you passed: 73 this round. Trick bets are treacherous — winning one too many also loses.',
           },
           gameDone: {
             title: 'You won the game!',
-            description: '148 points: you crossed 100 and the game ends. You now know how to swap, bet points, collection and tricks, and use all three birds. Create a game against bots and try it yourself.',
+            description: '153 points when the game ran out of bid cards: you win. You now know how to swap, bet points, collection and tricks, and use all three birds. Create a game against bots and try it yourself.',
           },
         },
       },

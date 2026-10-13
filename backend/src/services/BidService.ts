@@ -1,6 +1,6 @@
 import { GameModel } from '@/models/Game.js'
 import type { PlayerId } from '@domain/interfaces/Player'
-import type { BidType } from '@domain/interfaces/Bid'
+import type { BidType, PlayerCount } from '@domain/interfaces/Bid'
 import type { TrickNumber } from '@domain/interfaces/Trick'
 import { canMakeSpecificBid, calculateBidOnLose } from '@domain/rules/BidRules'
 import { createBidMadeEvent } from '@domain/events/GameEvents'
@@ -49,7 +49,8 @@ export class BidService {
       throw new Error(validation.reason || 'Cannot make bid')
     }
 
-    const onLose = calculateBidOnLose(bidType, trickNumber)
+    const playerCount = Math.min(4, Math.max(2, game.activePlayers.length)) as PlayerCount
+    const onLose = calculateBidOnLose(bidType, trickNumber, playerCount)
 
     if (!game.round.roundBids.playerBids[playerId]) {
       game.round.roundBids.playerBids[playerId] = []

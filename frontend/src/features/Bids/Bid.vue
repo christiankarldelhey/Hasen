@@ -148,7 +148,7 @@ const handleBidClick = () => {
       <div class="flex flex-row items-stretch">
         <BidScore :score="bid.bid_score" :bidders="bidders" />
         <div class="w-[80%] flex flex-row items-center justify-center gap-2 min-w-0">
-          <WinCondition :type="bid?.bid_type" :win_condition="bid?.win_condition" />
+          <WinCondition :type="bid.bid_type" :win_condition="bid.win_condition" :bid-score="bid.bid_score" />
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { computed, type ComputedRef } from 'vue'
 import type { TrickNumber } from '@domain/interfaces/Trick'
 import type { PlayerBidEntry, Bid, TrickBidCondition, SetCollectionBidCondition, PointsBidCondition } from '@domain/interfaces/Bid'
 import type { Suit } from '@domain/interfaces/Card'
+import { POINTS_BID_OPEN_MAX } from '@domain/data/bidDefinitions'
 
 type SuitDisplayKey = Suit | 'avoidOtherSuits'
 
@@ -18,11 +19,14 @@ export interface SetCollectionDisplay {
   avoidCount: number
   winScore: number
   avoidScore: number
+  netScore: number
+  floor: number
 }
 
 export interface PointsDisplay {
   minPoints: number
   maxPoints: number
+  isOpen: boolean
 }
 
 export interface SuitDisplay {
@@ -98,18 +102,21 @@ export function usePlayerScore(
     
     const { bid, entry, condition } = setCollectionBid.value
     const winSuit = condition.win_suit
-    const avoidSuits = Array.isArray(condition.avoid_suit) ? condition.avoid_suit : [condition.avoid_suit]
-    const avoidSuit: SuitDisplayKey = avoidSuits.length > 1 ? 'avoidOtherSuits' : (avoidSuits[0] ?? 'acorns')
+    const avoidSuits = (Object.keys(setCollection.value) as Suit[]).filter(suit => suit !== winSuit)
     const winCount = setCollection.value[winSuit] || 0
     const avoidCount = avoidSuits.reduce((total, suit) => total + (setCollection.value[suit] || 0), 0)
-    
+    const winScore = winCount * bid.bid_score
+    const avoidScore = avoidCount * entry.trickNumber * -2
+
     return {
       winSuit,
-      avoidSuit,
+      avoidSuit: 'avoidOtherSuits',
       avoidSuits,
       avoidCount,
-      winScore: winCount * bid.bid_score,
-      avoidScore: avoidCount * entry.onLose
+      winScore,
+      avoidScore,
+      netScore: winScore + avoidScore,
+      floor: condition.floor
     }
   })
 
@@ -120,7 +127,8 @@ export function usePlayerScore(
     
     return {
       minPoints: condition.min_points,
-      maxPoints: condition.max_points
+      maxPoints: condition.max_points,
+      isOpen: condition.max_points >= POINTS_BID_OPEN_MAX
     }
   })
 

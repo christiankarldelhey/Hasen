@@ -1,149 +1,169 @@
 import type { Game } from '../interfaces/Game'
 import type { PlayerId } from '../interfaces/Player'
-import type { BidType, SetCollectionBidCondition } from '../interfaces/Bid'
+import type {
+  Bid,
+  BidType,
+  PlayerBidEntry,
+  PlayerCount,
+  PointsBidCondition,
+  SetCollectionBidCondition,
+  TrickBidCondition
+} from '../interfaces/Bid'
+import type { PlayerRoundScore } from '../interfaces/Round'
 import type { TrickNumber } from '../interfaces/Trick'
+import { TOTAL_TRICKS } from '../interfaces/Trick'
+import { POINTS_BID_OPEN_MAX } from '../data/bidDefinitions'
 
 export interface CanMakeBidResult {
   canMakeBid: boolean
   reason?: string
 }
 
-function getAvoidSuitCount(
-  setCollection: import('../interfaces/Round').PlayerRoundScore['setCollection'],
-  avoidSuit: SetCollectionBidCondition['avoid_suit']
+export interface BidEvaluationOptions {
+  bidEntry?: PlayerBidEntry
+  currentTrickNumber?: TrickNumber
+}
+
+export interface PlayerBidOutcome {
+  bid: Bid
+  bidEntry: PlayerBidEntry
+  isWinning: boolean | null
+  score: number
+  collectionNet?: number
+}
+
+export const BID_DUEL_SCORE = 5
+const COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW = 2
+
+function getOtherSuitCount(
+  setCollection: PlayerRoundScore['setCollection'],
+  winSuit: SetCollectionBidCondition['win_suit']
 ): number {
-  const avoidSuits = Array.isArray(avoidSuit) ? avoidSuit : [avoidSuit]
-  return avoidSuits.reduce((total, suit) => total + (setCollection[suit] ?? 0), 0)
+  return Object.entries(setCollection).reduce(
+    (total, [suit, count]) => total + (suit === winSuit ? 0 : count),
+    0
+  )
+}
+
+function isTrickBidStillPossible(
+  condition: TrickBidCondition,
+  playerRoundScore: PlayerRoundScore,
+  currentTrickNumber: TrickNumber
+): boolean {
+  const tricksWon = playerRoundScore.tricksWon
+  const tricksWonSoFar = new Set(tricksWon).size
+  const tricksRemaining = TOTAL_TRICKS - currentTrickNumber + 1
+  const maxPossibleTricks = tricksWonSoFar + tricksRemaining
+
+  const requiredTricks = condition.win_trick_position ?? []
+  const optionalTricks = condition.may_win_trick_position ?? []
+  const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
+  const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
+
+  if (hasPositionConstraints && tricksWon.some(trick => !allowedWonTricks.has(trick))) {
+    return false
+  }
+
+  if (requiredTricks.some(
+    trick => trick < currentTrickNumber && !tricksWon.includes(trick)
+  )) {
+    return false
+  }
+
+  if (condition.lose_trick_position?.some(trick => tricksWon.includes(trick))) {
+    return false
+  }
+
+  if (condition.win_min_tricks !== undefined && maxPossibleTricks < condition.win_min_tricks) {
+    return false
+  }
+
+  if (condition.win_max_tricks !== undefined && tricksWonSoFar > condition.win_max_tricks) {
+    return false
+  }
+
+  return true
+}
+
+export function isPointsBidStillPossible(
+  condition: PointsBidCondition,
+  playerRoundScore: PlayerRoundScore
+): boolean {
+  if (playerRoundScore.points > condition.max_points) {
+    return false
+  }
+
+  // Una apuesta abierta ya cumplida no puede ganarse dos veces ni hacerse gratis.
+  if (
+    condition.max_points >= POINTS_BID_OPEN_MAX &&
+    playerRoundScore.points >= condition.min_points
+  ) {
+    return false
+  }
+
+  return true
+}
+
+export function isBidStillPossible(
+  bid: Bid,
+  playerRoundScore: PlayerRoundScore,
+  currentTrickNumber: TrickNumber
+): boolean {
+  if (bid.bid_type === 'trick') {
+    return isTrickBidStillPossible(
+      bid.win_condition as TrickBidCondition,
+      playerRoundScore,
+      currentTrickNumber
+    )
+  }
+
+  if (bid.bid_type === 'points') {
+    return isPointsBidStillPossible(
+      bid.win_condition as PointsBidCondition,
+      playerRoundScore
+    )
+  }
+
+  return true
+}
+
+function getBidderCount(game: Game, bidId: string): number {
+  return Object.values(game.round.roundBids.playerBids)
+    .flat()
+    .filter(playerBid => playerBid.bidId === bidId)
+    .length
 }
 
 /**
  * Valida si un bid específico puede ser hecho por el jugador
- * @param game - Estado del juego
- * @param playerId - ID del jugador
- * @param bid - El bid específico a validar
- * @param trickNumber - Número del trick actual
- * @returns Resultado de la validación con razón específica si no es posible
  */
 export function canMakeSpecificBid(
   game: Game,
   playerId: PlayerId,
-  bid: import('../interfaces/Bid').Bid,
+  bid: Bid,
   trickNumber: TrickNumber
 ): CanMakeBidResult {
-  // Primero validar las reglas generales usando canMakeBid
   const generalValidation = canMakeBid(game, playerId, bid.bid_type, trickNumber)
   if (!generalValidation.canMakeBid) {
     return generalValidation
   }
 
-  // Validaciones específicas del bid individual
-  
-  // Rule: Máximo 2 jugadores por bid específico
-  const biddersCount = Object.values(game.round.roundBids.playerBids)
-    .flat()
-    .filter(pb => pb.bidId === bid.bid_id)
-    .length
-  
-  if (biddersCount >= 2) {
+  if (getBidderCount(game, bid.bid_id) >= 2) {
     return {
       canMakeBid: false,
       reason: 'This bid already has the maximum of 2 players'
     }
   }
 
-  // Validaciones específicas según el progreso del jugador para este bid en particular
   const playerRoundScore = game.round.roundScore.find(score => score.playerId === playerId)
-  if (playerRoundScore) {
-    // Para trick bids: verificar si este bid específico es todavía posible
-    if (bid.bid_type === 'trick') {
-      const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
-      const tricksWonSoFar = new Set(playerRoundScore.tricksWon).size
-      const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
-      const maxPossibleTricks = tricksWonSoFar + tricksRemaining
-
-      const requiredTricks = condition.win_trick_position ?? []
-      const optionalTricks = condition.may_win_trick_position ?? []
-      const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
-      const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
-
-      // Verificar may_win_trick_position + win_trick_position: si ganamos un trick fuera de los permitidos
-      if (hasPositionConstraints) {
-        const wonUnexpectedTrick = playerRoundScore.tricksWon.some(
-          wonTrick => !allowedWonTricks.has(wonTrick)
-        )
-        if (wonUnexpectedTrick) {
-          return {
-            canMakeBid: false,
-            reason: 'You already won a trick outside the allowed positions for this bid'
-          }
-        }
-      }
-      
-      // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
-      if (condition.win_trick_position) {
-        const lostRequiredTrick = condition.win_trick_position.some(
-          requiredTrick => requiredTrick < trickNumber && !playerRoundScore.tricksWon.includes(requiredTrick)
-        )
-        if (lostRequiredTrick) {
-          return {
-            canMakeBid: false,
-            reason: 'You already lost a trick you needed to win'
-          }
-        }
-      }
-      
-      // Verificar lose_trick_position: si debíamos perder un trick específico y ya lo ganamos
-      if (condition.lose_trick_position) {
-        const wonForbiddenTrick = condition.lose_trick_position.some(
-          forbiddenTrick => playerRoundScore.tricksWon.includes(forbiddenTrick)
-        )
-        if (wonForbiddenTrick) {
-          return {
-            canMakeBid: false,
-            reason: 'You already won a trick you needed to lose'
-          }
-        }
-      }
-      
-      // Verificar win_min_tricks: si ya es imposible alcanzar el mínimo
-      if (condition.win_min_tricks) {
-        if (maxPossibleTricks < condition.win_min_tricks) {
-          return {
-            canMakeBid: false,
-            reason: 'You can no longer reach the minimum required tricks'
-          }
-        }
-      }
-      
-      // Verificar win_max_tricks: si ya superamos el máximo
-      if (condition.win_max_tricks !== undefined) {
-        if (tricksWonSoFar > condition.win_max_tricks) {
-          return {
-            canMakeBid: false,
-            reason: 'You already exceeded the maximum allowed tricks'
-          }
-        }
-      }
+  if (playerRoundScore && !isBidStillPossible(bid, playerRoundScore, trickNumber)) {
+    return {
+      canMakeBid: false,
+      reason: 'This bid is no longer possible given your current progress'
     }
-    
-    // Para points bids: verificar si ya superamos el max_points de este bid específico
-    if (bid.bid_type === 'points') {
-      const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition
-      
-      if (playerRoundScore.points > condition.max_points) {
-        return {
-          canMakeBid: false,
-          reason: 'You have exceeded the maximum points for this bid'
-        }
-      }
-    }
-    
-    // Para set_collection: no hay validaciones (siempre hay posibilidad de revertir)
   }
 
-  return {
-    canMakeBid: true
-  }
+  return { canMakeBid: true }
 }
 
 export function canMakeBid(
@@ -176,8 +196,8 @@ export function canMakeBid(
     }
   }
 
-  const availableBids = game.round.roundBids.bids.filter(b => b.bid_type === bidType)
-  
+  const availableBids = game.round.roundBids.bids.filter(bid => bid.bid_type === bidType)
+
   if (availableBids.length === 0) {
     return {
       canMakeBid: false,
@@ -186,22 +206,19 @@ export function canMakeBid(
   }
 
   const playerBids = game.round.roundBids.playerBids[playerId] || []
-  
-  // Rule: Solo un bid por turno (por trick)
-  const hasBidInCurrentTrick = playerBids.some(pb => pb.trickNumber === trickNumber)
-  if (hasBidInCurrentTrick) {
+
+  if (playerBids.some(playerBid => playerBid.trickNumber === trickNumber)) {
     return {
       canMakeBid: false,
       reason: 'You can only make one bid per trick'
     }
   }
 
-  // Rule: No se pueden hacer dos bids del mismo tipo en una ronda
-  const hasBidTypeInRound = playerBids.some(pb => {
-    const bid = game.round.roundBids.bids.find(b => b.bid_id === pb.bidId)
+  const hasBidTypeInRound = playerBids.some(playerBid => {
+    const bid = game.round.roundBids.bids.find(candidate => candidate.bid_id === playerBid.bidId)
     return bid?.bid_type === bidType
   })
-  
+
   if (hasBidTypeInRound) {
     return {
       canMakeBid: false,
@@ -209,7 +226,6 @@ export function canMakeBid(
     }
   }
 
-  // Rule: Máximo 3 bids por ronda
   if (playerBids.length >= 3) {
     return {
       canMakeBid: false,
@@ -217,315 +233,222 @@ export function canMakeBid(
     }
   }
 
-  // Rule: Máximo 2 jugadores por bid específico
-  const allBidsFull = availableBids.every(bid => {
-    const biddersCount = Object.values(game.round.roundBids.playerBids)
-      .flat()
-      .filter(pb => pb.bidId === bid.bid_id)
-      .length
-    return biddersCount >= 2
-  })
-  
-  if (allBidsFull) {
+  const selectableBids = availableBids.filter(bid => getBidderCount(game, bid.bid_id) < 2)
+
+  if (selectableBids.length === 0) {
     return {
       canMakeBid: false,
       reason: 'All bids of this type already have the maximum of 2 players'
     }
   }
 
-  // Rule: Verificar si la apuesta ya está perdida de antemano
   const playerRoundScore = game.round.roundScore.find(score => score.playerId === playerId)
-  if (playerRoundScore) {
-    // Para trick bids: verificar si al menos un bid disponible es todavía posible
-    if (bidType === 'trick') {
-      const tricksWonSoFar = new Set(playerRoundScore.tricksWon).size
-      const tricksRemaining = 6 - (game.round.currentTrick?.trick_number || 1) + 1
-      const maxPossibleTricks = tricksWonSoFar + tricksRemaining
-      
-      // Verificar si existe al menos un bid que todavía sea posible
-      const hasAnyPossibleBid = availableBids.some(bid => {
-        const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition
-
-        const requiredTricks = condition.win_trick_position ?? []
-        const optionalTricks = condition.may_win_trick_position ?? []
-        const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
-        const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
-
-        // Verificar may_win_trick_position + win_trick_position: si ya ganó un trick fuera de los permitidos
-        if (hasPositionConstraints) {
-          const wonUnexpectedTrick = playerRoundScore.tricksWon.some(
-            wonTrick => !allowedWonTricks.has(wonTrick)
-          )
-          if (wonUnexpectedTrick) return false
-        }
-        
-        // Verificar win_trick_position: si debíamos ganar un trick específico y ya lo perdimos
-        if (condition.win_trick_position) {
-          const lostRequiredTrick = condition.win_trick_position.some(
-            requiredTrick => requiredTrick < trickNumber && !playerRoundScore.tricksWon.includes(requiredTrick)
-          )
-          if (lostRequiredTrick) return false
-        }
-        
-        // Verificar lose_trick_position: si debíamos perder un trick específico y ya lo ganamos
-        if (condition.lose_trick_position) {
-          const wonForbiddenTrick = condition.lose_trick_position.some(
-            forbiddenTrick => playerRoundScore.tricksWon.includes(forbiddenTrick)
-          )
-          if (wonForbiddenTrick) return false
-        }
-        
-        // Verificar win_min_tricks: si ya es imposible alcanzar el mínimo
-        if (condition.win_min_tricks) {
-          if (maxPossibleTricks < condition.win_min_tricks) return false
-        }
-        
-        // Verificar win_max_tricks: si ya superamos el máximo
-        if (condition.win_max_tricks !== undefined) {
-          if (tricksWonSoFar > condition.win_max_tricks) return false
-        }
-        
-        // Este bid todavía es posible
-        return true
-      })
-      
-      if (!hasAnyPossibleBid) {
-        return {
-          canMakeBid: false,
-          reason: 'No trick bids are possible given your current progress'
-        }
-      }
+  if (
+    playerRoundScore &&
+    !selectableBids.some(bid => isBidStillPossible(bid, playerRoundScore, trickNumber))
+  ) {
+    return {
+      canMakeBid: false,
+      reason: `No ${bidType} bids are possible given your current progress`
     }
-    
-    // Para points bids: verificar si existe al menos un bid que todavía sea posible
-    if (bidType === 'points') {
-      const hasAnyPossibleBid = availableBids.some(bid => {
-        const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition
-        return playerRoundScore.points <= condition.max_points
-      })
-      
-      if (!hasAnyPossibleBid) {
-        return {
-          canMakeBid: false,
-          reason: 'No points bids are possible given your current points'
-        }
-      }
-    }
-    
-    // Para set_collection: no hay validaciones (siempre hay posibilidad de revertir)
   }
 
-  return {
-    canMakeBid: true
-  }
+  return { canMakeBid: true }
 }
 
 /**
- * Calcula la penalización (onLose) por fallar un bid según las reglas del juego
- * 
- * Reglas:
- * - set_collection: -10 (trick 1), -15 (trick 2), -20 (trick 3)
- * - trick/points: -20 (trick 1), -25 (trick 2), -30 (trick 3)
+ * Multa fija por fallar una apuesta, según la ventana y la cantidad de jugadores.
  */
 export function calculateBidOnLose(
   bidType: BidType,
-  trickNumber: TrickNumber
+  trickNumber: TrickNumber,
+  playerCount: PlayerCount = 4
 ): number {
+  if (trickNumber < 1 || trickNumber > 3) return 0
+
   if (bidType === 'set_collection') {
-    if (trickNumber === 1) return -10
-    if (trickNumber === 2) return -15
-    if (trickNumber === 3) return -20
+    if (playerCount === 2) {
+      return [-15, -20, -25][trickNumber - 1] ?? 0
+    }
+    return [-10, -15, -20][trickNumber - 1] ?? 0
   }
-  
-  if (bidType === 'trick' || bidType === 'points') {
-    if (trickNumber === 1) return -20
-    if (trickNumber === 2) return -25
-    if (trickNumber === 3) return -30
-  }
-  
-  return 0
+
+  return [-20, -25, -30][trickNumber - 1] ?? 0
+}
+
+export function getCollectionNetScore(
+  bid: Bid,
+  playerRoundScore: PlayerRoundScore,
+  bidEntry: Pick<PlayerBidEntry, 'trickNumber'>
+): number {
+  const condition = bid.win_condition as SetCollectionBidCondition
+  const winSuitCount = playerRoundScore.setCollection[condition.win_suit] ?? 0
+  const otherSuitCount = getOtherSuitCount(playerRoundScore.setCollection, condition.win_suit)
+  const otherSuitPenalty = bidEntry.trickNumber * COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW
+
+  return winSuitCount * bid.bid_score - otherSuitCount * otherSuitPenalty
 }
 
 /**
- * Determina si un bid está siendo ganado actualmente (parcial o final)
- * @param bid - El bid a evaluar
- * @param playerRoundScore - El score del jugador en el round actual
- * @param isRoundComplete - Si el round ya terminó (para evaluación final)
- * @returns true si está ganando, false si está perdiendo, null si aún no se puede determinar
+ * Determina si un bid está siendo ganado actualmente (parcial o final).
+ * true = la condición se cumple ahora, false = ya es imposible o falló,
+ * null = todavía depende de las bazas restantes.
  */
 export function isWinningBid(
-  bid: import('../interfaces/Bid').Bid,
-  playerRoundScore: import('../interfaces/Round').PlayerRoundScore,
-  isRoundComplete: boolean = false
+  bid: Bid,
+  playerRoundScore: PlayerRoundScore,
+  isRoundComplete: boolean = false,
+  options: BidEvaluationOptions = {}
 ): boolean | null {
-  const bidType = bid.bid_type;
+  if (bid.bid_type === 'trick') {
+    const condition = bid.win_condition as TrickBidCondition
+    const tricksWon = playerRoundScore.tricksWon
+    const tricksWonCount = new Set(tricksWon).size
+    const currentTrickNumber = options.currentTrickNumber
+    const tricksPlayed = currentTrickNumber === undefined
+      ? Math.max(0, ...tricksWon)
+      : Math.max(0, currentTrickNumber - 1)
 
-  // TRICK BIDS
-  if (bidType === 'trick') {
-    const condition = bid.win_condition as import('../interfaces/Bid').TrickBidCondition;
-    const tricksWon = playerRoundScore.tricksWon;
-    const tricksWonCount = new Set(tricksWon).size;
+    const requiredTricks = condition.win_trick_position ?? []
+    const optionalTricks = condition.may_win_trick_position ?? []
+    const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0
+    const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks])
 
-    const requiredTricks = condition.win_trick_position ?? [];
-    const optionalTricks = condition.may_win_trick_position ?? [];
-    const hasPositionConstraints = requiredTricks.length > 0 || optionalTricks.length > 0;
-    const allowedWonTricks = new Set([...requiredTricks, ...optionalTricks]);
-
-    if (hasPositionConstraints) {
-      const wonUnexpectedTrick = tricksWon.some(t => !allowedWonTricks.has(t));
-      if (wonUnexpectedTrick) return false;
+    if (hasPositionConstraints && tricksWon.some(trick => !allowedWonTricks.has(trick))) {
+      return false
     }
 
-    // Verificar lose_trick_position: si ganó un trick que debía perder
-    if (condition.lose_trick_position) {
-      const wonForbiddenTrick = condition.lose_trick_position.some(
-        forbiddenTrick => tricksWon.includes(forbiddenTrick)
-      );
-      if (wonForbiddenTrick) return false;
+    if (condition.lose_trick_position?.some(trick => tricksWon.includes(trick))) {
+      return false
     }
 
-    // Verificar win_trick_position: si debía ganar tricks específicos
-    if (condition.win_trick_position) {
-      const requiredTricks = condition.win_trick_position;
-      const wonAllRequired = requiredTricks.every(t => tricksWon.includes(t));
-      
-      if (isRoundComplete) {
-        return wonAllRequired;
-      } else {
-        const lostRequiredTrick = requiredTricks.some(
-          t => !tricksWon.includes(t)
-        );
-        if (lostRequiredTrick && isRoundComplete) return false;
-        if (wonAllRequired) return true;
-        return null;
-      }
+    if (requiredTricks.some(trick => trick <= tricksPlayed && !tricksWon.includes(trick))) {
+      return false
     }
 
-    // Verificar win_min_tricks y win_max_tricks
+    if (requiredTricks.length > 0) {
+      return isRoundComplete
+        ? requiredTricks.every(trick => tricksWon.includes(trick))
+        : null
+    }
+
     if (condition.win_min_tricks !== undefined || condition.win_max_tricks !== undefined) {
-      const minTricks = condition.win_min_tricks ?? 0;
-      const maxTricks = condition.win_max_tricks ?? 5;
+      const minTricks = condition.win_min_tricks ?? 0
+      const maxTricks = condition.win_max_tricks ?? TOTAL_TRICKS
+      const tricksRemaining = TOTAL_TRICKS - tricksPlayed
 
-      if (tricksWonCount > maxTricks) return false;
-      
-      if (isRoundComplete) {
-        return tricksWonCount >= minTricks && tricksWonCount <= maxTricks;
-      } else {
-        const tricksRemaining = 5 - new Set(tricksWon).size;
-        const maxPossible = tricksWonCount + tricksRemaining;
-        
-        if (maxPossible < minTricks) return false;
-        if (tricksWonCount >= minTricks && tricksWonCount <= maxTricks) return true;
-        return null;
-      }
+      if (tricksWonCount > maxTricks) return false
+      if (tricksWonCount + tricksRemaining < minTricks) return false
+      if (isRoundComplete) return tricksWonCount >= minTricks && tricksWonCount <= maxTricks
+      return tricksWonCount >= minTricks && tricksWonCount <= maxTricks ? true : null
     }
 
-    return null;
+    return null
   }
 
-  // POINTS BIDS
-  if (bidType === 'points') {
-    const condition = bid.win_condition as import('../interfaces/Bid').PointsBidCondition;
-    const points = playerRoundScore.points;
+  if (bid.bid_type === 'points') {
+    const condition = bid.win_condition as PointsBidCondition
+    const points = playerRoundScore.points
 
-    if (points > condition.max_points) return false;
-
-    if (isRoundComplete) {
-      return points >= condition.min_points && points <= condition.max_points;
-    } else {
-      if (points > condition.max_points) return false;
-      if (points >= condition.min_points && points <= condition.max_points) return true;
-      return null;
-    }
+    if (points > condition.max_points) return false
+    if (isRoundComplete) return points >= condition.min_points && points <= condition.max_points
+    return points >= condition.min_points && points <= condition.max_points ? true : null
   }
 
-  // SET COLLECTION BIDS
-  if (bidType === 'set_collection') {
-    const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
-    const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-    const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
+  if (bid.bid_type === 'set_collection') {
+    const condition = bid.win_condition as SetCollectionBidCondition
+    const bidEntry = options.bidEntry ?? { trickNumber: 1 as TrickNumber, bidId: bid.bid_id, onLose: 0, isPlayerWinning: null }
+    const netScore = getCollectionNetScore(bid, playerRoundScore, bidEntry)
+    const meetsFloor = netScore >= condition.floor
 
-    // Calcular puntos netos: (winSuit * 10) - (avoidSuit * 10)
-    const winPoints = winSuitCount * 10;
-    const avoidPenalty = avoidSuitCount * 10;
-    const netPoints = winPoints - avoidPenalty;
+    return isRoundComplete ? meetsFloor : (meetsFloor ? true : null)
+  }
 
-    if (isRoundComplete) {
-      // Gana si los puntos netos son >= 10
-      return netPoints >= 10;
-    } else {
-      // Durante el round, evaluamos parcialmente
-      if (netPoints < 10 && avoidSuitCount > 0) return false;
-      if (netPoints >= 10) return true;
-      return null; // Aún no se puede determinar
+  return null
+}
+
+export function getPlayerBidOutcome(
+  bid: Bid,
+  bidEntry: PlayerBidEntry,
+  playerRoundScore: PlayerRoundScore
+): PlayerBidOutcome {
+  const isWinning = isWinningBid(bid, playerRoundScore, true, { bidEntry })
+
+  if (bid.bid_type === 'set_collection') {
+    const collectionNet = getCollectionNetScore(bid, playerRoundScore, bidEntry)
+    return {
+      bid,
+      bidEntry,
+      isWinning,
+      score: isWinning ? collectionNet : bidEntry.onLose,
+      collectionNet
     }
   }
 
-  return null;
+  return {
+    bid,
+    bidEntry,
+    isWinning,
+    score: isWinning ? bid.bid_score : bidEntry.onLose
+  }
+}
+
+export function getBidDuelAdjustment(
+  game: Game,
+  playerId: PlayerId,
+  bidEntry: PlayerBidEntry,
+  isWinning: boolean | null
+): number {
+  const sharedEntries = Object.entries(game.round.roundBids.playerBids)
+    .flatMap(([bidderId, entries]) =>
+      (entries ?? [])
+        .filter((entry: PlayerBidEntry) => entry.bidId === bidEntry.bidId)
+        .map((entry: PlayerBidEntry) => ({ bidderId: bidderId as PlayerId, entry }))
+    )
+
+  if (sharedEntries.length !== 2) return 0
+
+  const other = sharedEntries.find(shared => shared.bidderId !== playerId)
+  if (!other) return 0
+
+  const bid = game.round.roundBids.bids.find(candidate => candidate.bid_id === bidEntry.bidId)
+  const otherRoundScore = game.round.roundScore.find(score => score.playerId === other.bidderId)
+  if (!bid || !otherRoundScore) return 0
+
+  const otherIsWinning = isWinningBid(bid, otherRoundScore, true, { bidEntry: other.entry })
+  if (isWinning === otherIsWinning) return 0
+
+  return isWinning ? BID_DUEL_SCORE : -BID_DUEL_SCORE
 }
 
 /**
- * Calcula el score que obtiene un jugador al final del round
- * basado en sus bids ganados/perdidos y los points del round
- * @param game - El estado completo del juego
- * @param playerId - ID del jugador
- * @returns Score total del round (puede ser negativo)
+ * Calcula el score que obtiene un jugador al final del round.
+ * Sin apuestas, cobra los puntos de sus cartas. Con apuestas, solo se resuelven
+ * esas apuestas; si dos jugadores comparten una apuesta y solo uno la cumple,
+ * hay un ajuste de duelo de ±5.
  */
 export function getPlayerScoreFromRound(
   game: Game,
   playerId: PlayerId
 ): number {
-  const playerRoundScore = game.round.roundScore.find(s => s.playerId === playerId) || {
+  const playerRoundScore = game.round.roundScore.find(score => score.playerId === playerId) || {
     playerId,
     points: 0,
     tricksWon: [],
     setCollection: { acorns: 0, leaves: 0, berries: 0, flowers: 0 }
-  };
-
-  const playerBids = game.round.roundBids.playerBids[playerId] || [];
-  // Si el jugador NO hizo apuestas, usar card points como fallback
-  // Si hizo apuestas, empezar en 0 y solo sumar bid scores
-  let totalScore = playerBids.length === 0 ? playerRoundScore.points : 0;
-
-  for (const bidEntry of playerBids) {
-    const bid = game.round.roundBids.bids.find(b => b.bid_id === bidEntry.bidId);
-    if (!bid) continue;
-
-    const isWinning = isWinningBid(bid, playerRoundScore, true);
-
-    if (isWinning === true) {
-      if (bid.bid_type === 'set_collection') {
-        // Calcular puntos netos: (winSuit * 10) - (avoidSuit * |onLose|)
-        const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
-        const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-        const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
-        const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
-        const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
-        totalScore += netPoints;
-      } else {
-        totalScore += bid.bid_score;
-      }
-    } else if (isWinning === false) {
-      if (bid.bid_type === 'set_collection') {
-        // Calcular puntos netos
-        const condition = bid.win_condition as import('../interfaces/Bid').SetCollectionBidCondition;
-        const winSuitCount = playerRoundScore.setCollection[condition.win_suit];
-        const avoidSuitCount = getAvoidSuitCount(playerRoundScore.setCollection, condition.avoid_suit);
-        const penaltyPerCard = Math.abs(bidEntry.onLose); // 10, 15, o 20 según trick
-        const netPoints = (winSuitCount * 10) - (avoidSuitCount * penaltyPerCard);
-        
-        // Si está entre -9 y 9: pierde con -10 fijo
-        // Si es <= -10: pierde con ese valor
-        if (netPoints >= -9 && netPoints <= 9) {
-          totalScore += -10;
-        } else {
-          totalScore += netPoints;
-        }
-      } else {
-        totalScore += bidEntry.onLose;
-      }
-    }
   }
 
-  return totalScore;
+  const playerBids = game.round.roundBids.playerBids[playerId] || []
+  let totalScore = playerBids.length === 0 ? playerRoundScore.points : 0
+
+  for (const bidEntry of playerBids) {
+    const bid = game.round.roundBids.bids.find(candidate => candidate.bid_id === bidEntry.bidId)
+    if (!bid) continue
+
+    const outcome = getPlayerBidOutcome(bid, bidEntry, playerRoundScore)
+    totalScore += outcome.score
+    totalScore += getBidDuelAdjustment(game, playerId, bidEntry, outcome.isWinning)
+  }
+
+  return totalScore
 }

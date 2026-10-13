@@ -1,6 +1,6 @@
 import { GameModel } from '../models/Game.js'
 import { createDeck } from '@domain/rules/DeckRules.js'
-import { createBidDeck } from '@domain/rules/BidDeckRules.js'
+import { createBidDeck, getBidDeckCounts } from '@domain/rules/BidDeckRules.js'
 import { shuffleDeck } from '@domain/rules/DeckRules.js'
 import { 
   createDeckShuffledEvent,
@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { getAvailablePlayerColors, getDefaultPlayerProfile, PLAYER_IDS } from '@domain/interfaces'
 import type { ActivePlayer, PlayerId, Game, PlayingCard } from '@domain/interfaces'
 import { canSkipCardReplacement, canReplaceCard } from '@domain/rules/CardReplacementRules.js'
-import { GAME_END_MAX_SCORE } from '@domain/rules/GameEndRules.js'
 import { TrickService } from './TrickService.js'
 
 export class GameService {
@@ -93,7 +92,7 @@ export class GameService {
     console.log("Creating game");
     const gameId = uuidv4();
     let deck = createDeck();
-    const bidDecks = createBidDeck();
+    const bidDecks = createBidDeck(maxPlayers || 4);
     
     // Inicializar playerSessions con el host
     const playerSessions = new Map<string, PlayerId>();
@@ -132,7 +131,6 @@ export class GameService {
       gameSettings: {
         minPlayers: 2,
         maxPlayers: maxPlayers || 4,
-        pointsToWin: GAME_END_MAX_SCORE,
         reconnectionTimeoutMinutes: 3
       }
     });
@@ -166,11 +164,7 @@ export class GameService {
       roundBids: game.round.roundBids,
       roundScore: game.round.roundScore || []
     },
-    bidDecks: {
-      setCollectionBidDeck: game.bidDecks.setCollectionBidDeck,
-      pointsBidDeck: game.bidDecks.pointsBidDeck,
-      tricksBidDeck: game.bidDecks.tricksBidDeck
-    },
+    bidDeckCounts: getBidDeckCounts(game.bidDecks),
     gameSettings: game.gameSettings,
     playerScores: game.playerScores,
     winner: game.winner || null,
@@ -314,6 +308,7 @@ export class GameService {
     game.round.round = 0;
     game.round.roundPhase = 'round_setup';
     game.deck = shuffleDeck(game.deck);
+    game.bidDecks = createBidDeck(activePlayerIds.length);
     
     game.deck.forEach(card => {
       card.state = 'in_deck';

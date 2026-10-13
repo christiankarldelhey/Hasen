@@ -5,6 +5,7 @@ import { RoundService } from '../services/RoundService.js'
 import { PlayerId } from '../../../domain/interfaces/Player'
 import { GameSocketPublisher } from '../socket/services/gameSocketPublisher.js'
 import { BotTurnCoordinator } from '@/ai/BotTurnCoordinator.js'
+import { GAME_TOTAL_LAPS } from '@domain/rules/BidDeckRules'
 
 export const createGame = async (req: Request, res: Response) => {
   try {
@@ -80,7 +81,7 @@ export const createGame = async (req: Request, res: Response) => {
           maxPlayers: gameWithRound.gameSettings.maxPlayers,
           minPlayers: gameWithRound.gameSettings.minPlayers,
           hasSpace: gameWithRound.activePlayers.length < gameWithRound.gameSettings.maxPlayers,
-          pointsToWin: gameWithRound.gameSettings.pointsToWin,
+          totalLaps: GAME_TOTAL_LAPS,
           createdAt: gameWithRound.createdAt,
           gamePhase: gameWithRound.gamePhase,
           autoStarted: true
@@ -101,7 +102,7 @@ export const createGame = async (req: Request, res: Response) => {
       maxPlayers: createdGame.gameSettings.maxPlayers,
       minPlayers: createdGame.gameSettings.minPlayers,
       hasSpace: createdGame.activePlayers.length < createdGame.gameSettings.maxPlayers,
-      pointsToWin: createdGame.gameSettings.pointsToWin,
+      totalLaps: GAME_TOTAL_LAPS,
       createdAt: createdGame.createdAt
     })
     
@@ -116,7 +117,7 @@ export const createGame = async (req: Request, res: Response) => {
         maxPlayers: createdGame.gameSettings.maxPlayers,
         minPlayers: createdGame.gameSettings.minPlayers,
         hasSpace: createdGame.activePlayers.length < createdGame.gameSettings.maxPlayers,
-        pointsToWin: createdGame.gameSettings.pointsToWin,
+        totalLaps: GAME_TOTAL_LAPS,
         createdAt: createdGame.createdAt,
         gamePhase: createdGame.gamePhase,
         deckSize: createdGame.deck.length,
@@ -155,7 +156,7 @@ export const getGame = async (req: Request, res: Response) => {
 export const getGames = async (req: Request, res: Response) => {
   try {
     const games = await GameModel.find({ gamePhase: 'setup' })
-      .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers gameSettings.pointsToWin')
+      .select('gameId gameName hostPlayer activePlayers gameSettings.maxPlayers gameSettings.minPlayers')
       .sort({ createdAt: -1 })
       .lean()
     
@@ -168,7 +169,7 @@ export const getGames = async (req: Request, res: Response) => {
       maxPlayers: game.gameSettings.maxPlayers,
       minPlayers: game.gameSettings.minPlayers,
       hasSpace: game.activePlayers.length < game.gameSettings.maxPlayers,
-      pointsToWin: game.gameSettings.pointsToWin,
+      totalLaps: GAME_TOTAL_LAPS,
       createdAt: game.createdAt
     }))
     
@@ -242,7 +243,7 @@ export const updatePlayerProfile = async (req: Request, res: Response) => {
       maxPlayers: result.game.gameSettings.maxPlayers,
       minPlayers: result.game.gameSettings.minPlayers,
       hasSpace: result.game.activePlayers.length < result.game.gameSettings.maxPlayers,
-      pointsToWin: result.game.gameSettings.pointsToWin,
+      totalLaps: GAME_TOTAL_LAPS,
       createdAt: result.game.createdAt
     })
 

@@ -18,7 +18,7 @@ interface RoomCreatedPayload {
   maxPlayers: 2 | 3 | 4;
   minPlayers: 2;
   hasSpace: boolean;
-  pointsToWin: number;
+  totalLaps: number;
   createdAt: string;
 }
 

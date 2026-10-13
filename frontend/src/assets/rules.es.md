@@ -2,7 +2,7 @@
 
 *Un juego de bazas donde ganar bazas es la herramienta, no el objetivo — los puntos de verdad salen de las apuestas que declarás en el camino.*
 
-**Jugadores:** 2–4 · **Una ronda:** 5 bazas · **La partida termina:** cuando alguien llega a **100** o cae a **−85**
+**Jugadores:** 2–4 · **Una ronda:** 5 bazas · **La partida termina:** cuando el mazo de apuestas ya no alcanza para repartir un pozo completo
 
 ## ¿Qué es Hasen?
 
@@ -67,7 +67,7 @@ Detalle completo en [Las tres aves](#las-tres-aves).
 
 Al comienzo de cada ronda:
 
-1. **Se arma el pozo de apuestas.** Se ponen seis cartas de apuesta a la vista en el centro: 2 de Puntaje, 2 de Colección, 2 de Bazas. Esas seis — y solo esas — se pueden reclamar esta ronda.
+1. **Se arma el pozo de apuestas.** Se ponen seis cartas de apuesta a la vista en el centro: 2 de Puntaje, 2 de Colección, 2 de Bazas. Salen de tres mazos que se gastan durante la partida: esas seis — y solo esas — se pueden reclamar esta ronda, y no vuelven a salir.
 2. **Se reparte.** Recibís 5 cartas: 4 tapadas en la mano y **1 boca arriba** delante tuyo, a la vista de todos.
 3. El resto del mazo queda como **pila de robo**.
 
@@ -232,7 +232,7 @@ Cuando termina la baza 3 se cierra el kiosco: las bazas 4 y 5 se juegan sin pode
 
 ![El panel de apuestas disponibles: 2 de bazas, 2 de puntaje y 2 de colección](/rules/es/bids-panel.png)
 
-*El panel de apuestas disponibles: arriba las de Bazas 🔴, en el medio las de Puntaje 🔵, abajo las de Colección 🟡. El círculo de la izquierda es lo que cobrás si cumplís.*
+*El panel de apuestas disponibles: arriba las de Bazas 🔴, en el medio las de Puntaje 🔵, abajo las de Colección 🟡. El círculo de la izquierda es el premio si cumplís; en Colección, es el valor de cada carta del palo apostado.*
 
 Y estas son las restricciones:
 
@@ -240,7 +240,7 @@ Y estas son las restricciones:
 - **Si acumulás varias, tienen que ser de categorías distintas.** No podés tener dos apuestas de Puntaje.
 - **Tenés que cumplirlas todas**, simultáneamente. No se elige cuál salvar al final.
 - **Todas las apuestas son públicas.** Acá no hay nada escondido.
-- **Máximo 2 jugadores por carta de apuesta.** El tercero que la quiera elige otra — sin rencores y sin penalidad extra por coincidir.
+- **Máximo 2 jugadores por carta de apuesta.** El tercero que la quiera elige otra. Si exactamente dos jugadores comparten una apuesta y solo uno la cumple, el duelo paga **+5** al que cumplió y **−5** al que falló.
 
 ### Cuánto cuesta fallar
 
@@ -248,68 +248,82 @@ Lo que determina la penalización es **en qué ventana declaraste**, no cuándo 
 
 | Categoría | Ventana 1 | Ventana 2 | Ventana 3 |
 | --- | --- | --- | --- |
-| 🟡 Colección | −10 | −15 | −20 |
+| 🟡 Colección — con 2 jugadores | −15 | −20 | −25 |
+| 🟡 Colección — con 3 o 4 jugadores | −10 | −15 | −20 |
 | 🔵 Puntaje y 🔴 Bazas | −20 | −25 | −30 |
 
-En las apuestas de Colección, esos números son **por cada carta prohibida** que juntes — no una multa fija.
+Son multas fijas. En Colección, además, apostar más tarde encarece la condición porque cada carta de los otros palos resta más al calcular tu neto.
 
 > **Por qué esperar.** En la ventana 1 apostás casi a ciegas: viste tu mano y las cartas visibles de los demás. En la ventana 3 ya viste tres bazas completas, sabés qué triunfos salieron y podés apostar casi sobre seguro. El juego te cobra esa información. La pregunta no es *"¿me animo?"* sino *"¿cuánta información necesito para que esta apuesta sea segura, y me alcanza el margen para pagarla?"*
 
 ## Los tipos de apuesta
 
-En cada ronda solo hay **2 cartas de cada categoría** sobre la mesa, sacadas al azar — parte del juego es adaptar tu mano a lo que salió. Pensalas como **pedidos de recetas**: promesas sobre lo que vas a traer del bosque, tasadas según lo difícil que son de cumplir.
+En cada ronda solo hay **2 cartas de cada categoría** sobre la mesa, sacadas de mazos que se consumen. El catálogo cambia según la cantidad de jugadores: algunas apuestas solo existen con 2, 3 o 4 jugadores, y su premio puede cambiar. Pensalas como **pedidos de recetas**: promesas sobre lo que vas a traer del bosque, tasadas según lo difícil que son de cumplir.
+
+En las tablas, **2J / 3J / 4J** muestran el premio según la cantidad de jugadores. **Copias** indica cuántas cartas de esa apuesta hay en el mazo, siempre en el orden 2J / 3J / 4J. Un `—` significa que no existe en esa partida.
 
 ### 🔵 Puntaje — *"sé exactamente cuánto voy a sacar"*
 
 Predecís cuántos **puntos de carta** vas a tener al final de la ronda — sumando lo que ganaste en bazas más lo que te llevaste con el Gorrión.
 
-| Necesitás | Cobrás |
-| --- | --- |
-| entre 11 y 30 puntos | +40 |
-| entre 22 y 40 puntos | +45 |
-| entre 5 y 20 puntos | +50 |
-| entre 3 y 15 puntos | +55 |
-| 35 puntos o más | +60 |
-| entre 2 y 10 puntos | +65 |
-| 45 puntos o más | +70 |
+| Necesitás | 2J | 3J | 4J | Copias |
+| --- | ---: | ---: | ---: | --- |
+| entre 1 y 20 puntos | +35 | +45 | +45 | 2 / 2 / 2 |
+| entre 5 y 25 puntos | +30 | +40 | +50 | 1 / 2 / 2 |
+| entre 10 y 30 puntos | +25 | +35 | +45 | 2 / 2 / 2 |
+| entre 15 y 35 puntos | +25 | +35 | +45 | 2 / 2 / 2 |
+| entre 20 y 40 puntos | — | +55 | +70 | 0 / 2 / 2 |
+| 25 puntos o más | +30 | +25 | +25 | 1 / 2 / 2 |
+| 30 puntos o más | — | — | +40 | 0 / 0 / 2 |
+| 35 puntos o más | — | — | +55 | 0 / 0 / 2 |
 
-Los rangos **se superponen a propósito** — con 12 puntos cumplirías tres apuestas distintas. Fijate el patrón de los premios: cuanto más incómoda y estrecha la promesa, más paga. Sacar 45+ es una hazaña; sacar entre 2 y 10 con la mano llena de cartas ganadoras es un acto de equilibrio, y está tasado como tal.
+Los rangos **se superponen a propósito** — con 25 puntos cumplirías varias apuestas distintas. Las abiertas son apuestas de mano fuerte: pagan menos solas, pero combinan muy bien con colecciones de Flores o con apuestas que piden terminar ganando.
 
-> **Ejemplo.** Apostaste **2-10** en la ventana 1. Vas cómoda con 6 puntos hasta la última baza, pero lo único que te queda en la mano es el **Rey de Flores**. Lo tenés que tirar. Arrasa con todo, suma 11 y terminás con 17. Fallaste: **−20**. Ganaste una baza que no querías ganar con una carta que no podías no jugar.
+> **Ejemplo.** Apostaste **1-20** en la ventana 1 con 4 jugadores. Vas cómoda con 12 puntos hasta la última baza, pero lo único que te queda en la mano es el **Rey de Flores**. Lo tenés que tirar. Arrasa con todo, suma 11 y terminás con 23. Fallaste: **−20**. Ganaste una baza que no querías ganar con una carta que no podías no jugar.
 >
 > **Moraleja:** en las apuestas bajas, el problema no son las cartas malas. Son las buenas.
 
-### 🟡 Colección — *"quiero estas, no quiero esas"*
+### 🟡 Colección — *"quiero juntar este palo"*
 
-Juntás cartas de un palo y evitás las de otro. Cuentan **todas** las cartas que llegaron a tu montón: las que ganaste en bazas y las que te llevaste con el Gorrión.
+Apostás por **un solo palo**. No hay un palo prohibido declarado: **todas las cartas de los otros palos restan**. Cuentan las cartas que llegaron a tu montón: las que ganaste en bazas y las que te llevaste con el Gorrión.
 
-Las siete combinaciones que existen: Bellotas/no-Hojas · Bellotas/no-Bayas · Bayas/no-Bellotas · Bayas/no-Hojas · Hojas/no-Bayas · Hojas/no-Bellotas · **Flores/no-ninguna-de-las-otras**.
+| Apuesta | Piso | Copias |
+| --- | ---: | --- |
+| Bellotas | neto 10 | 2 / 4 / 5 |
+| Hojas | neto 10 | 2 / 4 / 5 |
+| Bayas | neto 10 | 2 / 4 / 5 |
+| Flores | neto 20 | 2 / 0 / 1 |
 
 **Cómo se cuenta:**
 
-`NETO = (cartas del palo que querías × 10) − (cartas prohibidas × penalización de tu ventana)`
+`NETO = (cartas del palo apostado × 15) − (cartas de los otros palos × penalización de tu ventana)`
 
-Cumplís la apuesta si el **neto es 10 o más**, y cobrás el neto. Si fallás, siempre te cuesta: **como mínimo −10**, y si el neto es todavía más bajo, pagás el número entero.
+La penalización por cada carta de otro palo es **−2** en la ventana 1, **−4** en la ventana 2 y **−6** en la ventana 3.
+
+- Si el neto llega al piso impreso, **cobrás el neto**.
+- Si no llega, pagás la **multa fija** de tu ventana. Un neto negativo nunca se cobra como número.
 
 **Esta apuesta no mira los puntos, mira la cantidad de cartas.** Un 8 de Bayas que no vale nada cuenta exactamente igual que el 10. Es la única categoría donde las cartas basura valen oro.
 
-> **Ejemplo A — cómoda.** Apostaste "Bayas / no Hojas" en la **ventana 1**. Terminás con 4 Bayas y 1 Hoja: `4 × 10 = 40` menos `1 × 10 = 10` → **neto 30**. Cumplida y con margen: cobrás **30**.
+> **Ejemplo A — cómoda.** Apostaste "Bayas, piso 10" en la **ventana 1**. Terminás con 4 Bayas y 1 carta de otro palo: `4 × 15 = 60` menos `1 × 2 = 2` → **neto 58**. Cumplida y con margen: cobrás **58**.
 >
-> **Ejemplo B — la misma mano, tres bazas más tarde.** Apostaste lo mismo pero en la **ventana 3**. Esa única Hoja ahora te cuesta 20: `40 − 20` → **neto 20**. Seguís cumpliendo, pero perdiste 10 puntos por haber esperado.
+> **Ejemplo B — la misma pila, tres bazas más tarde.** Apostaste lo mismo pero en la **ventana 3**. Esa carta ajena ahora cuesta 6: `60 − 6` → **neto 54**. Seguís cumpliendo, pero perdiste 4 puntos por haber esperado.
 >
-> **Ejemplo C — al filo.** Ventana 2, terminás con 3 Bayas y 2 Hojas: `30 − 30` → **neto 0**. Cero es menos que diez: **fallaste**, y te cuesta **−10**. Una sola carta más de cualquiera de los dos palos daba vuelta el resultado.
+> **Ejemplo C — al filo.** Ventana 1, terminás con 1 Baya y 4 cartas de otros palos: `15 − 8` → **neto 7**. Siete es menos que diez: **fallaste**, y con 3 o 4 jugadores te cuesta **−10**. Una Baya más daba vuelta el resultado.
 
 ### 🔴 Bazas — *"sé exactamente qué bazas voy a ganar"*
 
-| Tenés que | Cobrás |
-| --- | --- |
-| Ganar exactamente 3 bazas | +40 |
-| Ganar las bazas 4 y 5 (las anteriores no importan) | +45 |
-| Ganar exactamente 1 baza | +50 |
-| Ganar 4 o 5 bazas | +55 |
-| Perder las bazas 1-3 y ganar la 4 y la 5 | +60 |
-| Ganar **solo** la baza 5 — y ninguna otra | +65 |
-| Ganar las 5 bazas | +70 |
+| Tenés que | 2J | 3J | 4J | Copias |
+| --- | ---: | ---: | ---: | --- |
+| No ganar ninguna baza | +40 | +25 | +20 | 2 / 2 / 2 |
+| Ganar exactamente 1 baza | +80 | +65 | +50 | 2 / 2 / 2 |
+| Ganar exactamente 2 bazas | — | — | +70 | 0 / 0 / 2 |
+| Ganar exactamente 3 bazas | — | +55 | +80 | 0 / 2 / 2 |
+| Ganar las bazas 4 y 5; las 1–3 son libres | +15 | +25 | +35 | 1 / 2 / 2 |
+| Perder las bazas 1–3 y ganar la 4 y la 5 | — | +55 | +70 | 0 / 2 / 2 |
+| Ganar **solo** la baza 4 | — | — | +65 | 0 / 0 / 2 |
+| Ganar **solo** la baza 5 | +80 | +75 | +60 | 2 / 2 / 2 |
+| Ganar las 5 bazas | +80 | — | — | 1 / 0 / 0 |
 
 **"Exactamente 1 baza" es la trampa hermosa de esta categoría.** Parece la apuesta más fácil del tablero y es donde más gente se cae. Ganar una sola baza suena trivial hasta que te acordás de que también tenés que **perder** las otras cuatro — y que nadie está obligado a seguir el palo, incluido el rival que te quiere hacer ganar una baza que no querías.
 
@@ -328,21 +342,23 @@ Cuando se resuelve la quinta baza, cada jugador cuenta su puntaje de la ronda:
 3. **Restá lo que pagaste** por cada apuesta fallada (según la ventana en que la declaraste).
 4. El **+3** por no cambiar ya entró a tu total cuando lo cobraste.
 
-Después se mezcla el mazo, los conejos se liberan, la mano rota un asiento en sentido horario y arranca la ronda siguiente.
+Después se mezcla el mazo, los conejos se liberan, la mano rota un asiento en sentido horario y arranca la ronda siguiente — si quedan suficientes cartas de apuesta para repartir un pozo completo.
 
 ![Tu panel de puntaje de ronda: bazas ganadas, progreso de tus apuestas y cartas juntadas por palo](/rules/es/round-score.png)
 
-*Tu panel de puntaje de ronda te muestra todo de un vistazo: qué bazas ganaste, cómo viene tu apuesta de Puntaje (acá: 12 puntos, dentro del rango 11–30) y cuántas cartas de cada palo juntaste.*
+*Tu panel de puntaje de ronda te muestra todo de un vistazo: qué bazas ganaste, cómo viene tu apuesta de Puntaje (acá: 12 puntos, dentro del rango 10–30) y cuántas cartas de cada palo juntaste.*
 
 > **Este es el punto de decisión más importante del juego.** No apostar es una jugada legítima: te asegura los puntos de las cartas que ganaste, sin riesgo y sin techo alto. Apostar cambia esos puntos por una promesa. Una ronda en la que ganaste tres bazas y 30 puntos vale 30 si te quedaste callado — y vale 0 si apostaste Colección y no llegaste.
 
 ## Fin de la partida
 
-La partida termina en cuanto un jugador **llega a 100 puntos** — o **cae a −85**. El bosque da y el bosque quita.
+Las apuestas salen de **tres mazos separados** — uno de Bazas, uno de Puntaje y uno de Colección — que se gastan durante la partida. Cada mazo tiene **8 cartas con 2 jugadores, 12 con 3 y 16 con 4**, y cada ronda consume 2 cartas de cada uno. Como la mano rota, el resultado son **dos vueltas completas**: 4 rondas con 2 jugadores, 6 con 3 y 8 con 4.
 
-**Gana quien tenga el puntaje total más alto** — que no siempre es el que cruzó la línea, porque en la última ronda cualquiera puede meter un +70.
+La partida termina **después de la última ronda**, cuando ya no se pueden repartir 2 cartas de cada categoría para armar el pozo siguiente. Nadie puede terminar antes con ventaja de haber sido mano más veces.
 
-**Empates:** si hay jugadores igualados, gana el que esté **más cerca del mano** en el orden de turno.
+**Gana quien tenga el puntaje total más alto.**
+
+**Empates:** si hay jugadores igualados, gana el que esté **más cerca del mano** en el orden de turno de la última ronda.
 
 ![El marcador de la partida con el puntaje total de cada conejo](/rules/es/game-scores.png)
 

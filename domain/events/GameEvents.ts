@@ -1,4 +1,5 @@
 import type { Bid, PlayingCard, PlayerId, PlayerBidsMap } from "../interfaces";
+import type { BidDeckCounts } from "../rules/BidDeckRules";
 // DECK SHUFFLED EVENT
 /**
  * Event emitted when the deck is shuffled
@@ -32,6 +33,7 @@ export interface RoundSetupCompletedEvent {
       bids: Bid[]
       playerBids: PlayerBidsMap
     }
+    bidDeckCounts: BidDeckCounts
   }
 }
 export function createRoundSetupCompletedEvent(
@@ -43,11 +45,12 @@ export function createRoundSetupCompletedEvent(
   roundBids: {
     bids: Bid[]
     playerBids: PlayerBidsMap
-  }
+  },
+  bidDeckCounts: BidDeckCounts
 ): RoundSetupCompletedEvent {
   return {
     type: 'ROUND_SETUP_COMPLETED',
-    payload: { round, deckSize, roundPhase, playerTurn, currentTrick, roundBids }
+    payload: { round, deckSize, roundPhase, playerTurn, currentTrick, roundBids, bidDeckCounts }
   }
 }
 

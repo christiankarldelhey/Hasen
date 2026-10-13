@@ -1,6 +1,6 @@
 import { GameModel } from '../models/Game.js'
 import { shuffleDeck } from '@domain/rules/DeckRules.js'
-import { shuffleBidDeck, updateBidsPool } from '@domain/rules/BidDeckRules'
+import { drawBidPool, getBidDeckCounts } from '@domain/rules/BidDeckRules'
 import { createFirstCardDealtEvent } from '@domain/events/GameEvents.js'
 import { createRoundSetupCompletedEvent } from '@domain/events/GameEvents.js'
 import { createRoundEndedEvent } from '@domain/events/GameEvents.js'
@@ -15,6 +15,7 @@ export class RoundService {
   static async startNewRound(gameId: string) {
     const game = await GameModel.findOne({ gameId });
     if (!game) throw new Error('Game not found');
+    if (game.gamePhase !== 'playing') throw new Error('Game is not currently being played');
     const activePlayerIds = game.activePlayers.map(player => player.id)
     
     // 1. Incrementar ronda
@@ -36,17 +37,11 @@ export class RoundService {
       card.owner = null;
     });
     
-    // 3. Shuffle y repartir bids
-    const shuffledSetCollection = shuffleBidDeck(game.bidDecks.setCollectionBidDeck);
-    const shuffledPoints = shuffleBidDeck(game.bidDecks.pointsBidDeck);
-    const shuffledTricks = shuffleBidDeck(game.bidDecks.tricksBidDeck);
-    
-    game.bidDecks.setCollectionBidDeck = shuffledSetCollection;
-    game.bidDecks.pointsBidDeck = shuffledPoints;
-    game.bidDecks.tricksBidDeck = shuffledTricks;
-    
-    const bidPool = updateBidsPool(shuffledSetCollection, shuffledPoints, shuffledTricks);
+    // 3. Repartir bids y consumirlas del mazo: no se repiten durante la partida
+    const bidPool = drawBidPool(game.bidDecks);
     game.round.roundBids = bidPool;
+    game.bidsHistory.push(...bidPool.bids);
+    game.markModified('bidDecks');
 
     // 4. Deal first card to each player (visible/público)
   const firstCards: { playerId: PlayerId; card: PlayingCard }[] = [];
@@ -102,7 +97,8 @@ export class RoundService {
       'player_drawing',
       game.round.playerTurn,
       null,
-      game.round.roundBids
+      game.round.roundBids,
+      getBidDeckCounts(game.bidDecks)
     );
     
     const firstCardsEvent = createFirstCardDealtEvent(
