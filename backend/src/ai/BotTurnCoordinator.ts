@@ -15,47 +15,13 @@ import { emitPrivateCards } from '@/socket/handlers/roundHandlers.helpers.js'
 import { HeuristicAgent } from './HeuristicAgent.js'
 import type { AgentPolicy, BotAction } from './AgentPolicy.js'
 import { getLegalActionsForBot } from './legalActions.js'
+import { getBotToAct } from './botTurns.js'
 
 const BOT_DELAY_MS = 850
-const MAX_CHAINED_BOT_ACTIONS = 10
+const MAX_CHAINED_BOT_ACTIONS = 500
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function isBotPlayer(game: Game, playerId: PlayerId): boolean {
-  return game.activePlayers.some(player => player.id === playerId && player.isBot)
-}
-
-export function getBotToAct(game: Game): PlayerId | null {
-  if (game.round.roundPhase === 'player_drawing' && game.round.playerTurn && isBotPlayer(game, game.round.playerTurn)) {
-    return game.round.playerTurn
-  }
-
-  const trick = game.round.currentTrick
-  if (trick?.trick_state === 'awaiting_special_action' && trick.pendingSpecialAction?.playerId) {
-    return isBotPlayer(game, trick.pendingSpecialAction.playerId) ? trick.pendingSpecialAction.playerId : null
-  }
-
-  if (trick?.trick_state === 'resolve') {
-    const trickWinner = trick.score?.trick_winner
-    if (trickWinner && isBotPlayer(game, trickWinner)) {
-      return trickWinner
-    }
-    return null
-  }
-
-  if (game.round.roundPhase === 'playing' && game.round.playerTurn && isBotPlayer(game, game.round.playerTurn)) {
-    return game.round.playerTurn
-  }
-
-  if (game.round.roundPhase === 'scoring') {
-    const readyPlayers = game.round.playersReadyForNextRound || []
-    const botWaiting = game.activePlayers.find(player => player.isBot && !readyPlayers.includes(player.id))
-    return botWaiting?.id ?? null
-  }
-
-  return null
 }
 
 export class BotTurnCoordinator {
