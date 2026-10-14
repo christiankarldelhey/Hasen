@@ -2,11 +2,11 @@
 import { computed } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
-import { IconStar } from '@tabler/icons-vue'
+import { IconStar, IconStarFilled } from '@tabler/icons-vue'
 import PlayerAvatar from '@/common/components/PlayerAvatar.vue'
 import ScoreStatusDot from '@/features/Score/components/ScoreStatusDot.vue'
 const gameStore = useGameStore()
-const { getPlayerById, getPlayerDisplayName } = usePlayers()
+const { getPlayerById, getPlayerDisplayName, isPlayerTurn } = usePlayers()
 
 const sortedPlayerScores = computed(() => {
   const scores = gameStore.publicGameState?.playerScores || []
@@ -39,7 +39,8 @@ const sortedPlayerScores = computed(() => {
     </div>
     <div class="flex flex-row items-center gap-1 pr-2">
       <ScoreStatusDot :player-id="ps.playerId" />
-      <IconStar class="text-hasen-dark" :size="12" />
+      <IconStarFilled v-if="isPlayerTurn(ps.playerId)" class="text-hasen-dark" :size="12" />
+      <IconStar v-else class="text-hasen-dark" :size="12" />
       <span :class="['text-md font-semibold', ps.score >= 0 ? 'text-hasen-dark' : 'text-hasen-red']">{{ ps.score }}</span>
     </div>
     </div>

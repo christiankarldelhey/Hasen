@@ -97,8 +97,6 @@ export default {
     cardSpecialAcorns: 'At the end of the trick, choose who leads the next one.',
     cardPointsValue: '{points} points',
     roundProgress: 'Round {round}/{total}',
-    lapProgress: 'Lap {lap}/{total}',
-    bidDecksShort: 'Bids T{tricks} · P{points} · C{collection}',
     endedDeckExhausted: 'The bid decks cannot provide another complete round.',
   },
   bids: {
@@ -112,6 +110,7 @@ export default {
     winExactly: 'Win exactly {count} tricks',
     winRange: 'Win {min}-{max} tricks',
     winOnly: 'Win only {numbers}',
+    winWithFree: 'Win tricks {win}; tricks {free} are free',
     winAndLose: 'Win {win}, lose {lose}',
     allTricks: 'all tricks',
     noBids: 'No bids',

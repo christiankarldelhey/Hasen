@@ -9,6 +9,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { useHasenStore } from '@/stores/hasenStore'
 import { usePlayers } from '@/features/Players/composables/usePlayers'
 import { useBidTooltips } from '@/common/composables/useBidTooltips'
+import { COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW } from '@domain/rules/BidRules'
 
 const props = withDefaults(defineProps<{
   bid: Bid | null
@@ -54,6 +55,12 @@ const currentPlayerBidColor = computed(() => {
   
   const player = getPlayerById.value(currentPlayerId)
   return player?.color || null
+})
+
+// Penalización por carta de otro palo en Colección según la ventana de apuesta actual (baza 1-3)
+const otherSuitPenalty = computed(() => {
+  const trickNumber = gameStore.publicGameState?.round.currentTrick?.trick_number ?? 1
+  return Math.min(3, Math.max(1, trickNumber)) * COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW
 })
 
 const isCurrentPlayerTurn = computed(() => {
@@ -148,7 +155,7 @@ const handleBidClick = () => {
       <div class="flex flex-row items-stretch">
         <BidScore :score="bid.bid_score" :bidders="bidders" />
         <div class="w-[80%] flex flex-row items-center justify-center gap-2 min-w-0">
-          <WinCondition :type="bid.bid_type" :win_condition="bid.win_condition" :bid-score="bid.bid_score" />
+          <WinCondition :type="bid.bid_type" :win_condition="bid.win_condition" :bid-score="bid.bid_score" :other-suit-penalty="otherSuitPenalty" />
         </div>
       </div>
     </div>

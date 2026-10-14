@@ -33,7 +33,7 @@ export interface PlayerBidOutcome {
 }
 
 export const BID_DUEL_SCORE = 5
-const COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW = 2
+export const COLLECTION_OTHER_SUIT_PENALTY_PER_WINDOW = 2
 
 function getOtherSuitCount(
   setCollection: PlayerRoundScore['setCollection'],

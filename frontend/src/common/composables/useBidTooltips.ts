@@ -67,8 +67,10 @@ function getTrickBidDescription(
   }
   
   if (condition.win_trick_position && condition.may_win_trick_position) {
-    const winPositions = formatTrickPositions(condition.win_trick_position)
-    return t('bids.winOnly', { numbers: winPositions === 'all' ? t('bids.allTricks') : winPositions })
+    return t('bids.winWithFree', {
+      win: formatTrickPositions(condition.win_trick_position),
+      free: formatTrickPositions(condition.may_win_trick_position)
+    })
   }
   
   if (condition.win_trick_position) {

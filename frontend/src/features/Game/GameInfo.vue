@@ -13,7 +13,7 @@ import { useSocket } from '@/common/composables/useSocket'
 import { useHasenStore } from '@/stores/hasenStore'
 import { userIdService } from '@/services/userIdService'
 import { IconLogout2, IconMusic, IconMusicOff, IconVolume, IconVolumeOff } from '@tabler/icons-vue'
-import { GAME_TOTAL_LAPS, getTotalRounds } from '@domain/rules/BidDeckRules'
+import { getTotalRounds } from '@domain/rules/BidDeckRules'
 
 const gameStore = useGameStore()
 const route = useRoute()
@@ -24,11 +24,7 @@ const { t } = useI18n()
 
 const playerCount = computed(() => gameStore.publicGameState?.activePlayers.length ?? 4)
 const totalRounds = computed(() => getTotalRounds(playerCount.value))
-const currentLap = computed(() => {
-  const round = gameStore.publicGameState?.round.round ?? 1
-  return Math.min(GAME_TOTAL_LAPS, Math.ceil(round / Math.max(1, playerCount.value)))
-})
-const bidDeckCounts = computed(() => gameStore.publicGameState?.bidDeckCounts)
+const currentRound = computed(() => gameStore.publicGameState?.round.round ?? 1)
 
 const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx } = useAudio()
 
@@ -83,14 +79,10 @@ const handleConfirmLogout = () => {
   </div>
   <GamePanel class="">
     <div class="flex flex-col gap-1">
+      <span class="text-hasen-base text-sm">{{ t('game.roundProgress', { round: currentRound, total: totalRounds }) }}</span>
       <div class="flex flex-row gap-2">
         <div class="flex flex-col gap-1" data-tutorial-id="deck-zone">
           <Deck />
-          <div v-if="bidDeckCounts" class="flex flex-col items-center gap-0.5 text-[10px] font-semibold text-hasen-base">
-            <span>{{ t('game.roundProgress', { round: gameStore.publicGameState?.round.round ?? 1, total: totalRounds }) }}</span>
-            <span>{{ t('game.lapProgress', { lap: currentLap, total: GAME_TOTAL_LAPS }) }}</span>
-            <span>{{ t('game.bidDecksShort', { tricks: bidDeckCounts.trick, points: bidDeckCounts.points, collection: bidDeckCounts.set_collection }) }}</span>
-          </div>
         </div>
         <div data-tutorial-id="game-scores">
           <GameScores />

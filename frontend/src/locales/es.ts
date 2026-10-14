@@ -97,8 +97,6 @@ export default {
     cardSpecialAcorns: 'Al final de la baza, elige quién abre la siguiente.',
     cardPointsValue: '{points} puntos',
     roundProgress: 'Ronda {round}/{total}',
-    lapProgress: 'Vuelta {lap}/{total}',
-    bidDecksShort: 'Apuestas B{tricks} · P{points} · C{collection}',
     endedDeckExhausted: 'Los mazos de apuestas ya no alcanzan para repartir otra ronda completa.',
   },
   bids: {
@@ -112,6 +110,7 @@ export default {
     winExactly: 'Gana exactamente {count} bazas',
     winRange: 'Gana {min}-{max} bazas',
     winOnly: 'Gana solo {numbers}',
+    winWithFree: 'Gana las bazas {win}; las {free} son libres',
     winAndLose: 'Gana {win}, pierde {lose}',
     allTricks: 'todas las bazas',
     noBids: 'Sin apuestas',

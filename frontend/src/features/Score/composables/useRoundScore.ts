@@ -3,6 +3,7 @@ import type { PlayerId } from '@domain/interfaces/Player'
 import type { Bid, PlayerBidEntry } from '@domain/interfaces/Bid'
 import { getBidDuelAdjustment, getCollectionNetScore, getPlayerBidOutcome, getPlayerScoreFromRound } from '@domain/rules/BidRules'
 import { useGameStore } from '@/stores/gameStore'
+import { useHasenStore } from '@/stores/hasenStore'
 
 export interface RoundBidResult {
   bid: Bid
@@ -42,6 +43,7 @@ export interface UseRoundScoreReturn {
  */
 export function useRoundScore(): UseRoundScoreReturn {
   const gameStore = useGameStore()
+  const hasenStore = useHasenStore()
 
   /**
    * Calcula el resultado de un bid específico para un jugador
@@ -156,7 +158,12 @@ export function useRoundScore(): UseRoundScoreReturn {
       }
 
       return playerResult
-    }).filter(player => player !== null).sort((a, b) => b.roundScore - a.roundScore)
+    }).filter(player => player !== null).sort((a, b) => {
+      const currentPlayerId = hasenStore.currentPlayerId
+      if (a.playerId === currentPlayerId) return -1
+      if (b.playerId === currentPlayerId) return 1
+      return b.roundScore - a.roundScore
+    })
   })
 
   /**

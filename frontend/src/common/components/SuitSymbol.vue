@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { Suit } from '@domain/interfaces/Card'
 import AcornSymbol from '@/assets/symbols/acorn.png'
 import BerrySymbol from '@/assets/symbols/berry.png'
@@ -34,10 +33,7 @@ const trioSizeClasses = {
   large: 'h-6 w-6'
 }
 
-const avoidTrio = computed<Suit[]>(() => {
-  const suits: Suit[] = ['acorns', 'leaves', 'berries', 'flowers']
-  return props.exceptSuit ? suits.filter(suit => suit !== props.exceptSuit) : ['acorns', 'berries', 'leaves']
-})
+const avoidTrio: Suit[] = ['acorns', 'berries', 'leaves']
 
 function getSymbol(collect: SuitSymbolKey) {
     switch (collect) {
@@ -56,7 +52,29 @@ function getSymbol(collect: SuitSymbolKey) {
 </script>
 
 <template>
-    <div v-if="props.suit === 'avoidOtherSuits'" class="relative flex-shrink-0 mx-1 flex items-center gap-0.5">
+    <!-- "Todos menos el palo X": se muestra el propio palo tachado -->
+    <div v-if="props.suit === 'avoidOtherSuits' && props.exceptSuit" :class="['relative flex-shrink-0 mx-1', sizeClasses[props.size]]">
+        <img
+            :src="getSymbol(props.exceptSuit)"
+            :alt="`avoid all but ${props.exceptSuit}`"
+            :class="['object-contain', sizeClasses[props.size]]"
+        />
+        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="4" y1="4" x2="96" y2="96"
+                stroke="#dc2626" stroke-width="8" />
+        </svg>
+
+        <div
+            v-if="props.value !== undefined"
+            class="absolute inset-x-0 top-4 flex items-end justify-center pointer-events-none"
+        >
+            <span class="bg-hasen-base rounded-full px-2 py-1 text-hasen-dark font-bold text-xs shadow-md border border-hasen-dark">
+                {{ props.value }}
+            </span>
+        </div>
+    </div>
+
+    <div v-else-if="props.suit === 'avoidOtherSuits'" class="relative flex-shrink-0 mx-1 flex items-center gap-0.5">
         <div
             v-for="suitIcon in avoidTrio"
             :key="suitIcon"
